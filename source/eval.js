@@ -30,6 +30,7 @@ return function ( msg, cb ) {
 		timeout;
 
 	var code = msg.toString();
+
 	if ( code[0] === 'c' ) {
 		code = CoffeeScript.compile( code.replace(/^c>/, ''), {bare:1} );
 	}
@@ -48,6 +49,7 @@ return function ( msg, cb ) {
 	};
 
 	worker.onerror = function ( error ) {
+        bot.log( error, 'eval worker.onerror' );
 		finish( error.toString() );
 	};
 
@@ -55,6 +57,10 @@ return function ( msg, cb ) {
 	worker.postMessage( code );
 
 	function start () {
+		if ( timeout ) {
+			return;
+		}
+
 		timeout = window.setTimeout(function() {
 			finish( 'Maximum execution time exceeded' );
 		}, 500 );
@@ -78,6 +84,12 @@ function dressUpAnswer ( answerObj ) {
 	var answer = answerObj.answer,
 		log = answerObj.log,
 		result;
+
+	if ( answer === undefined ) {
+		return 'Malformed output from web-worker. If you weren\'t just ' +
+			'fooling around trying to break me, raise an issue or contact ' +
+			'Zirak';
+	}
 
 	result = snipAndCodify( answer );
 

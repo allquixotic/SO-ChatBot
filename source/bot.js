@@ -135,6 +135,9 @@ var bot = window.bot = {
 		msgObj = this.adapter.transform( msgObj );
 
 		var msg = IO.decodehtmlEntities( msgObj.content );
+		//fixes issues #87 and #90 globally
+		msg = msg.replace( /\u200b|\u200c/g, '' );
+
 		return this.Message(
 			msg.slice( this.invocationPattern.length ).trim(),
 			msgObj );
@@ -240,12 +243,12 @@ var bot = window.bot = {
 	},
 
     devMode : false,
-    activateDevMode : function (pattern) {
+    activateDevMode : function ( pattern ) {
         this.devMode = true;
         this.invocationPattern = pattern || 'beer!';
         IO.events.userjoin.length = 0;
-        this.validateMessage = function (msgObj) {
-            return msgObj.content.trim().startsWith(this.invocationPattern);
+        this.validateMessage = function ( msgObj ) {
+            return msgObj.content.trim().startsWith( this.invocationPattern );
         };
     }
 };
