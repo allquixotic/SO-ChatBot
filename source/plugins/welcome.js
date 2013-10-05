@@ -18,7 +18,7 @@ function welcome ( user, room ) {
 	{
 		msg = messageForOwner;
 	}
-	else if(user.name >= 20 && user.name <= 10000)
+	else if(user.reputation >= 20 && user.reputation <= 10000)
 	{
 		msg = message;
 	}
@@ -40,9 +40,6 @@ IO.register( 'userregister', function ( user, room ) {
 	if (
 		Number( room ) !== 118  || seen[ user.id ]
 	) {
-		if ( semiLegitUser ) {
-			finish( true );
-		}
 		return;
 	}
 
