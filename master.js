@@ -115,7 +115,7 @@ var IO = window.IO = {
 
 IO.decodehtmlEntities = (function (){
 var entities; //will be filled in the following line
-entities = {"quot":"\"","amp":"&","apos":"'","lt":"<","gt":">","nbsp":" ","iexcl":"¡","cent":"¢","pound":"£","curren":"¤","yen":"¥","brvbar":"¦","sect":"§","uml":"¨","copy":"©","ordf":"ª","laquo":"«","not":"¬","reg":"®","macr":"¯","deg":"°","plusmn":"±","sup2":"²","sup3":"³","acute":"´","micro":"µ","para":"¶","middot":"·","cedil":"¸","sup1":"¹","ordm":"º","raquo":"»","frac14":"¼","frac12":"½","frac34":"¾","iquest":"¿","Agrave":"À","Aacute":"Á","Acirc":"Â","Atilde":"Ã","Auml":"Ä","Aring":"Å","AElig":"Æ","Ccedil":"Ç","Egrave":"È","Eacute":"É","Ecirc":"Ê","Euml":"Ë","Igrave":"Ì","Iacute":"Í","Icirc":"Î","Iuml":"Ï","ETH":"Ð","Ntilde":"Ñ","Ograve":"Ò","Oacute":"Ó","Ocirc":"Ô","Otilde":"Õ","Ouml":"Ö","times":"×","Oslash":"Ø","Ugrave":"Ù","Uacute":"Ú","Ucirc":"Û","Uuml":"Ü","Yacute":"Ý","THORN":"Þ","szlig":"ß","agrave":"à","aacute":"á","acirc":"â","atilde":"ã","auml":"ä","aring":"å","aelig":"æ","ccedil":"ç","egrave":"è","eacute":"é","ecirc":"ê","euml":"ë","igrave":"ì","iacute":"í","icirc":"î","iuml":"ï","eth":"ð","ntilde":"ñ","ograve":"ò","oacute":"ó","ocirc":"ô","otilde":"õ","ouml":"ö","divide":"÷","oslash":"ø","ugrave":"ù","uacute":"ú","ucirc":"û","uuml":"ü","yacute":"ý","thorn":"þ","yuml":"ÿ","OElig":"Œ","oelig":"œ","Scaron":"Š","scaron":"š","Yuml":"Ÿ","fnof":"ƒ","circ":"ˆ","tilde":"˜","Alpha":"Α","Beta":"Β","Gamma":"Γ","Delta":"Δ","Epsilon":"Ε","Zeta":"Ζ","Eta":"Η","Theta":"Θ","Iota":"Ι","Kappa":"Κ","Lambda":"Λ","Mu":"Μ","Nu":"Ν","Xi":"Ξ","Omicron":"Ο","Pi":"Π","Rho":"Ρ","Sigma":"Σ","Tau":"Τ","Upsilon":"Υ","Phi":"Φ","Chi":"Χ","Psi":"Ψ","Omega":"Ω","alpha":"α","beta":"β","gamma":"γ","delta":"δ","epsilon":"ε","zeta":"ζ","eta":"η","theta":"θ","iota":"ι","kappa":"κ","lambda":"λ","mu":"μ","nu":"ν","xi":"ξ","omicron":"ο","pi":"π","rho":"ρ","sigmaf":"ς","sigma":"σ","tau":"τ","upsilon":"υ","phi":"φ","chi":"χ","psi":"ψ","omega":"ω","thetasym":"ϑ","upsih":"ϒ","piv":"ϖ","ensp":" ","emsp":" ","thinsp":" ","ndash":"–","mdash":"—","lsquo":"‘","rsquo":"’","sbquo":"‚","ldquo":"“","rdquo":"”","bdquo":"„","dagger":"†","Dagger":"‡","bull":"•","hellip":"…","permil":"‰","prime":"′","Prime":"″","lsaquo":"‹","rsaquo":"›","oline":"‾","frasl":"⁄","euro":"€","image":"ℑ","weierp":"℘","real":"ℜ","trade":"™","alefsym":"ℵ","larr":"←","uarr":"↑","rarr":"→","darr":"↓","harr":"↔","crarr":"↵","lArr":"⇐","uArr":"⇑","rArr":"⇒","dArr":"⇓","hArr":"⇔","forall":"∀","part":"∂","exist":"∃","empty":"∅","nabla":"∇","isin":"∈","notin":"∉","ni":"∋","prod":"∏","sum":"∑","minus":"−","lowast":"∗","radic":"√","prop":"∝","infin":"∞","ang":"∠","and":"∧","or":"∨","cap":"∩","cup":"∪","int":"∫","there4":"∴","sim":"∼","cong":"≅","asymp":"≈","ne":"≠","equiv":"≡","le":"≤","ge":"≥","sub":"⊂","sup":"⊃","nsub":"⊄","sube":"⊆","supe":"⊇","oplus":"⊕","otimes":"⊗","perp":"⊥","sdot":"⋅","lceil":"⌈","rceil":"⌉","lfloor":"⌊","rfloor":"⌋","lang":"〈","rang":"〉","loz":"◊","spades":"♠","clubs":"♣","hearts":"♥","diams":"♦", "zwnj":""};
+entities = {"quot":"\"","amp":"&","apos":"'","lt":"<","gt":">","nbsp":" ","iexcl":"¡","cent":"¢","pound":"£","curren":"¤","yen":"¥","brvbar":"¦","sect":"§","uml":"¨","copy":"©","ordf":"ª","laquo":"«","not":"¬","reg":"®","macr":"¯","deg":"°","plusmn":"±","sup2":"²","sup3":"³","acute":"´","micro":"µ","para":"¶","middot":"·","cedil":"¸","sup1":"¹","ordm":"º","raquo":"»","frac14":"¼","frac12":"½","frac34":"¾","iquest":"¿","Agrave":"À","Aacute":"Á","Acirc":"Â","Atilde":"Ã","Auml":"Ä","Aring":"Å","AElig":"Æ","Ccedil":"Ç","Egrave":"È","Eacute":"É","Ecirc":"Ê","Euml":"Ë","Igrave":"Ì","Iacute":"Í","Icirc":"Î","Iuml":"Ï","ETH":"Ð","Ntilde":"Ñ","Ograve":"Ò","Oacute":"Ó","Ocirc":"Ô","Otilde":"Õ","Ouml":"Ö","times":"×","Oslash":"Ø","Ugrave":"Ù","Uacute":"Ú","Ucirc":"Û","Uuml":"Ü","Yacute":"Ý","THORN":"Þ","szlig":"ß","agrave":"à","aacute":"á","acirc":"â","atilde":"ã","auml":"ä","aring":"å","aelig":"æ","ccedil":"ç","egrave":"è","eacute":"é","ecirc":"ê","euml":"ë","igrave":"ì","iacute":"í","icirc":"î","iuml":"ï","eth":"ð","ntilde":"ñ","ograve":"ò","oacute":"ó","ocirc":"ô","otilde":"õ","ouml":"ö","divide":"÷","oslash":"ø","ugrave":"ù","uacute":"ú","ucirc":"û","uuml":"ü","yacute":"ý","thorn":"þ","yuml":"ÿ","OElig":"Œ","oelig":"œ","Scaron":"Š","scaron":"š","Yuml":"Ÿ","fnof":"ƒ","circ":"ˆ","tilde":"˜","Alpha":"Α","Beta":"Β","Gamma":"Γ","Delta":"Δ","Epsilon":"Ε","Zeta":"Ζ","Eta":"Η","Theta":"Θ","Iota":"Ι","Kappa":"Κ","Lambda":"Λ","Mu":"Μ","Nu":"Ν","Xi":"Ξ","Omicron":"Ο","Pi":"Π","Rho":"Ρ","Sigma":"Σ","Tau":"Τ","Upsilon":"Υ","Phi":"Φ","Chi":"Χ","Psi":"Ψ","Omega":"Ω","alpha":"α","beta":"β","gamma":"γ","delta":"δ","epsilon":"ε","zeta":"ζ","eta":"η","theta":"θ","iota":"ι","kappa":"κ","lambda":"λ","mu":"μ","nu":"ν","xi":"ξ","omicron":"ο","pi":"π","rho":"ρ","sigmaf":"ς","sigma":"σ","tau":"τ","upsilon":"υ","phi":"φ","chi":"χ","psi":"ψ","omega":"ω","thetasym":"ϑ","upsih":"ϒ","piv":"ϖ","ensp":" ","emsp":" ","thinsp":" ","ndash":"–","mdash":"—","lsquo":"‘","rsquo":"’","sbquo":"‚","ldquo":"“","rdquo":"”","bdquo":"„","dagger":"†","Dagger":"‡","bull":"•","hellip":"…","permil":"‰","prime":"′","Prime":"″","lsaquo":"‹","rsaquo":"›","oline":"‾","frasl":"⁄","euro":"€","image":"ℑ","weierp":"℘","real":"ℜ","trade":"™","alefsym":"ℵ","larr":"←","uarr":"↑","rarr":"→","darr":"↓","harr":"↔","crarr":"↵","lArr":"⇐","uArr":"⇑","rArr":"⇒","dArr":"⇓","hArr":"⇔","forall":"∀","part":"∂","exist":"∃","empty":"∅","nabla":"∇","isin":"∈","notin":"∉","ni":"∋","prod":"∏","sum":"∑","minus":"−","lowast":"∗","radic":"√","prop":"∝","infin":"∞","ang":"∠","and":"∧","or":"∨","cap":"∩","cup":"∪","int":"∫","there4":"∴","sim":"∼","cong":"≅","asymp":"≈","ne":"≠","equiv":"≡","le":"≤","ge":"≥","sub":"⊂","sup":"⊃","nsub":"⊄","sube":"⊆","supe":"⊇","oplus":"⊕","otimes":"⊗","perp":"⊥","sdot":"⋅","lceil":"⌈","rceil":"⌉","lfloor":"⌊","rfloor":"⌋","lang":"〈","rang":"〉","loz":"◊","spades":"♠","clubs":"♣","hearts":"♥","diams":"♦", "zwnj":"", "zwsp":""};
 
 
 /*
@@ -797,6 +797,9 @@ var bot = window.bot = {
 		msgObj = this.adapter.transform( msgObj );
 
 		var msg = IO.decodehtmlEntities( msgObj.content );
+		//fixes issues #87 and #90 globally
+		msg = msg.replace( /\u200b|\u200c/g, '' );
+
 		return this.Message(
 			msg.slice( this.invocationPattern.length ).trim(),
 			msgObj );
@@ -902,12 +905,12 @@ var bot = window.bot = {
 	},
 
     devMode : false,
-    activateDevMode : function (pattern) {
+    activateDevMode : function ( pattern ) {
         this.devMode = true;
         this.invocationPattern = pattern || 'beer!';
         IO.events.userjoin.length = 0;
-        this.validateMessage = function (msgObj) {
-            return msgObj.content.trim().startsWith(this.invocationPattern);
+        this.validateMessage = function ( msgObj ) {
+            return msgObj.content.trim().startsWith( this.invocationPattern );
         };
     }
 };
@@ -1237,6 +1240,7 @@ return function ( msg, cb ) {
 		timeout;
 
 	var code = msg.toString();
+
 	if ( code[0] === 'c' ) {
 		code = CoffeeScript.compile( code.replace(/^c>/, ''), {bare:1} );
 	}
@@ -1255,6 +1259,7 @@ return function ( msg, cb ) {
 	};
 
 	worker.onerror = function ( error ) {
+        bot.log( error, 'eval worker.onerror' );
 		finish( error.toString() );
 	};
 
@@ -1262,6 +1267,10 @@ return function ( msg, cb ) {
 	worker.postMessage( code );
 
 	function start () {
+		if ( timeout ) {
+			return;
+		}
+
 		timeout = window.setTimeout(function() {
 			finish( 'Maximum execution time exceeded' );
 		}, 500 );
@@ -1285,6 +1294,12 @@ function dressUpAnswer ( answerObj ) {
 	var answer = answerObj.answer,
 		log = answerObj.log,
 		result;
+
+	if ( answer === undefined ) {
+		return 'Malformed output from web-worker. If you weren\'t just ' +
+			'fooling around trying to break me, raise an issue or contact ' +
+			'Zirak';
+	}
 
 	result = snipAndCodify( answer );
 
@@ -2511,6 +2526,121 @@ what              #simply the word what
 }());
 
 ;
+//follows is an explanation of how SO's chat does things. you may want to skip
+// this gigantuous comment.
+/*
+  Note: This may be outdated next year, tomorrow, never, or in 4 minutes. We
+are leeching off a disinterested 3rd party, and knowledge of how to poke
+around requests/websockets is required to correctly maintain everything.
+
+  Generally, the client gets input from a websocket connected to SO's server,
+grabbing events as they come in (new message, edits, room invites, whatever).
+However, output (sending a message, editing, basically creating these events) is
+not handled via this socket, but via separate http requests. One should note
+that if/when the socket fails for any reason, the chat resorts to long polling.
+
+  First, a note on authentication. Apparently, the chat uses two things to
+decide who you are. The first is, quite obviously, cookies. The second is an
+elusive thing called the "fkey". It's given to us by the server inside an input
+called (you guessed it) "fkey", and its value is a 32 character string. Maybe
+its the result of running a checksum of something, maybe it's the first 32 chars
+of a sha512, who knows. But it is used, since you can view chat while not being
+logged in, and you have to provide it in all your requests.
+
+  Now to the actual meat.
+
+  Connecting to the input websocket is done in two steps, of which the first
+is obtaining the link to the second. We make a request containing our room id
+to /ws-auth (e.g. http://chat.stackoverflow.com/ws-auth), and we receive a JSON
+object containing a url property (or something else if there was an error):
+
+Request:
+  POST http://chat.stackoverflow.com/ws-auth
+  Content-Length: 47
+  Content-Type: application/x-www-form-urlencoded
+  Content: roomid=17&fkey=01234567890123456789012345678901
+
+Response:
+  Content-Type: application/json; charset=utf-8
+  Content: {"url":"wss://chat.sockets.stackexchange.com/events/17/another32CharLongStringBlahBlaah"}
+
+We parse the response, and connect to the websocket at the specified URL. Note
+that the websocket URL accepts an `l` query parameter
+(...another32CharLongStringBlahBlaah?l=someNumber). It's a number, I'm not sure
+what it's supposed to represent exactly, but omitting it brings a lot of history
+messages in the first frame, and setting it to a really high value brings no
+messages, so we opt to the latter (?l=99999999 or something like that. also note
+that it doesn't appear to be a "since message id" parameter, but I may be wrong)
+
+  Okay, we've got a connection to the web socket. How does a frame look like?
+The simplest one, containing no events, looks like this:
+
+    {"r17" : {}}
+
+Just a simple object with the keys being the room's were connected to, each id
+prefixed with an "r". But sometimes, even if your room(s) has no traffic, you
+may get something like this:
+
+    {"r17" : {
+        "t" : 23531002,
+        "d" : 3
+    }}
+
+Again, I have no clue what these mean. I think `d` is short for `delta`, and
+maybe `t` is a form of internal timestamp or counter or...I don't know. However,
+remember this `t` value for when we discuss polling - it is used there. It does
+however seem to be related to how many messages were sent which are not in this
+room - so if you're listening to room 17, and someone posted a mesage on room 42
+then you'd get a `d` of 1, and the `t` value may be updated by 1. Or maybe not.
+The `t` values don't seem to be consistently increasing, or decreasing, or
+following any pattern I could recognise.
+
+Anyway! What does a message look like?
+
+  {"r1" : {
+      "e" : [{
+        "event_type" : 1,
+        "time_stamp" : 1379405022,
+        "content" : "test",
+        "id" : 23531402,
+        "user_id" : 617762,
+        "user_name" : "Zirak",
+        "room_id" : 1,
+        "room_name" : "Sandbox",
+        "message_id" : 11832153
+      }],
+      "t": 23531402,
+      "d": 1
+    }}
+
+We receive an array of events under the property `e` of the respective room.
+Each event, called inside the bot a `msgObj` (message object), contains several
+interesting properties, which may change according to what kind of event it is.
+You can determine the type of the event by checking...drum roll...the event_type
+field. 1 is new message, 2 is edit, 3 is user-join, 4 is user-leave, and there
+are many others. Also note that pinging a user may add some properties, replying
+to a message adds some more, and so forth.
+
+Once we have this array, we simply iterate over it, and decide what we want to
+do based on what event it is. But at the end, the adapter's job is to do one
+thing - call IO.fire, and pass the torch onwards.
+
+[insert magic about polling. I don't have the web console in front of me, so I
+can't stimulate requests]
+
+  Now, output! Sending a message is a simple http request, containing the text
+and the magical fkey. In the following example, we send a new message to room 1
+containing just the word "butts":
+
+Request:
+  POST http://chat.stackoverflow.com/chats/1/messages/new
+  text=butts&fkey=01234567890123456789012345678901
+Response:
+  {"id":11832651,"time":1379406464}
+
+And...that's it. Pretty simple. Most of the requests endpoints are like that.
+*/
+
 (function () {
 "use strict";
 
@@ -2602,9 +2732,6 @@ var polling = bot.adapter.in = {
 	// the latest id or something like that. could also be the time last
 	// sent, which is why I called it times at the beginning. or something.
 	times : {},
-	//currently, used for messages sent when the room's been silent for a
-	// while
-	lastTimes : {},
 
 	firstPoll : true,
 
@@ -2737,7 +2864,6 @@ var polling = bot.adapter.in = {
 		else if ( et !== 1 && et !== 2 ) {
 			return;
 		}
-		this.lastTimes[ msg.room_id ] = Date.now();
 
 		//check for a multiline message
 		if ( msg.content.startsWith('<div class=\'full\'>') ) {
@@ -5479,16 +5605,23 @@ IO.register( 'userregister', function permissionCb ( user, room ) {
 });
 
 function stringMuteList () {
-	var keys = Object.keys( muted );
+	var users = Object.keys( muted );
 
-	if ( !keys.length ) {
+	if ( !users.length ) {
 		return 'Nobody is muted';
 	}
 
 	var base = 'http://chat.stackoverflow.com/transcript/message/';
 
-	return keys.map(function ( k ) {
-		return bot.adapter.link( k, base + muted[k].invokingId );
+	return users.map(function ( user ) {
+		var info = muted[ user ],
+
+			remaining = remainingDuration( info.endDate ),
+			strung = remaining ? '(' + remaining + ')' : '',
+
+			text = user + strung;
+
+		return bot.adapter.link( text, base + info.invokingId );
 	}).join( '; ' );
 }
 
@@ -5518,6 +5651,28 @@ function parseDuration ( str ) {
 		parts[ 0 ] += 'm';
 	}
 	return parts[ 0 ];
+}
+
+function remainingDuration ( future ) {
+	var now = Date.now();
+
+	if ( future < now ) {
+		return;
+	}
+	var delta	= new Date( future - now ),
+		days	= delta.getUTCDate(),
+		hours	= delta.getUTCHours(),
+		minutes = delta.getUTCMinutes(),
+		seconds = delta.getUTCSeconds();
+
+	if ( days > 1 ) {
+		return ( days - 1 ) + 'd ' + hours + 'h';
+	}
+	else if ( hours > 0 ) {
+		return hours + 'h ' + minutes + 'm';
+	}
+
+	return minutes + 'm ' + seconds + 's';
 }
 
 bot.addCommand({
@@ -6229,7 +6384,7 @@ undecided=["SSdtIG5vdCBzdXJl", "RVJST1IgQ0FMQ1VMQVRJTkcgUkVTVUxU","SSBrbm93IGp1c
 sameness=["VGhhdCdzIG5vdCByZWFsbHkgYSBjaG9pY2UsIG5vdyBpcyBpdD8=","U291bmRzIGxpa2UgeW91IGhhdmUgYWxyZWFkeSBkZWNpZGVk","Q2hlYXRlciBjaGVhdGVyIHlvdXIgaG91c2UgaXMgYSBoZWF0ZXI="].map(atob);
 
 //now for the juicy part
-answers=["QWJzb2x1dGVseSBub3Q=","QWJzb2x1dGVseSBub3Q=","QWJzb2x1dGVseSBub3Q=","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QnV0IG9mIGNvdXJzZQ==","QnV0IG9mIGNvdXJzZQ==","QnV0IG9mIGNvdXJzZQ==","QnkgYWxsIG1lYW5z","QnkgYWxsIG1lYW5z","QnkgYWxsIG1lYW5z","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5","Q2VydGFpbmx5","Q2VydGFpbmx5","RGVmaW5pdGVseQ==","RGVmaW5pdGVseQ==","RGVmaW5pdGVseQ==","RG91YnRmdWxseQ==","RG91YnRmdWxseQ==","RG91YnRmdWxseQ==","SSBjYW4gbmVpdGhlciBjb25maXJtIG5vciBkZW55","SSBleHBlY3Qgc28=","SSBleHBlY3Qgc28=","SSBleHBlY3Qgc28=","SSdtIG5vdCBzbyBzdXJlIGFueW1vcmUuIEl0IGNhbiBnbyBlaXRoZXIgd2F5","SW1wb3NzaWJsZQ==","SW1wb3NzaWJsZQ==","SW1wb3NzaWJsZQ==","SW5kZWVk","SW5kZWVk","SW5kZWVk","SW5kdWJpdGFibHk=","SW5kdWJpdGFibHk=","SW5kdWJpdGFibHk=","Tm8gd2F5","Tm8gd2F5","Tm8gd2F5","Tm8=","Tm8=","Tm8=","Tm8=","Tm9wZQ==","Tm9wZQ==","Tm9wZQ==","Tm90IGEgY2hhbmNl","Tm90IGEgY2hhbmNl","Tm90IGEgY2hhbmNl","Tm90IGF0IGFsbA==","Tm90IGF0IGFsbA==","Tm90IGF0IGFsbA==","TnVoLXVo","TnVoLXVo","TnVoLXVo","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIQ==","T2YgY291cnNlIQ==","T2YgY291cnNlIQ==","UHJvYmFibHk=","UHJvYmFibHk=","UHJvYmFibHk=","WWVzIQ==","WWVzIQ==","WWVzIQ==","WWVzIQ==","WWVzLCBhYnNvbHV0ZWx5","WWVzLCBhYnNvbHV0ZWx5","WWVzLCBhYnNvbHV0ZWx5"].map(atob);
+answers=["QWJzb2x1dGVseSBub3Q=","QWJzb2x1dGVseSBub3Q=","QWJzb2x1dGVseSBub3Q=","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QnV0IG9mIGNvdXJzZQ==","QnV0IG9mIGNvdXJzZQ==","QnV0IG9mIGNvdXJzZQ==","QnkgYWxsIG1lYW5z","QnkgYWxsIG1lYW5z","QnkgYWxsIG1lYW5z","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5","Q2VydGFpbmx5","Q2VydGFpbmx5","RGVmaW5pdGVseQ==","RGVmaW5pdGVseQ==","RGVmaW5pdGVseQ==","RG91YnRmdWxseQ==","RG91YnRmdWxseQ==","RG91YnRmdWxseQ==","RnJhbmtseSBtZWFyIGRlYXIsIEkgZG9uJ3QgZ2l2ZSBhIGRlYW4=","RnJhbmtseSBtZWFyIGRlYXIsIEkgZG9uJ3QgZ2l2ZSBhIGRlYW4=","SSBjYW4gbmVpdGhlciBjb25maXJtIG5vciBkZW55","SSBleHBlY3Qgc28=","SSBleHBlY3Qgc28=","SSBleHBlY3Qgc28=","SSdtIG5vdCBzbyBzdXJlIGFueW1vcmUuIEl0IGNhbiBnbyBlaXRoZXIgd2F5","SW1wb3NzaWJsZQ==","SW1wb3NzaWJsZQ==","SW1wb3NzaWJsZQ==","SW5kZWVk","SW5kZWVk","SW5kZWVk","SW5kdWJpdGFibHk=","SW5kdWJpdGFibHk=","SW5kdWJpdGFibHk=","Tm8gd2F5","Tm8gd2F5","Tm8gd2F5","Tm8=","Tm8=","Tm8=","Tm8=","Tm9wZQ==","Tm9wZQ==","Tm9wZQ==","Tm90IGEgY2hhbmNl","Tm90IGEgY2hhbmNl","Tm90IGEgY2hhbmNl","Tm90IGF0IGFsbA==","Tm90IGF0IGFsbA==","Tm90IGF0IGFsbA==","TnVoLXVo","TnVoLXVo","TnVoLXVo","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIQ==","T2YgY291cnNlIQ==","T2YgY291cnNlIQ==","UHJvYmFibHk=","UHJvYmFibHk=","UHJvYmFibHk=","WWVzIQ==","WWVzIQ==","WWVzIQ==","WWVzIQ==","WWVzLCBhYnNvbHV0ZWx5","WWVzLCBhYnNvbHV0ZWx5","WWVzLCBhYnNvbHV0ZWx5"].map(atob)
 //can you feel the nectar?
 
 
@@ -6569,7 +6724,7 @@ bot.addCommand({
 
 function command ( args, cb ) {
 	IO.jsonp({
-		url : 'http://en.wiktionary.org/w/api.php',
+		url : 'http://en.wikipedia.org/w/api.php',
 		jsonpName : 'callback',
 		data : {
 			action : 'opensearch',
@@ -6638,16 +6793,21 @@ function getXKCD( args, cb ) {
 		linkBase = 'http://xkcd.com/';
 
 	//they want a specifix xkcd
-	if ( /\d{1,4}/.test(prop) ) {
+	if ( /^\d+$/.test(prop) ) {
+        bot.log( '/xkcd specific', prop );
 		finish( linkBase + prop );
 		return;
 	}
-	//we have no idea what they want. lazy arrogant bastards.
+	//they want to search for a certain comic
 	else if ( prop && prop !== 'new' ) {
-		finish( 'Clearly, you\'re not geeky enough for XKCD.' );
+        bot.log( '/xkcd search', args.toString() );
+		IO.jsonp.google(
+            args.toString() + ' site:xkcd.com -forums.xkcd -m.xkcd -fora.xkcd',
+            finishGoogleQuery );
 		return;
 	}
 
+    bot.log( '/xkcd random/latest', prop );
 	//they want a random XKCD, or the latest
 	IO.jsonp({
 		url : 'http://dynamic.xkcd.com/api-0/jsonp/comic',
@@ -6665,6 +6825,28 @@ function getXKCD( args, cb ) {
 			finish( linkBase + maxID );
 		}
 	}
+    function finishGoogleQuery ( resp ) {
+        if ( resp.responseStatus !== 200 ) {
+			finish( 'Something went on fire; status ' + resp.responseStatus );
+			return;
+		}
+
+        var results = resp.responseData.results;
+        if ( !results.length ) {
+            finish( 'Seems like you hallucinated this comic' );
+            return;
+        }
+
+		var result = results[ 0 ],
+            answer = result.url,
+            matches = /xkcd.com\/(\d+)/.exec( answer );
+
+        if ( !matches ) {
+            answer = 'Search didn\'t yield a comic; got ' + result.unescapedUrl;
+        }
+
+        finish( answer );
+    }
 
 	function finish( res ) {
 		bot.log( res, '/xkcd finish' );
@@ -6688,6 +6870,7 @@ bot.addCommand({
 		'`new` for latest, or a number for a specific one.',
 	async : true
 });
+
 })();
 
 ;
