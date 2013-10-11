@@ -4341,6 +4341,25 @@ bot.listen( /(which |what |give me a )?firefly( episode)?/i, function ( msg ) {
 
 ;
 (function () {
+//Forgets all the users it's seen.
+
+bot.addCommand({
+	name : 'forgetSeen',
+	fun : function ( args ) {
+		bot.memory.set('users', '');
+	},
+	permission : {
+		del : 'NONE'
+		use : 'OWNER'
+	},
+	description : 'Gives the bot a serious case of amnesia. Who are you again? (Only wipes out the list of known users)'
+});
+}());
+
+;
+
+;
+(function () {
 //they made me make it. I begged them not to.
 
 //obligatories
@@ -6810,7 +6829,7 @@ function welcome ( user, room ) {
 	{
 		msg = message;
 	}
-	else(user.reputation < 20)
+	else
 	{
 		msg = messageForSpecialPeople;
 	}
@@ -6878,6 +6897,8 @@ bot.addCommand({
 	description : 'Welcomes a user. `/welcome user`'
 });
 }());
+
+;
 
 ;
 (function () {
