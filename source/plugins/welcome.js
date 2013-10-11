@@ -5,24 +5,19 @@
 var seen = bot.memory.get( 'users' );
 
 var message = "Welcome to Root Access chat for " + bot.adapter.link("Super User", "http://superuser.com") + "s! " +
-	"Please don't ask if you can ask or if anyone's around; just ask " +
-	"your question, and if anyone's free and interested they'll help.";
+	"I am this channel's helpful chat bot. Please don't ask if you can ask or if anyone's around; just ask " +
+	"your question, and if anyone's free and interested they'll help. For bot commands, type !!listcommands";
 	
-var messageForSpecialPeople = "Hey there! You're pretty special, aren't you? :)";
-
-var messageForOwner = "Oh no, master is here! Hide the cookies!";
+var messageForSpecialPeople = "Hello, new user! This is Root Access, a chatroom for " + bot.adapter.link("Super User", "http://superuser.com") +
+", and I am this channel's helpful chat bot. You will need to earn 20 reputation to chat; meanwhile, if you need help, please see " + bot.adapter.link("the Help page for Super User", "http://superuser.com/help") + ".";
 
 function welcome ( user, room ) {
 	var msg = null;
-	if(bot.isOwner( user.id ))
-	{
-		msg = messageForOwner;
-	}
-	else if(user.reputation >= 20 && user.reputation <= 10000)
+	if(user.reputation >= 20)
 	{
 		msg = message;
 	}
-	else
+	else(user.reputation < 20)
 	{
 		msg = messageForSpecialPeople;
 	}
