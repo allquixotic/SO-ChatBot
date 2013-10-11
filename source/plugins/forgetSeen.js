@@ -5,7 +5,7 @@
 bot.addCommand({
 	name : 'forgetSeen',
 	fun : function ( args ) {
-		bot.memory.set('users', '');
+		bot.memory.get('users').length = 0;
 	},
 	permission : {
 		del : 'NONE',
