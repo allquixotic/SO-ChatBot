@@ -17,7 +17,7 @@ function welcome ( user, room ) {
 	{
 		msg = message;
 	}
-	else(user.reputation < 20)
+	else
 	{
 		msg = messageForSpecialPeople;
 	}
