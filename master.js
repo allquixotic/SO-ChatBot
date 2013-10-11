@@ -2644,7 +2644,8 @@ bot.adapter = {
 		}
 		this.fkey = fkey.value;
 		this.roomid = Number( /\d+/.exec(location)[0] );
-		this.site = /chat\.(\w+)/.exec( location )[ 1 ];
+		//this.site = /chat\.(\w+)/.exec( location )[ 1 ];
+		this.site = "superuser"; //above regex is currently broken
 		this.user_id = CHAT.user.current().id;
 
 		this.in.init();
