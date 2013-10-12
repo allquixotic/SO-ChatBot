@@ -130,13 +130,16 @@ bot.adapter = {
 	//not a necessary function, used in here to set some variables
 	init : function () {
 		var fkey = document.getElementById( 'fkey' );
+		//produces http://chat.stackexchange.com/?tab=site&host=superuser.com
+		var pathToHostSite = document.getElementById('siterooms').href;
 		if ( !fkey ) {
 			console.error( 'bot.adapter could not find fkey; aborting' );
 			return;
 		}
 		this.fkey = fkey.value;
 		this.roomid = Number( /\d+/.exec(location)[0] );
-		this.site = /chat\.(\w+)/.exec( location )[ 1 ];
+		//gets the end of the pathToHostSite var (everything after 2nd equals)
+		this.site = /[a-z]*\.com$/.exec(pathToHostSite)[0];
 		this.user_id = CHAT.user.current().id;
 
 		this.in.init();

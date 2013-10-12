@@ -2638,13 +2638,16 @@ bot.adapter = {
 	//not a necessary function, used in here to set some variables
 	init : function () {
 		var fkey = document.getElementById( 'fkey' );
+		//produces http://chat.stackexchange.com/?tab=site&host=superuser.com
+		var pathToHostSite = document.getElementById('siterooms').href;
 		if ( !fkey ) {
 			console.error( 'bot.adapter could not find fkey; aborting' );
 			return;
 		}
 		this.fkey = fkey.value;
 		this.roomid = Number( /\d+/.exec(location)[0] );
-		this.site = /chat\.(\w+)/.exec( location )[ 1 ];
+		//gets the end of the pathToHostSite var (everything after 2nd equals)
+		this.site = /[a-z]*\.com$/.exec(pathToHostSite)[0];
 		this.user_id = CHAT.user.current().id;
 
 		this.in.init();
@@ -3212,33 +3215,6 @@ bot.listen(
 	/(I('m| am))?\s*sorry/i,
 	bot.personality.apologize, bot.personality );
 bot.listen( /^bitch/i, bot.personality.bitch, bot.personality );
-
-;
-(function () {
-var hammers = {
-	STOP  : 'HAMMERTIME!',
-	STAHP : 'HAMMAHTIME!',
-	HALT  : 'HAMMERZEIT!',
-	STOY  : 'ZABIVAT\' VREMYA!',
-	CAESUM: 'MALLEUS TEMPUS!'
-};
-
-// /(STOP|STAHP|...)[\.!\?]?$/
-var re = new RegExp(
-	'(' +
-		Object.keys(hammers).map(RegExp.escape).join('|') +
-	')[\\.!?]?$' );
-
-IO.register( 'input', function STOP ( msgObj ) {
-	var sentence = msgObj.content.toUpperCase(),
-		res = re.exec( sentence );
-
-	if ( res ) {
-		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
-	}
-});
-
-})();
 
 ;
 //solves #86, mostly written by @Shmiddty
@@ -4341,22 +4317,21 @@ bot.listen( /(which |what |give me a )?firefly( episode)?/i, function ( msg ) {
 
 ;
 (function () {
+"use strict";
 //Forgets all the users it's seen.
 
 bot.addCommand({
 	name : 'forgetSeen',
 	fun : function ( args ) {
-		bot.memory.set('users', '');
+		bot.memory.get('users').length = 0;
 	},
 	permission : {
-		del : 'NONE'
+		del : 'NONE',
 		use : 'OWNER'
 	},
 	description : 'Gives the bot a serious case of amnesia. Who are you again? (Only wipes out the list of known users)'
 });
 }());
-
-;
 
 ;
 (function () {
@@ -6093,6 +6068,33 @@ bot.addCommand({
 
 ;
 (function () {
+var hammers = {
+	STOP  : 'HAMMERTIME!',
+	STAHP : 'HAMMAHTIME!',
+	HALT  : 'HAMMERZEIT!',
+	STOY  : 'ZABIVAT\' VREMYA!',
+	CAESUM: 'MALLEUS TEMPUS!'
+};
+
+// /(STOP|STAHP|...)[\.!\?]?$/
+var re = new RegExp(
+	'(' +
+		Object.keys(hammers).map(RegExp.escape).join('|') +
+	')[\\.!?]?$' );
+
+IO.register( 'input', function STOP ( msgObj ) {
+	var sentence = msgObj.content.toUpperCase(),
+		res = re.exec( sentence );
+
+	if ( res ) {
+		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
+	}
+});
+
+})();
+
+;
+(function () {
 /*
   ^\s*         #tolerate pre-whitespace
   s            #substitution prefix
@@ -6897,8 +6899,6 @@ bot.addCommand({
 	description : 'Welcomes a user. `/welcome user`'
 });
 }());
-
-;
 
 ;
 (function () {
