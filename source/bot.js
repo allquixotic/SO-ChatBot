@@ -30,7 +30,7 @@ var bot = window.bot = {
 
 			//tell the user he's banned only if he hasn't already been told
 			if ( !this.banlist[id].told ) {
-				msg.reply( 'You iz in mindjail' );
+				//msg.reply( 'You iz in mindjail' );
 				this.banlist[ id ].told = true;
 			}
 			return;
