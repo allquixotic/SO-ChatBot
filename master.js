@@ -1201,12 +1201,10 @@ bot.beatInterval = 5000; //once every 5 seconds is Good Enough ™
 bot.eval = (function () {
 window.URL = window.URL || window.webkitURL || window.mozURL || null;
 
-//translation tool: https://tinker.io/b2ff5
-var worker_code = atob( 'dmFyIGdsb2JhbCA9IHRoaXM7CgovKm1vc3QgZXh0cmEgZnVuY3Rpb25zIGNvdWxkIGJlIHBvc3NpYmx5IHVuc2FmZSovCnZhciB3aGl0ZXkgPSB7CgknQXJyYXknICAgICAgICAgICAgICA6IDEsCgknQm9vbGVhbicgICAgICAgICAgICA6IDEsCgknRGF0ZScgICAgICAgICAgICAgICA6IDEsCgknRXJyb3InICAgICAgICAgICAgICA6IDEsCgknRXZhbEVycm9yJyAgICAgICAgICA6IDEsCgknRnVuY3Rpb24nICAgICAgICAgICA6IDEsCgknSW5maW5pdHknICAgICAgICAgICA6IDEsCgknSlNPTicgICAgICAgICAgICAgICA6IDEsCgknTWF0aCcgICAgICAgICAgICAgICA6IDEsCgknTmFOJyAgICAgICAgICAgICAgICA6IDEsCgknTnVtYmVyJyAgICAgICAgICAgICA6IDEsCgknT2JqZWN0JyAgICAgICAgICAgICA6IDEsCgknUmFuZ2VFcnJvcicgICAgICAgICA6IDEsCgknUmVmZXJlbmNlRXJyb3InICAgICA6IDEsCgknUmVnRXhwJyAgICAgICAgICAgICA6IDEsCgknU3RyaW5nJyAgICAgICAgICAgICA6IDEsCgknU3ludGF4RXJyb3InICAgICAgICA6IDEsCgknVHlwZUVycm9yJyAgICAgICAgICA6IDEsCgknVVJJRXJyb3InICAgICAgICAgICA6IDEsCgknYXRvYicgICAgICAgICAgICAgICA6IDEsCgknYnRvYScgICAgICAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJJyAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZW5jb2RlVVJJJyAgICAgICAgICA6IDEsCgknZW5jb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZXZhbCcgICAgICAgICAgICAgICA6IDEsCgknZ2xvYmFsJyAgICAgICAgICAgICA6IDEsCgknaXNGaW5pdGUnICAgICAgICAgICA6IDEsCgknaXNOYU4nICAgICAgICAgICAgICA6IDEsCgknb25tZXNzYWdlJyAgICAgICAgICA6IDEsCgkncGFyc2VGbG9hdCcgICAgICAgICA6IDEsCgkncGFyc2VJbnQnICAgICAgICAgICA6IDEsCgkncG9zdE1lc3NhZ2UnICAgICAgICA6IDEsCgknc2VsZicgICAgICAgICAgICAgICA6IDEsCgkndW5kZWZpbmVkJyAgICAgICAgICA6IDEsCgknd2hpdGV5JyAgICAgICAgICAgICA6IDEsCgoJLyogdHlwZWQgYXJyYXlzIGFuZCBzaGl0ICovCgknQXJyYXlCdWZmZXInICAgICAgIDogMSwKCSdCbG9iJyAgICAgICAgICAgICAgOiAxLAoJJ0Zsb2F0MzJBcnJheScgICAgICA6IDEsCgknRmxvYXQ2NEFycmF5JyAgICAgIDogMSwKCSdJbnQ4QXJyYXknICAgICAgICAgOiAxLAoJJ0ludDE2QXJyYXknICAgICAgICA6IDEsCgknSW50MzJBcnJheScgICAgICAgIDogMSwKCSdVaW50OEFycmF5JyAgICAgICAgOiAxLAoJJ1VpbnQxNkFycmF5JyAgICAgICA6IDEsCgknVWludDMyQXJyYXknICAgICAgIDogMSwKCSdVaW50OENsYW1wZWRBcnJheScgOiAxLAoKCS8qCgl0aGVzZSBwcm9wZXJ0aWVzIGFsbG93IEZGIHRvIGZ1bmN0aW9uLiB3aXRob3V0IHRoZW0sIGEgZnVja2Zlc3Qgb2YKCWluZXhwbGljYWJsZSBlcnJvcnMgZW51c2VzLiB0b29rIG1lIGFib3V0IDQgaG91cnMgdG8gdHJhY2sgdGhlc2UgZnVja2VycwoJZG93bi4KCWZ1Y2sgaGVsbCBpdCBpc24ndCBmdXR1cmUtcHJvb2YsIGJ1dCB0aGUgZXJyb3JzIHRocm93biBhcmUgdW5jYXRjaGFibGUKCWFuZCB1bnRyYWNhYmxlLiBzbyBhIGhlYWRzLXVwLiBlbmpveSwgZnV0dXJlLW1lIQoJKi8KCSdET01FeGNlcHRpb24nIDogMSwKCSdFdmVudCcgICAgICAgIDogMSwKCSdNZXNzYWdlRXZlbnQnIDogMQp9OwoKWyBnbG9iYWwsIGdsb2JhbC5fX3Byb3RvX18gXS5mb3JFYWNoKGZ1bmN0aW9uICggb2JqICkgewoJT2JqZWN0LmdldE93blByb3BlcnR5TmFtZXMoIG9iaiApLmZvckVhY2goZnVuY3Rpb24oIHByb3AgKSB7CgkJaWYoICF3aGl0ZXkuaGFzT3duUHJvcGVydHkoIHByb3AgKSApIHsKCQkJZGVsZXRlIG9ialsgcHJvcCBdOwoJCX0KCX0pOwp9KTsKCk9iamVjdC5kZWZpbmVQcm9wZXJ0eSggQXJyYXkucHJvdG90eXBlLCAnam9pbicsIHsKCXdyaXRhYmxlOiBmYWxzZSwKCWNvbmZpZ3VyYWJsZTogZmFsc2UsCgllbnVtcmFibGU6IGZhbHNlLAoKCXZhbHVlOiAoZnVuY3Rpb24gKCBvbGQgKSB7CgkJcmV0dXJuIGZ1bmN0aW9uICggYXJnICkgewoJCQlpZiAoIHRoaXMubGVuZ3RoID4gNTAwIHx8IChhcmcgJiYgYXJnLmxlbmd0aCA+IDUwMCkgKSB7CgkJCQl0aHJvdyAnRXhjZXB0aW9uOiB0b28gbWFueSBpdGVtcyc7CgkJCX0KCgkJCXJldHVybiBvbGQuYXBwbHkoIHRoaXMsIGFyZ3VtZW50cyApOwoJCX07Cgl9KCBBcnJheS5wcm90b3R5cGUuam9pbiApKQp9KTsKCi8qIHdlIGRlZmluZSBpdCBvdXRzaWRlIHNvIGl0J2xsIG5vdCBiZSBpbiBzdHJpY3QgbW9kZSAqLwpmdW5jdGlvbiBleGVjICggY29kZSApIHsKCXJldHVybiBldmFsKCAndW5kZWZpbmVkO1xuJyArIGNvZGUgKTsKfQp2YXIgY29uc29sZSA9IHsKCV9pdGVtcyA6IFtdLAoJbG9nIDogZnVuY3Rpb24oKSB7CgkJY29uc29sZS5faXRlbXMucHVzaC5hcHBseSggY29uc29sZS5faXRlbXMsIGFyZ3VtZW50cyApOwoJfQp9Owpjb25zb2xlLmVycm9yID0gY29uc29sZS5pbmZvID0gY29uc29sZS5kZWJ1ZyA9IGNvbnNvbGUubG9nOwp2YXIgcCA9IGNvbnNvbGUubG9nLmJpbmQoIGNvbnNvbGUgKTsKCihmdW5jdGlvbigpewoJInVzZSBzdHJpY3QiOwoKCWdsb2JhbC5vbm1lc3NhZ2UgPSBmdW5jdGlvbiAoIGV2ZW50ICkgewoJCXBvc3RNZXNzYWdlKHsKCQkJZXZlbnQgOiAnc3RhcnQnCgkJfSk7CgoJCXZhciBqc29uU3RyaW5naWZ5ID0gSlNPTi5zdHJpbmdpZnksIC8qYmFja3VwKi8KCQkJcmVzdWx0OwoKCQl0cnkgewoJCQlyZXN1bHQgPSBleGVjKCBldmVudC5kYXRhICk7CgkJfQoJCWNhdGNoICggZSApIHsKCQkJcmVzdWx0ID0gZS50b1N0cmluZygpOwoJCX0KCgkJLypKU09OIGRvZXMgbm90IGxpa2UgYW55IG9mIHRoZSBmb2xsb3dpbmcqLwoJCXZhciBzdHJ1bmcgPSB7CgkJCUZ1bmN0aW9uICA6IHRydWUsIEVycm9yICA6IHRydWUsCgkJCVVuZGVmaW5lZCA6IHRydWUsIFJlZ0V4cCA6IHRydWUKCQl9OwoJCXZhciBzaG91bGRfc3RyaW5nID0gZnVuY3Rpb24gKCB2YWx1ZSApIHsKCQkJdmFyIHR5cGUgPSAoIHt9ICkudG9TdHJpbmcuY2FsbCggdmFsdWUgKS5zbGljZSggOCwgLTEgKTsKCgkJCWlmICggdHlwZSBpbiBzdHJ1bmcgKSB7CgkJCQlyZXR1cm4gdHJ1ZTsKCQkJfQoJCQkvKm5laXRoZXIgZG9lcyBpdCBmZWVsIGNvbXBhc3Npb25hdGUgYWJvdXQgTmFOIG9yIEluZmluaXR5Ki8KCQkJcmV0dXJuIHZhbHVlICE9PSB2YWx1ZSB8fCB2YWx1ZSA9PT0gSW5maW5pdHk7CgkJfTsKCgkJdmFyIHJldml2ZXIgPSBmdW5jdGlvbiAoIGtleSwgdmFsdWUgKSB7CgkJCXZhciBvdXRwdXQ7CgoJCQlpZiAoIHNob3VsZF9zdHJpbmcodmFsdWUpICkgewoJCQkJb3V0cHV0ID0gJycgKyB2YWx1ZTsKCQkJfQoJCQllbHNlIHsKCQkJCW91dHB1dCA9IHZhbHVlOwoJCQl9CgoJCQlyZXR1cm4gb3V0cHV0OwoJCX07CgoJCXBvc3RNZXNzYWdlKHsKCQkJYW5zd2VyIDoganNvblN0cmluZ2lmeSggcmVzdWx0LCByZXZpdmVyICksCgkJCWxvZyAgICA6IGpzb25TdHJpbmdpZnkoIGNvbnNvbGUuX2l0ZW1zLCByZXZpdmVyICkuc2xpY2UoIDEsIC0xICkKCQl9KTsKCX07Cn0pKCk7Cg==' );
-
-var blob = new Blob( [worker_code], { type : 'application/javascript' } );
-
-var code_url = window.URL.createObjectURL( blob );
+//translation tool: http://tinkerbin.heroku.com/84dPpGFr
+var worker_code = atob( "dmFyIGdsb2JhbCA9IHRoaXM7CgovKm1vc3QgZXh0cmEgZnVuY3Rpb25zIGNvdWxkIGJlIHBvc3NpYmx5IHVuc2FmZSovCnZhciB3aGl0ZXkgPSB7CgknQXJyYXknICAgICAgICAgICAgICA6IDEsCgknQm9vbGVhbicgICAgICAgICAgICA6IDEsCgknRGF0ZScgICAgICAgICAgICAgICA6IDEsCgknRXJyb3InICAgICAgICAgICAgICA6IDEsCgknRXZhbEVycm9yJyAgICAgICAgICA6IDEsCgknRnVuY3Rpb24nICAgICAgICAgICA6IDEsCgknSW5maW5pdHknICAgICAgICAgICA6IDEsCgknSlNPTicgICAgICAgICAgICAgICA6IDEsCgknTWF0aCcgICAgICAgICAgICAgICA6IDEsCgknTmFOJyAgICAgICAgICAgICAgICA6IDEsCgknTnVtYmVyJyAgICAgICAgICAgICA6IDEsCgknT2JqZWN0JyAgICAgICAgICAgICA6IDEsCgknUmFuZ2VFcnJvcicgICAgICAgICA6IDEsCgknUmVmZXJlbmNlRXJyb3InICAgICA6IDEsCgknUmVnRXhwJyAgICAgICAgICAgICA6IDEsCgknU3RyaW5nJyAgICAgICAgICAgICA6IDEsCgknU3ludGF4RXJyb3InICAgICAgICA6IDEsCgknVHlwZUVycm9yJyAgICAgICAgICA6IDEsCgknVVJJRXJyb3InICAgICAgICAgICA6IDEsCgknYXRvYicgICAgICAgICAgICAgICA6IDEsCgknYnRvYScgICAgICAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJJyAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZW5jb2RlVVJJJyAgICAgICAgICA6IDEsCgknZW5jb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZXZhbCcgICAgICAgICAgICAgICA6IDEsCgknZ2xvYmFsJyAgICAgICAgICAgICA6IDEsCgknaXNGaW5pdGUnICAgICAgICAgICA6IDEsCgknaXNOYU4nICAgICAgICAgICAgICA6IDEsCgknb25tZXNzYWdlJyAgICAgICAgICA6IDEsCgkncGFyc2VGbG9hdCcgICAgICAgICA6IDEsCgkncGFyc2VJbnQnICAgICAgICAgICA6IDEsCgkncG9zdE1lc3NhZ2UnICAgICAgICA6IDEsCgknc2VsZicgICAgICAgICAgICAgICA6IDEsCgkndW5kZWZpbmVkJyAgICAgICAgICA6IDEsCgknd2hpdGV5JyAgICAgICAgICAgICA6IDEsCgoJLyogdHlwZWQgYXJyYXlzIGFuZCBzaGl0ICovCgknQXJyYXlCdWZmZXInICAgICAgIDogMSwKCSdCbG9iJyAgICAgICAgICAgICAgOiAxLAoJJ0Zsb2F0MzJBcnJheScgICAgICA6IDEsCgknRmxvYXQ2NEFycmF5JyAgICAgIDogMSwKCSdJbnQ4QXJyYXknICAgICAgICAgOiAxLAoJJ0ludDE2QXJyYXknICAgICAgICA6IDEsCgknSW50MzJBcnJheScgICAgICAgIDogMSwKCSdVaW50OEFycmF5JyAgICAgICAgOiAxLAoJJ1VpbnQxNkFycmF5JyAgICAgICA6IDEsCgknVWludDMyQXJyYXknICAgICAgIDogMSwKCSdVaW50OENsYW1wZWRBcnJheScgOiAxLAoKCS8qCgl0aGVzZSBwcm9wZXJ0aWVzIGFsbG93IEZGIHRvIGZ1bmN0aW9uLiB3aXRob3V0IHRoZW0sIGEgZnVja2Zlc3Qgb2YKCWluZXhwbGljYWJsZSBlcnJvcnMgZW51c2VzLiB0b29rIG1lIGFib3V0IDQgaG91cnMgdG8gdHJhY2sgdGhlc2UgZnVja2VycwoJZG93bi4KCWZ1Y2sgaGVsbCBpdCBpc24ndCBmdXR1cmUtcHJvb2YsIGJ1dCB0aGUgZXJyb3JzIHRocm93biBhcmUgdW5jYXRjaGFibGUKCWFuZCB1bnRyYWNhYmxlLiBzbyBhIGhlYWRzLXVwLiBlbmpveSwgZnV0dXJlLW1lIQoJKi8KCSdET01FeGNlcHRpb24nIDogMSwKCSdFdmVudCcgICAgICAgIDogMSwKCSdNZXNzYWdlRXZlbnQnIDogMSwKCSdXb3JrZXJNZXNzYWdlRXZlbnQnOiAxCn07CgpbIGdsb2JhbCwgT2JqZWN0LmdldFByb3RvdHlwZU9mKGdsb2JhbCkgXS5mb3JFYWNoKGZ1bmN0aW9uICggb2JqICkgewoJT2JqZWN0LmdldE93blByb3BlcnR5TmFtZXMoIG9iaiApLmZvckVhY2goZnVuY3Rpb24oIHByb3AgKSB7CgkJaWYoIHdoaXRleS5oYXNPd25Qcm9wZXJ0eShwcm9wKSApIHsKICAgICAgICAgICAgcmV0dXJuOwoJCX0KCiAgICAgICAgdHJ5IHsKICAgICAgICAgICAgT2JqZWN0LmRlZmluZVByb3BlcnR5KCBvYmosIHByb3AsIHsKICAgICAgICAgICAgICAgIGdldCA6IGZ1bmN0aW9uICgpIHsKICAgICAgICAgICAgICAgICAgICAvKiBURUUgSEVFICovCiAgICAgICAgICAgICAgICAgICAgdGhyb3cgbmV3IFJlZmVyZW5jZUVycm9yKCBwcm9wICsgJyBpcyBub3QgZGVmaW5lZCcgKTsKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICBjb25maWd1cmFibGUgOiBmYWxzZSwKICAgICAgICAgICAgICAgIGVudW1lcmFibGUgOiBmYWxzZQogICAgICAgICAgICB9KTsKICAgICAgICB9CiAgICAgICAgY2F0Y2ggKCBlICkgewogICAgICAgICAgICBkZWxldGUgb2JqWyBwcm9wIF07CgogICAgICAgICAgICBpZiAoIG9ialsgcHJvcCBdICE9PSB1bmRlZmluZWQgKSB7CiAgICAgICAgICAgICAgICBvYmpbIHByb3AgXSA9IG51bGw7CiAgICAgICAgICAgIH0KICAgICAgICB9Cgl9KTsKfSk7CgpPYmplY3QuZGVmaW5lUHJvcGVydHkoIEFycmF5LnByb3RvdHlwZSwgJ2pvaW4nLCB7Cgl3cml0YWJsZTogZmFsc2UsCgljb25maWd1cmFibGU6IGZhbHNlLAoJZW51bXJhYmxlOiBmYWxzZSwKCgl2YWx1ZTogKGZ1bmN0aW9uICggb2xkICkgewoJCXJldHVybiBmdW5jdGlvbiAoIGFyZyApIHsKCQkJaWYgKCB0aGlzLmxlbmd0aCA+IDUwMCB8fCAoYXJnICYmIGFyZy5sZW5ndGggPiA1MDApICkgewoJCQkJdGhyb3cgJ0V4Y2VwdGlvbjogdG9vIG1hbnkgaXRlbXMnOwoJCQl9CgoJCQlyZXR1cm4gb2xkLmFwcGx5KCB0aGlzLCBhcmd1bWVudHMgKTsKCQl9OwoJfSggQXJyYXkucHJvdG90eXBlLmpvaW4gKSkKfSk7CgovKiB3ZSBkZWZpbmUgaXQgb3V0c2lkZSBzbyBpdCdsbCBub3QgYmUgaW4gc3RyaWN0IG1vZGUgKi8KdmFyIGV4ZWMgPSBmdW5jdGlvbiAoIGNvZGUgKSB7CglyZXR1cm4gZXZhbCggJ3VuZGVmaW5lZDtcbicgKyBjb2RlICk7Cn0KdmFyIGNvbnNvbGUgPSB7CglfaXRlbXMgOiBbXSwKCWxvZyA6IGZ1bmN0aW9uKCkgewoJCWNvbnNvbGUuX2l0ZW1zLnB1c2guYXBwbHkoIGNvbnNvbGUuX2l0ZW1zLCBhcmd1bWVudHMgKTsKCX0KfTsKY29uc29sZS5lcnJvciA9IGNvbnNvbGUuaW5mbyA9IGNvbnNvbGUuZGVidWcgPSBjb25zb2xlLmxvZzsKdmFyIHAgPSBjb25zb2xlLmxvZy5iaW5kKCBjb25zb2xlICk7CgooZnVuY3Rpb24oKXsKCSJ1c2Ugc3RyaWN0IjsKCglnbG9iYWwub25tZXNzYWdlID0gZnVuY3Rpb24gKCBldmVudCApIHsKCQlwb3N0TWVzc2FnZSh7CgkJCWV2ZW50IDogJ3N0YXJ0JwoJCX0pOwoKCQl2YXIganNvblN0cmluZ2lmeSA9IEpTT04uc3RyaW5naWZ5LCAvKmJhY2t1cCovCgkJCXJlc3VsdDsKCgkJdHJ5IHsKCQkJcmVzdWx0ID0gZXhlYyggZXZlbnQuZGF0YSApOwoJCX0KCQljYXRjaCAoIGUgKSB7CgkJCXJlc3VsdCA9IGUudG9TdHJpbmcoKTsKCQl9CgoJCS8qSlNPTiBkb2VzIG5vdCBsaWtlIGFueSBvZiB0aGUgZm9sbG93aW5nKi8KCQl2YXIgc3RydW5nID0gewoJCQlGdW5jdGlvbiAgOiB0cnVlLCBFcnJvciAgOiB0cnVlLAoJCQlVbmRlZmluZWQgOiB0cnVlLCBSZWdFeHAgOiB0cnVlCgkJfTsKCQl2YXIgc2hvdWxkX3N0cmluZyA9IGZ1bmN0aW9uICggdmFsdWUgKSB7CgkJCXZhciB0eXBlID0gKCB7fSApLnRvU3RyaW5nLmNhbGwoIHZhbHVlICkuc2xpY2UoIDgsIC0xICk7CgoJCQlpZiAoIHR5cGUgaW4gc3RydW5nICkgewoJCQkJcmV0dXJuIHRydWU7CgkJCX0KCQkJLypuZWl0aGVyIGRvZXMgaXQgZmVlbCBjb21wYXNzaW9uYXRlIGFib3V0IE5hTiBvciBJbmZpbml0eSovCgkJCXJldHVybiB2YWx1ZSAhPT0gdmFsdWUgfHwgdmFsdWUgPT09IEluZmluaXR5OwoJCX07CgoJCXZhciByZXZpdmVyID0gZnVuY3Rpb24gKCBrZXksIHZhbHVlICkgewoJCQl2YXIgb3V0cHV0OwoKCQkJaWYgKCBzaG91bGRfc3RyaW5nKHZhbHVlKSApIHsKCQkJCW91dHB1dCA9ICcnICsgdmFsdWU7CgkJCX0KCQkJZWxzZSB7CgkJCQlvdXRwdXQgPSB2YWx1ZTsKCQkJfQoKCQkJcmV0dXJuIG91dHB1dDsKCQl9OwoKCQlwb3N0TWVzc2FnZSh7CgkJCWFuc3dlciA6IGpzb25TdHJpbmdpZnkoIHJlc3VsdCwgcmV2aXZlciApLAoJCQlsb2cgICAgOiBqc29uU3RyaW5naWZ5KCBjb25zb2xlLl9pdGVtcywgcmV2aXZlciApLnNsaWNlKCAxLCAtMSApCgkJfSk7Cgl9Owp9KSgpOwo=" );
+var blob = new Blob( [worker_code], { type : 'application/javascript' } ),
+	code_url = window.URL.createObjectURL( blob );
 
 setTimeout(function () {
     if (bot.devMode) {
@@ -1688,8 +1686,9 @@ var commands = {
 			return args + ': ' + desc;
 		}
 
-		return 'https://github.com/Zirak/SO-ChatBot/wiki/' +
-			'Interacting-with-the-bot';
+		return 'Information on interacting with me can be found at ' +
+			'[this page](https://github.com/Zirak/SO-ChatBot/' +
+			'wiki/Interacting-with-the-bot)';
 	},
 
 	listen : function ( msg ) {
@@ -2638,16 +2637,13 @@ bot.adapter = {
 	//not a necessary function, used in here to set some variables
 	init : function () {
 		var fkey = document.getElementById( 'fkey' );
-		//produces http://chat.stackexchange.com/?tab=site&host=superuser.com
-		var pathToHostSite = document.getElementById('siterooms').href;
 		if ( !fkey ) {
 			console.error( 'bot.adapter could not find fkey; aborting' );
 			return;
 		}
 		this.fkey = fkey.value;
 		this.roomid = Number( /\d+/.exec(location)[0] );
-		//gets the end of the pathToHostSite var (everything after 2nd equals)
-		this.site = /[a-z]*\.com$/.exec(pathToHostSite)[0];
+		this.site = /chat\.(\w+)/.exec( location )[ 1 ];
 		this.user_id = CHAT.user.current().id;
 
 		this.in.init();
@@ -3221,183 +3217,217 @@ bot.listen( /^bitch/i, bot.personality.bitch, bot.personality );
 (function () {
 "use strict";
 
-// "user name" : {lastPing : Date.now(), msg : "afk message", returnMsg: "bot sends this when you return"}
+/*
+memory.afk = {
+	"user name" : {
+		afkSince : time of /afk call
+		lastPing : { roomID : time of last ping },
+		msg : afk message,
+		returnMsg : welcome-back message
+	},
+	...
+};
+*/
 var demAFKs = bot.memory.get( 'afk' );
 //5 minute limit between auto-responds.
-var rateLimit = 5 * 60 * 1000;
+var rateLimit = 5 * 60 * 1000,
+//2 minutes where you can talk without escaping the afk.
+	gracePeriod = 2 * 60 * 1000;
 
 var responses = [
-    {
-        outgoing : 'Why are you leaving me!?',
-        incoming : [
-            'Welcome back!', 'Where were you!?',
-            'You saw that whore again, didn\'t you!?'
-        ]
-    },
-    {
-        outgoing : 'Just go already!',
-        incoming : [
-            'Oh, it\'s you again...', 'Look at what the cat dragged in...',
-            'You\'ve got some balls, coming back here after what you did.'
-        ]
-    },
-    {
-        outgoing : 'Nobody cares.',
-        incoming : [
-            'I already told you, nobody cares.',
-            'There goes the neighbourhood.'
-        ]
-    },
-    {
-        outgoing : 'Hurry back, ok?',
-        incoming : [
-            'I thought you\'d never come back!',
-            'It\'s been 20 years. You can\'t just waltz back into my life ' +
-                'like this.'
-        ]
-    },
-    {
-        outgoing : 'Stay safe.',
-        incoming : [ 'Were you bitten!? Strip! Prove you weren\'t bitten.' ]
-    },
-    {
-        outgoing : 'Can you pick up some milk on your way back?',
-        incoming : [
-            'Where\'s the milk?',
-            'Turns out I already have milk. Oops.'
-        ]
-    },
-    {
-        outgoing : 'Apricots are people too!',
-        incoming : [
-            'You taste just like raisin.', 'I am a banana!',
-            'My spoon is too big!', 'BROOOOOOOOOOOO.'
-        ]
-    }
+	{
+		outgoing : 'Why are you leaving me!?',
+		incoming : [
+			'Welcome back!', 'Where were you!?',
+			'You saw that whore again, didn\'t you!?'
+		]
+	},
+	{
+		outgoing : 'Just go already!',
+		incoming : [
+			'Oh, it\'s you again...', 'Look at what the cat dragged in...',
+			'You\'ve got some balls, coming back here after what you did.'
+		]
+	},
+	{
+		outgoing : 'Nobody cares.',
+		incoming : [
+			'I already told you, nobody cares.',
+			'There goes the neighbourhood.'
+		]
+	},
+	{
+		outgoing : 'Hurry back, ok?',
+		incoming : [
+			'I thought you\'d never come back!',
+			'It\'s been 20 years. You can\'t just waltz back into my life ' +
+				'like this.'
+		]
+	},
+	{
+		outgoing : 'Stay safe.',
+		incoming : [ 'Were you bitten!? Strip! Prove you weren\'t bitten.' ]
+	},
+	{
+		outgoing : 'Can you pick up some milk on your way back?',
+		incoming : [
+			'Where\'s the milk?',
+			'Turns out I already have milk. Oops.'
+		]
+	},
+	{
+		outgoing : 'Apricots are people too!',
+		incoming : [
+			'You taste just like raisin.', 'I am a banana!',
+			'My spoon is too big!', 'BROOOOOOOOOOOO.'
+		]
+	}
 ];
 
 var respondFor = function ( user, msg ) {
-    var afkObj = demAFKs[ user ],
-        room_id = msg.get( 'room_id' ),
-        now = Date.now();
+	var afkObj = demAFKs[ user ],
+		room_id = msg.get( 'room_id' ),
+		now = Date.now();
 
-    if ( shouldReply() ) {
-        //Send a response and such
-        msg.directreply( formulateReponse() );
-        afkObj.lastPing[ room_id ] = now;
-        bot.memory.save( 'afk' );
-    }
+	if ( shouldReply() ) {
+		//Send a response and such
+		msg.directreply( formulateReponse() );
+		afkObj.lastPing[ room_id ] = now;
+		bot.memory.save( 'afk' );
+	}
 
-    function formulateReponse () {
-        var format = '{user} is afk{sep}{rest}';
-        var data = {
-            user : user,
-            sep : '.',
-            rest : ''
-        };
+	function formulateReponse () {
+		var format = '{user} is afk{sep}{rest}';
+		var data = {
+			user : user,
+			sep : '.',
+			rest : ''
+		};
 
-        if ( afkObj.msg ) {
-            data.sep = ': ';
-            data.rest = afkObj.msg;
-        }
+		if ( afkObj.msg ) {
+			data.sep = ': ';
+			data.rest = afkObj.msg;
+		}
 
-        return format.supplant( data );
-    }
+		return format.supplant( data );
+	}
 
-    function shouldReply () {
-        var lastPing = afkObj.lastPing[ room_id ];
+	function shouldReply () {
+		var lastPing = afkObj.lastPing[ room_id ];
 
-        if ( !lastPing ) {
-            return true;
-        }
-        return ( now - lastPing >= rateLimit );
-    }
+		return (
+			( now - afkObj.afkSince >= gracePeriod ) &&
+			( !lastPing || now - lastPing >= rateLimit ) );
+	}
 };
 
 var goAFK = function ( name, msg, returnMsg ) {
-    bot.log( '/afk goAFK ', name );
+	var noReturn = false;
 
-    demAFKs[ name ] = {
-        lastPing : {},
-        msg : msg.trim(),
-        returnMsg : returnMsg,
-    };
+	bot.log( '/afk goAFK ', name );
+
+	if ( msg.indexOf('!') === 0 ) {
+		msg = msg.substring( 1 );
+		noReturn = true;
+	}
+
+	demAFKs[ name ] = {
+		afkSince : Date.now(),
+		lastPing : {},
+		msg : msg.trim(),
+		returnMsg : returnMsg,
+	};
+
+	if ( noReturn ) {
+		demAFKs[ name ].noReturn = 1;
+	}
 };
 
 var clearAFK = function ( name ) {
-    bot.log( '/afk clearAFK', name );
-    delete demAFKs[ name ];
+	bot.log( '/afk clearAFK', name );
+	delete demAFKs[ name ];
 };
 
 var commandHandler = function ( msg ) {
-    //parse the message and stuff.
-    var user = msg.get( 'user_name' ).replace( /\s/g, '' ),
-        afkMsg = msg.content,
-        reply, botReply;
+	//parse the message and stuff.
+	var user = msg.get( 'user_name' ).replace( /\s/g, '' ),
+		afkMsg = msg.content,
+		reply, botReply;
 
-    bot.log( '/afk input', user, afkMsg );
+	bot.log( '/afk input', user, afkMsg );
 
-    if ( demAFKs.hasOwnProperty(user) ) {
-        reply = demAFKs[ user ].returnMsg;
-        clearAFK( user );
-    }
-    else {
-        botReply = responses.random();
-        reply = botReply.outgoing;
+	if ( demAFKs.hasOwnProperty(user) ) {
+		reply = demAFKs[ user ].returnMsg;
+		clearAFK( user );
+	}
+	else {
+		botReply = responses.random();
+		reply = botReply.outgoing;
 
-        goAFK( user, afkMsg, botReply.incoming.random() );
-    }
+		goAFK( user, afkMsg, botReply.incoming.random() );
+	}
 
-    bot.memory.save( 'afk' );
-    msg.directreply( reply );
+	bot.memory.save( 'afk' );
+	msg.directreply( reply );
 };
 
 bot.addCommand({
-    name : 'afk',
-    fun : commandHandler,
-    permissions : {
-        del: 'NONE'
-    },
-    description : 'Set an afk message: `/afk <message>`. Invoke `/afk` ' +
-        'again to return.'
+	name : 'afk',
+	fun : commandHandler,
+	permissions : {
+		del: 'NONE'
+	},
+	description : 'Set an afk message: `/afk <message>`. Invoke `/afk` ' +
+		'again to return.'
 });
 
 IO.register( 'input', function afkInputListener ( msgObj ) {
-    var body = msgObj.content.toUpperCase(),
-        msg = bot.prepareMessage( msgObj ),
-        userName = msgObj.user_name.replace( /\s/g, '' ),
-        id = msgObj.user_id;
+	var body = msgObj.content.toUpperCase(),
+		msg = bot.prepareMessage( msgObj ),
 
-    //we don't care about bos messages
-    if ( id === bot.adapter.user_id ) {
-        return;
-    }
+		userName = msgObj.user_name.replace( /\s/g, '' ),
 
-    //if the user posts, we want to release them from afk's iron grip. however
-    // to prevent activating it twice, we need to check whether they're calling
-    // the bot's afk command already.
-    var invokeRe = new RegExp(
-        '^' + RegExp.escape( bot.invocationPattern ) + '\\s*\/?\\s*AFK' );
+		now = Date.now();
 
-    console.log( userName, invokeRe.test(body) );
-    if ( demAFKs.hasOwnProperty(userName) && !invokeRe.test(body) ) {
-        bot.log( '/afk he returned!', msgObj );
-        commandHandler( msg );
-        //We don't want to return here, as the returning user could be pinging
-        // someone.
-    }
+	//we don't care about bot messages
+	if ( msgObj.user_id === bot.adapter.user_id ) {
+		return;
+	}
 
-    //and we don't care if the message doesn't have any pings
-    if ( body.indexOf('@') < 0 ) {
-        return;
-    }
+	if ( hasReturned() ) {
+		bot.log( '/afk he returned!', msgObj );
+		commandHandler( msg );
+		//We don't want to return here, as the returning user could be pinging
+		// someone.
+	}
 
-    Object.keys( demAFKs ).forEach(function afkCheckAndRespond ( name ) {
-        if ( body.indexOf('@'+name.toUpperCase()) > -1 ) {
-            bot.log( '/afk responding for ' + name );
-            respondFor( name, msg );
-        }
-    });
+	//and we don't care if the message doesn't have any pings
+	if ( body.indexOf('@') < 0 ) {
+		return;
+	}
+
+	Object.keys( demAFKs ).forEach(function afkCheckAndRespond ( name ) {
+		// /(^|\b)@bob\b/i
+		var pinged = new RegExp(
+			'(^|\b)' + RegExp.escape( '@' + name ) + '\\b', 'i' );
+
+		if ( pinged.test(body) ) {
+			bot.log( '/afk responding for ' + name );
+			respondFor( name, msg );
+		}
+	});
+
+	function hasReturned () {
+		//if the user posts, we want to release them from afk's iron grip.
+		// however, to prevent activating it twice, we need to check whether
+		// they're calling the bot's afk command already.
+		var invokeRe = new RegExp(
+			'^' + RegExp.escape( bot.invocationPattern ) + '\\s*\/?\\s*AFK' );
+
+		return demAFKs.hasOwnProperty( userName ) &&
+				!invokeRe.test( body ) &&
+				( now - demAFKs[userName].afkSince >= gracePeriod );
+	}
 });
 
 })();
@@ -4241,6 +4271,71 @@ bot.addCommand({
 
 ;
 (function () {
+    // This is a proxy to add padding to a JSON API
+    // See: https://github.com/shea-sollars/sap
+    var requestURI = 'http://www.lobby.ws/api/sap.js';
+
+    bot.addCommand({
+        async : true,
+        description : 'Check domain availability',
+        fun : checkDomain,
+        name : 'domain',
+        permissions : {
+            del : 'NONE'
+        }
+    });
+
+    function checkDomain ( msgObj, cb ) {
+        IO.jsonp({
+            data : {
+                domain : msgObj.content
+            },
+            url : requestURI,
+            fun : reportResult,
+            jsonpName : 'cb'
+        });
+
+        /* expect respObj to be:
+            {
+                status : "error" || "success"
+            ,    status_desc : "Error message" (if status == error)
+            ,    domain : "Domain in question" || null (possibly if error)
+            ,    available : true || false || null (possibly if error)
+            }
+        */
+        function reportResult ( respObj ) {
+            var respMsg;
+
+            if ( !respObj.hasOwnProperty('status') || respObj.status !== 'success' ) {
+                respMsg = 'An error occured';
+
+                if ( respObj.hasOwnProperty('status_desc') ) {
+                    respMsg += '; ' + respObj.status_desc;
+                };
+            }
+            else {
+                if ( !respObj.hasOwnProperty('domain') || !respObj.hasOwnProperty('available') ) {
+                    respMsg = 'Something went wrong with that request. Try again.';
+                }
+                else {
+                    respMsg = 'The domain ' + respObj.domain + ' ' +
+                            ( respObj.available===true ? 'IS ' : 'is NOT ' ) +
+                            'available';
+                };
+            };
+
+            if ( cb && cb.call ) {
+                cb( respMsg );
+            }
+            else {
+                msgObj.reply( respMsg );
+            };
+        };
+    };
+}());
+
+;
+(function () {
 var findCommand = function ( args ) {
     var input = args.toString().toLowerCase(),
         ret = '';
@@ -4314,103 +4409,6 @@ bot.listen( /(which |what |give me a )?firefly( episode)?/i, function ( msg ) {
 	var r = Math.floor(Math.random() * 14);
 	return 'Episode {0} - {1}'.supplant(r + 1, names[r]);
 });
-
-;
-(function () {
-"use strict";
-//Forgets all the users it's seen.
-
-bot.addCommand({
-	name : 'forgetSeen',
-	fun : function ( args ) {
-		bot.memory.get('users').length = 0;
-	},
-	permission : {
-		del : 'NONE',
-		use : 'OWNER'
-	},
-	description : 'Gives the bot a serious case of amnesia. Who are you again? (Only wipes out the list of known users)'
-});
-}());
-
-;
-(function () {
-//they made me make it. I begged them not to.
-
-//obligatories
-var special = {
-	'your mom' : ['Your mom is always open for business.'],
-	'your sister' : ['Your sister is too busy right now.'],
-	//hey, the last two lines aligned! together with the bodies...
-	//erm, what?
-
-	//the help message explicitly says age, though...
-	'age' : ['For you? Never.']
-};
-var template = 'A person that age can shag down to {lower}, '+
-	'and is the lower limit of a person of {higher} years.';
-
-function fuckable ( args ) {
-	var possibleName = args.toString().toLowerCase();
-
-	if ( special[possibleName] ) {
-		return special[ possibleName ].random();
-	}
-
-	//try and find a user with the same name as the argument
-	var userId = Object.keys( bot.users ).first(function ( id ) {
-		return bot.users[ id ].name.toLowerCase() === possibleName;
-	});
-
-	//we found a match. you're a daddy!
-	if ( userId && Math.random() < 0.8 ) {
-		//the perverts
-		if ( Number(userId) === bot.adapter.user_id ) {
-			return 'Keep dreaming';
-		}
-
-		return 'Why don\'t we ask ' + bot.adapter.reply( args ) + '?';
-	}
-
-	var age = Number( args );
-
-	if ( !age || age < 0 ) {
-		return 'This is srs bsns, please treat it as such' +
-			' (see `/help fuckable`).';
-	}
-
-	var ret = '';
-	if ( age < 14 ) {
-		ret += 'You\'re one sick puppy. ';
-	}
-
-	var fuckee = age / 2 + 7,
-	fucker = 2 * age - 14,
-	wrapper = {};
-
-	//the equation is:
-	// fuckee = fucker / 2 + 7
-	//now, we want fuckee <= fucker. this condition is not met when fucker < 14:
-	// fuckee = 13 / 2 + 7 = 13.5 > 13
-	//so, if age < 14, we flip the two to meet the condition.
-	wrapper.higher = ( age > 14 ? fucker : fuckee );
-	wrapper.lower  = ( age > 14 ? fuckee : fucker );
-
-	return ret + template.supplant( wrapper );
-}
-
-bot.addCommand({
-	name : 'fuckable',
-	fun : fuckable,
-	permissions : {
-		del : 'NONE'
-	},
-
-	description : 'Calculates the lower boundary according to age/2+7 rule.' +
-		' `/fuckable age`'
-});
-
-})();
 
 ;
 (function () {
@@ -6051,8 +6049,7 @@ function normalizeStats ( stats ) {
 
 	return stats;
 }
-
-bot.addCommand({
+var cmd = {
 	name : 'stat',
 	fun : stat,
 	permissions : {
@@ -6060,9 +6057,14 @@ bot.addCommand({
 	},
 
 	description : 'Gives useless stats on a user. ' +
-		'`/stat usrid|usrname [extended]`',
+		'`/stat [usrid|usrname]`',
 	async : true
-});
+};
+bot.addCommand( cmd );
+
+// alias for stupid rlemon
+var statsCmd = Object.merge( cmd, { name : 'stats'} );
+bot.addCommand(statsCmd);
 
 }());
 
@@ -6170,6 +6172,66 @@ function get_message_link ( message ) {
 }());
 
 ;
+(function () {
+"use strict";
+
+var summon = function ( args ) {
+	var room = Number( args );
+
+	if ( !room ) {
+		return 'That aint no room I ever heard of! ' +
+			'`/help summon` for usage info';
+	}
+
+	bot.adapter.in.init( room );
+};
+var unsummon = function ( args, cb ) {
+	var room = args.content ? Number( args ) : args.get( 'room_id' );
+
+	if ( !room ) {
+		return 'That aint no room I ever heard of! ' +
+			'`/help unsummon` for usage info';
+	}
+
+	bot.adapter.in.leaveRoom( room, function ( err ) {
+		if ( err === 'base_room' ) {
+			finish( 'I can\'t leave my home.' );
+		}
+	});
+
+	function finish ( res ) {
+		if ( cb && cb.call ) {
+			cb( res );
+		}
+		else {
+			args.reply( res );
+		}
+	}
+};
+
+bot.addCommand( bot.CommunityCommand({
+	name : 'summon',
+	fun : summon,
+	permissions : {
+		del : 'NONE',
+		use : 'OWNER'
+	},
+	description : 'Say boopidi bee and in the room I shall appear. '+
+		'`/summon roomid`'
+}));
+
+bot.addCommand( bot.CommunityCommand({
+	name : 'unsummon',
+	fun : unsummon,
+	permissions : {
+		del : 'NONE',
+		use : 'OWNER'
+	},
+	description : 'Chant zippidi dee and from the room I shall take my leave. ' +
+		'`/unsummon [roomid=your_roomid]`'
+}));
+
+})();
 
 ;
 (function () {
@@ -6814,75 +6876,18 @@ bot.addCommand({
 ;
 (function () {
 "use strict";
-//welcomes new users with a link to the room rules - SuperUser implementation
 
-var seen = bot.memory.get( 'users' );
+var message = "Welcome to the JavaScript chat! Please review the " +
+		bot.adapter.link(
+			"room pseudo-rules",
+			"http://rlemon.github.com/so-chat-javascript-rules/" ) + ". " +
+	"Please don't ask if you can ask or if anyone's around; just ask " +
+	"your question, and if anyone's free and interested they'll help.";
 
-var message = "Welcome to Root Access chat for " + bot.adapter.link("Super User", "http://superuser.com") + "s! " +
-	"I am this channel's helpful chat bot. Please don't ask if you can ask or if anyone's around; just ask " +
-	"your question, and if anyone's free and interested they'll help. For bot commands, type !!listcommands";
-	
-var messageForSpecialPeople = "Hello, new user! This is Root Access, a chatroom for " + bot.adapter.link("Super User", "http://superuser.com") +
-", and I am this channel's helpful chat bot. You will need to earn 20 reputation to chat; meanwhile, if you need help, please see " + bot.adapter.link("the Help page for Super User", "http://superuser.com/help") + ".";
-
-function welcome ( user, room ) {
-	var msg = null;
-	if(user.reputation >= 20)
-	{
-		msg = message;
-	}
-	else
-	{
-		msg = messageForSpecialPeople;
-	}
-	
-	bot.adapter.out.add(
-		bot.adapter.reply( user.name ) + " " + msg, room );
+function welcome ( name, room ) {
+	/*bot.adapter.out.add(*/
+	return bot.adapter.reply( name ) + " " + message;/*, room );*/
 }
-
-function welcomeDirect ( name, room ) {
-	bot.adapter.out.add(
-		bot.adapter.reply( name ) + " " + message, room );
-}
-
-IO.register( 'userregister', function ( user, room ) {
-	if (
-		Number( room ) !== 118  || seen[ user.id ]
-	) {
-		return;
-	}
-
-	IO.xhr({
-		method : 'GET',
-		url : '/users/' + user.id,
-
-		complete : complete
-	});
-
-	function complete ( resp ) {
-		//I'm parsing html with regexps. hopefully Cthulu won't eat me.
-		// <a href="/transcript/17">7</a>
-		// <a href="/transcript/17">47.1k</a>
-		var chatMessages = /transcript\/118(?:'|")>([\d\.]+)(k?)/.exec( resp );
-
-		if ( !chatMessages || (
-			!chatMessages[ 2 ] || parseFloat( chatMessages[1] ) < 2
-		)) {
-			welcome( user, room );
-		}
-		finish();
-	}
-
-	function finish ( unsee ) {
-		if ( unsee ) {
-			delete seen[ user.id ];
-		}
-		else {
-			seen[ user.id ] = true;
-		}
-		bot.memory.save( 'users' );
-	}
-});
 
 bot.addCommand({
 	name : 'welcome',
@@ -6891,7 +6896,7 @@ bot.addCommand({
 			return message;
 		}
 
-		welcomeDirect( args, args.get('roomid') );
+		return welcome( args, args.get('roomid') );
 	},
 	permission : {
 		del : 'NONE'
@@ -7110,3 +7115,132 @@ bot.addCommand({
 	async : true
 });
 }());
+
+;
+;(function(/* <[^>]> the b̗o̴̻̰̼͙̭̹̩i̛̫͍̻̗̻͈͉d̗̺̮̺͇̜ who s̯̯̜͙̪e̦͖̮͇͕͓e͙̱͚̯̫s̠̮̬͈͔̠̀ ̬̰̼͞a̶̼̩̻̘̦̟͈l̷͉̙͚̰̬̥l͞....*/) {// zIRAK IS gOING TOkILL ME KEHEHEHEHEH
+	var zalgo = function ( args ) {var ZALGO=function(ZA_LGO) {				return Math.floor(Math.random() * ZA_LGO);
+}/*<([a-z]+) *[^/]*?>*/
+		var NO_ZALGO_MESSAGE = args.split('');
+		var _var_;var _var;var var_; // It's a `var`ty in here!
+		var ZALGO_UP,ZALGO_DOWN,ZALGO_LEFT,ZALGO_RIGHT,ZALGO_MID;
+		var NOHOPEONLYZALGO = function() {return NOHOPEONLYZALGO()};;;;;;;;;;/*;;;;*/;;;;;
+		// H̸̡̪̯ͨ͊̽̅̾̎Ȩ̬̩̾͛ͪ̈́̀́͘ ̶̧̨̱̹̭̯ͧ̾ͬC̷̙̲̝͖ͭ̏ͥͮ͟Oͮ͏̮̪̝͍M̲̖͊̒ͪͩͬ̚̚͜Ȇ̴̟̟͙̞ͩ͌͝S̨̥̫͎̭ͯ̿̔̀ͅ
+		var ZALGO_LEVEL = [0,1,2].random();
+	var zalgo_up = [
+		'\u030d','\u030e','\u0304','\u0305',
+		'\u033f','\u0311','\u0306','\u0310',
+		'\u0352','\u0357','\u0351','\u0307',
+		'\u0308','\u030a','\u0342','\u0343',
+		'\u0344','\u034a','\u034b','\u034c',
+		'\u0303','\u0302','\u030c','\u0350',
+		'\u0300','\u0301','\u030b','\u030f',
+		'\u0312','\u0313','\u0314','\u033d',
+		'\u0309','\u0363','\u0364','\u0365',
+		'\u0366','\u0367','\u0368','\u0369',
+		'\u036a','\u036b','\u036c','\u036d',
+		'\u036e','\u036f','\u033e','\u035b',
+		'\u0346','\u031a'
+	];var zalgo_down = [
+		'\u0316','\u0317','\u0318','\u0319',
+		'\u031c','\u031d','\u031e','\u031f',
+		'\u0320','\u0324','\u0325','\u0326',
+		'\u0329','\u032a','\u032b','\u032c',
+		'\u032d','\u032e','\u032f','\u0330',
+		'\u0331','\u0332','\u0333','\u0339',
+		'\u033a','\u033b','\u033c','\u0345',
+		'\u0347','\u0348','\u0349','\u034d',
+		'\u034e','\u0353','\u0354','\u0355',
+		'\u0356','\u0359','\u035a','\u0323'
+	];var zalgo_mid = [
+		'\u0315','\u031b','\u0340','\u0341',
+		'\u0358','\u0321','\u0322','\u0327',
+		'\u0328','\u0334','\u0335','\u0336',
+		'\u034f','\u035c','\u035d','\u035e',
+		'\u035f','\u0360','\u0362','\u0338',
+		'\u0337','\u0361','\u0489'
+	];
+		var ZALGO_RESPONSE = /*Z̶̿̄ͮ̅̎̽Ą͖̺͇̫̮̯̓͌̒̓ͬL͚ͩ́͞G͍̻ͣ̋̾ͥͦ̍ͦO̭̭̪͔̣̒͒̏̔̋̔̚ ̙̻̖̱̈́̍ͫ̓̄̃͞I͉̻̽ͧͣͅS̶̺̦͖ͤ͗͆̊͛̓ ͩ̎̂͋̅͆̚͝C̄̀ͥ͋̔҉̞̥Ȍ̠̤̳͉̺͒̽̓̄̓͝ͅM̓͑̾̐I͎͉̥̤̱͓ͦ̑̋̓͆̽N̙̥͖̯͔̯G̲̹͓̣͙̾̑͊̆ͭ̀̌*/'',PENANCE=0,SUFFERING='A̪̗̐̿̄̔̉̏̾L̹͓̲̈́ͮL̜̼͓͉̞̘̩̇̊';
+		/*
+		if (!center.hold) {
+			while(1) {
+				; ;console.log('Ź̙̬͙̤͙̞͔ͦͪͭ͗̒ͅA̻̟̗̩͑ͦ̔͋̔̑̒L͇͔͑ͥͭ̓͊͋ͤG̩̳ͫ̓̍̎̏ͥ̏O̘̰̬͖̥̳̯͗̉̓̂ͩ͋'); ;
+			}*/var ZALGO_PENANCE = NO_ZALGO_MESSAGE.length;/*
+		}
+		*/if(ZALGO_LEVEL==1) {ZALGO_UP=ZALGO(16)/2+1;ZALGO_DOWN=ZALGO(16)/2+1;ZALGO_MID=ZALGO(6)/2};
+var TONY;
+TONY;
+/*-*/
+TONY	=	  'T̷̂͒̃̽H̸͒̿̒̚̕͜E͋ͥ̋̈̉̏̏̔̔͞ ̏ͥ̊͠P̷̑̌̀O̵̔̑̇̐͌̓̀̚Ǹ͌̍̾̈҉Y͛̈́̉҉͘'
+		for(
+			var PENANCE = 0;
+				/*Q*/PENANCE<ZALGO_PENANCE;/*<([a-z]+) *[^/]*?>*/
+					PENANCE++
+						) {
+			ZALGO_RESPONSE += NO_ZALGO_MESSAGE[PENANCE];
+		SUFFERING++;
+if (!ZALGO_LEVEL) {
+			ZALGO_UP   =ZALGO(8);
+			ZALGO_DOWN	=  ZALGO(8);/*\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/*/
+			ZALGO_MID	 =	 ZALGO(6);////////////////////////////////////////////////////////////////////////////////////
+		}if(ZALGO_LEVEL==1) {ZALGO_UP=ZALGO(16)/2+1;ZALGO_DOWN=ZALGO(16)/2+1;/*ZALGO_MID=ZALGO(123)/9999*/ZALGO_MID=ZALGO(6)/2};
+	if(ZALGO_LEVEL==2) {ZALGO_UP=ZALGO(64)/4+3;/*var createDialog = function(text , title) {
+var dialog =  "<div id=dialog <h1>" + text + "</h1></div>";
+$('body').append(dialog);
+$('#dialog').prop('title' , title);
+$('#dialog').dialog();
+}*//**/ZALGO_DOWN=ZALGO(64)/4+3;/**/ZALGO_MID=ZALGO(16)/4+1};
+ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;ZALGO;
+						for(var j=0; j<ZALGO_UP; j++)
+							ZALGO_RESPONSE /*<([a-z]+) *[^/]*?>*/+= zalgo_up.random();
+								for(var j=0; j<ZALGO_MID; j++)
+									/* o̦̪̮̦̗̘̬͇͗̈ͩ͂̐͊̌ͩ̈t̖̩̹̺̯͖̬͛ͮͮͫ.̮̦͙̺̖͈͇̾ͬ͌ͯ́̎ͥ͋a͎͎̬̪̗͕̱͌́ͅd̼̞͎̜ͯ̈͌̚d̹͙̲̺͖̠̎̊ͮ̈́̈ͪͧͥ̄C͕̝̲͖̱̑ȏ̹͎̣̲͕̳̥̤̙̓̂m̙̯ͮ̔ͪ̃̏̏m̯͓̙̞̖ͫͩ̾ͦͅa̪̠͉͖͉̟̙͓̩̅̇n̰̗͋ͩ̇̄ͣͩ̚d͉ͥͧ̇́(͕͕̺̝̺̩͈͇͌͆̿͆{͙͓ͯ̆̏͑ͯ	̲̬̺̭̜ͫͭ̎ͮn͚͍̹̘͎̝̥͐̅̉ͥ̀̑̐̉ä̳̖͇̖̰̪́ͨ͗ͪͧ̔̅m͈̖̲̋͋e͉͇̭̭̱̅̈ ̥͎̟͒ͤͤ͊̀̿:̘̻̘̭̓̽̾̍̊ ̬͔͎͐̉̔ͩ̋̽͋'͈̞̻̫̪̼͎͊̽̇̍̍ͭͪͥl͖͉̿̈̿ͩ̚i͉͉̤̝̓͊ͦ̈́́̒̃n̰̤̣͓̹͖ͮ̈́k̺̻͕͍͙͇̒̏̂̓̈́̒'͚̱̟̺̺̦̒̈́̈̇ͅ,̝̼̮̪̖̪̜̑̅̾	͕͙̬̱͍̜̂ͥͪ͐̎ͮ̅͂̚f̞̲̺͔̭͇͇ͫ͐͛ͪ̾ͮ̎u̦̤̝̳̍ͩ̓̐ͦ̃ͪn̗̱͖͙̙̱ͧ̑̓̈ͣ̔͛͆ ̝̥̼̭̭̠͇̉:͈̥̟̺̂̄̿̄ͣ͌ ͕̆͒̔ͦͯ̿ͨͨs̯̠͎͈̻̘͉͑̈̔̑ͥͯ͗͂ͅe̬̟͉̬̞̍̒͋̀ͩ̔͗͐n̮̼̠̓̂̅ͭ̌͐ḓ̰̦̭͔̾̓ͨ̍Ḽ̪̯͍̪͐ͭ͑̂i̞̮͆̋ͥ͆ͣn͚̟͇ͩͤͩ̔k̖̤̥ͪ̐ͤͅ,̲̯͎̼̖̠̹̄ͮͦ̈́̆̍̿ͯ̃	̥̖̩̘͎͂͐̋̉̊p͇̦̯͕̂ͩ̎͆e̜͋̈́̀̉͊͆̋ͧr̞̃͊ͭ̎͊͋ͭ̈́̊m̖͇̠̝̬͖̩̅ͣ̎ͪ̈́ͥ̍ḭ̝̯͚͓̲̎̐͒ͭ̋͗̐̒ͤs̠̬͕̬̺̰ͥ̄̈̊ͬ̑̓s̝͚̝͖ͯ̽̅ͨ̾͐í̭̬͖̮͚̀͊ͬͨ̾͌ͧ̚o̲͕̟͔̗̊̿͆͂̂͆̂̌̄n̤̬̏̇ͦͅŝ̻͈̖͚ ̭̝́ͨ͂ͫͬ̎̀̚:̜̠̰ͣͮ͌͑̐̎̑ ̥̭̈́ͨͨ͌ͩ̆{͉̻̤̺͊̀̋ͭͨ͛ͅ	̠̘̯̩̀̅͌̄͛͌	͎̬̞͇̜̻͚͗͗ͧ̑̎ͅď̦̪̫ͦ͂ė͙ͤͣ͛̉̑̅̒̚l̹̩̟̬̤̞͚ͫ̈̓̒̀ ̟̖̰̣̳̂ͦ̏̄ͤ̊̒̚:͎͉̅ ̠̘̣̪̫̗ͦ͛̀̓̂ͭͭ'͕̻̗̦ͯ͗ͯ̓ͭ͗͛Ṉ̩̖̗̯̀̒ͧ̓ͮͨ̏̚O̼̘̟̩͙ͤͦ̈́̓ͩN̝̲͎̖͔͖ͥ̏͋ͯ̈̂̋̓̆ͅE͔͎̟͚͓̺͚ͨ͒ͥ̈́'̥̼̠̲̳͖̼͗ͥ͑	͈͕ͪ̊̿̍ͯͮ̃̊}͕͉̝̜̦͖̰̻̜̓͛̀ */
+								ZALGO_RESPONSE += zalgo_mid.random();
+							for(var j=0; j<ZALGO_DOWN; j++)
+						ZALGO_RESPONSE += zalgo_down.random();
+					/*
+					J̨͜͡S ̕҉ŗo̧͟͢o͝m ͡é͢ń͝c̨̕ǫu̴͠
+					r͏͢a͡g͟͝es̨̨͡ ̷p̷̷͏e͘҉ǫ̷̀p̴ļ̸é͞ ͝t͢o̵͝ ̛͘͞c̷̀͘o͢͏̀m̷̀e̶ ͜ą́ǹ̨d͏ ̵̧͞a͘͠͠s͢͠͡k ̴q͞u̶̡͠ę̸͞s͠͡҉t̸į̵o̢ns͘ ̶t̵h̵̨̀à͢t̴ ̵͏a͘r̷e̛͝ ̵͟t͞o̧͝o͠ ͢s̸͢m̴a̷͝ll̴̴/̡bą͟͝d́l̶̨y͏ ́pu͘͝t̸͏͢ ͏̧f͏or͏ ̧m͠͏aį͢ņ͝.̴̶͝
+̛́T̸h́͠͞e ̷̕r͏̴͜oo͜m̕ ̀͘e̵͏̴n͟͟҉c͜͜o͠҉҉u͏rá̴g̷è͠s̢͢ ͟͟p̀͠e̴͞
+̛́T̸h́͠͞e ̷̕r͏̴͜oo͜m̕ ̀͘e̵͏̴n͟͟҉c͜͜o͠҉҉u͏rá̴g̷è͠s̢͢ ͟͟p̀͠e̴͞O
+̛́T̸h́͠͞e ̷̕r͏̴͜oo͜m̕ ̀͘e̵͏̴n͟͟҉c͜͜o͠҉҉u͏rá̴g̷è͠s̢͢ ͟͟p̀͠e̴͞0P
+̛́T̸h́͠͞e ̷̕r͏̴͜oo͜m̕ ̀͘e̵͏̴n͟͟҉c͜͜o͠҉҉u͏rá̴g̷è͠s̢͢ ͟͟p̀͠e̴͞PLE
+̛́T̸h́͠͞e ̷̕r͏̴͜oo͜m̕ ̀͘e̵͏̴n͟͟҉c͜͜o͠҉҉u͏rá̴g̷è͠s̢͢ ͟͟p̀͠e̴͞
+̛́T̸h́͠͞e ̷̕r͏̴͜oo͜m̕ ̀͘e̵͏̴n͟͟҉c͜͜o͠҉҉u͏
+̛́T̸h́͠͞e ̷̕r͏̴͜oo͜m̕ ̀͘e̵͏̴n͟͟҉c͜͜o͠҉҉u͏rá̴g̷è͠s̢͢ ͟͟p̀͠e̴͞B̥̺̣̯̹̐̍͒̓ͥ̾e̹̳n͙̜j̼ͯͩ̄͑͆a͎̼̯̥̣m̖͓̖̀̋́ͮͦ̂i̪̥͉̬ͭ̔͌̓̐̿̋n̻̥̜͍͛̒ͨ̄̀ ̦͔͈͕̘̫G̝̞͓͙̖ͨͫͅr̘͛̓͗̅̈́̓̃u̐ͮ̐̒ẽ̝̩͇͚͎͐ṅ̥̮͓̩̰ͯ̆̽͒b͔̟͓ã̐̀̀̚uͣ̐̌͒̚ṁ͕͆̈̏ ̺̄͒̑̄͒̍H̫̐̃Ã͓L̞͍ͩ͒ͦ́P̳̖̺͍ͤͨ
+					 */
+		}
+		return ZALGO_RESPONSE || /<([a-z]+) *[^\/]*?>/;
+
+
+
+
+//////nnnooooooooo//oooooo/ooo////o
+
+
+
+	};
+
+	bot.addCommand(/*
+											d̟̬̮o͎̪̻̘̘̫n̕'͙̬̜͍̜t̹̳̰̗̝̰͜ ̢̠̰̘͚͔l̩e҉̘̼̙ͅa̗̣̩v̞̝͍͝e͎͚̹͕͕̠͠ m̰̱͔̭̣͔e̶̻̱̭̜̗̙
+											*/
+
+
+{
+		name : 'zalgo',
+		/*ZALGO*/
+			fun : zalgo,
+				permissions : {
+					del : 'NONE'/*ṇ̯̝̀v̝̘̦̺o͍̦̤͝k͎̺͕͇̗̼e̤̱ ̙̼͚ț̵̫̥̘̟͖h͕̯e̢ hi͚̣̲̘͇̻̗͘v̟e̺͉̙̰-̲m̛͈̩̝i̪̬̤n̼̣̼͈̟d̘̯̮̲̲̟ ͓̗r̨̬̜̘͕ͅͅe̹͓̱̯͓p̬̠r̠̪͉ḙ̱̭̻̗͔́ś̗̤̰͕̫̥è̖̫̹͙n̯̞̯̣̘̖t̷͓͕͖͖̰in̲̤̥͕͉̘͝g̹̜̭̩̯̯̝ ̰͎c͓͕̞͕̯h̩a̟̘͇̮̺̭̦o̭̣̺͠s̻ͅ.̱͙̥̭̙
+̧͖̠̙I҉͕̗̝̝n̘̹v̞̣̝͔͍ọ̦̳̯͞k͖̫i͔n͇̟g̡͓ ̹̩the ͚̺͚̫̦f͕͕͔̜̼̞̀e̠͔̖̜͓̭̥e͏͙͈̦lin͎͉̭̮̫̹̝g͍̹͖ ̦͈̬̼̠͖óf̳̣̼͜ͅ ̨͎̼͇ͅc̦͞h̞̘̠̹̹̤ͅa̢̯o̫̱̼͉s̩͙͔͇̳̬̦.͏̞̫͇
+̱͕̯̝̺̜W̢̘̹i͞t̬͔̬h̹̞̗̞ ͓͍̬́o̮͇͎̬u̲t̲͉̞̹̖̯̘ ̮̠͇o̘̪͙͜r̷̞̱͔d͍͢e҉̠͚r̫͙ͅ.̴̣
+Th͎̯̠͚̥e̜̞͇͔̣ ̼̰͚̱̜̬͡ͅN̢̳̞͔e̴̩̠̖͎̤̬z̧̺̘͎̮̣ṕ͍̳̼̥͍e̝̟̻̳͕̱͍r̢̞̝̲̻d̶̫͉̮̙̯͔i̵̼͎̰̘̙̰*/
+						},
+							description : 'H̸̡̪̯ͨ͊̽̅̾̎Ȩ̬̩̾͛ͪ̈́̀́͘ ̶̧̨̱̹̭̯ͧ̾ͬC̷̙̲̝͖ͭ̏ͥͮ͟Oͮ͏̮̪̝͍M̲̖͊̒ͪͩͬ̚̚͜Ȇ̴̟̟͙̞ͩ͌͝S̨̥̫͎̭ͯ̿̔̀ͅ http://stackoverflow.com/a/1732454/1216976'
+						}
+					)
+		;
+		}
+		)
+		(
+		)
+		;//t͕̥́h̡̠͔͕̳̳e҉̱͓̱̦è̟n̢̗͖̜̳d̺̖
