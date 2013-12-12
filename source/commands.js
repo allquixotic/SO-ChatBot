@@ -263,7 +263,7 @@ return function ( args ) {
 		partitioned = partition( commands, maxSize ),
 
 		valid = /^(\d+|$)/.test( args.content ),
-		page = Number( args.content ) || 0;
+		page = (Number( args.content ) - 1) || 0;
 
 	if ( page >= partitioned.length || !valid ) {
 		return args.codify( [
@@ -276,7 +276,7 @@ return function ( args ) {
 
 	var ret = partitioned[ page ].join( ', ' );
 
-	return ret + pagination.supplant( page, partitioned.length-1 );
+	return ret + pagination.supplant( (page + 1), partitioned.length );
 };
 })();
 
@@ -491,7 +491,7 @@ var descriptions = {
 		' `/help [cmdName]`',
 	info : 'Grabs some stats on my current instance or a command.' +
 		' `/info [cmdName]`',
-	listcommands : 'Lists commands. `/listcommands [page=0]`',
+	listcommands : 'Lists commands. `/listcommands [page=1]`',
 	listen : 'Forwards the message to my ears (as if called without the /)',
 	live : 'Resurrects me (:D) if I\'m down (D:)',
 	parse : 'Returns result of "parsing" message according to the my mini' +
