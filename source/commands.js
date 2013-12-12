@@ -263,7 +263,10 @@ return function ( args ) {
 		partitioned = partition( commands, maxSize ),
 
 		valid = /^(\d+|$)/.test( args.content ),
-		page = (Number( args.content ) - 1) || 0;
+		page = Number( args.content ) || 0;
+		
+		if(page > 0)
+			page--;
 
 	if ( page >= partitioned.length || !valid ) {
 		return args.codify( [
