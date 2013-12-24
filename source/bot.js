@@ -39,8 +39,9 @@ var bot = window.bot = {
 		try {
 			//it wants to execute some code
 			if ( /^c?>/.test(msg) ) {
-				this.eval( msg );
+				this.eval( msg.toString(), msg.directreply.bind(msg) );
 			}
+			//or maybe some other action.
 			else {
 				this.invokeAction( msg );
 			}
@@ -134,7 +135,10 @@ var bot = window.bot = {
 	prepareMessage : function ( msgObj ) {
 		msgObj = this.adapter.transform( msgObj );
 
-		var msg = IO.decodehtmlEntities( msgObj.content );
+		//decode markdown and html entities.
+		var msg = IO.htmlToMarkdown( msgObj.content ); //#150
+		msg = IO.decodehtmlEntities( msg );
+
 		//fixes issues #87 and #90 globally
 		msg = msg.replace( /\u200b|\u200c/g, '' );
 
@@ -556,6 +560,7 @@ bot.beatInterval = 5000; //once every 5 seconds is Good Enough ™
 //#build eval.js
 
 //#build parseCommandArgs.js
+//#build parseMacro.js
 //#build suggestionDict.js
 
 //#build commands.js
