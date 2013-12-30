@@ -1026,6 +1026,7 @@ bot.banlist.add = function ( id ) {
 bot.banlist.remove = function ( id ) {
 	if ( this.contains(id) ) {
 		delete this[ id ];
+		bot.memory.save( 'ban' );
 	}
 };
 
