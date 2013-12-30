@@ -5,7 +5,7 @@
     return ret;
     
     function import() {
-      bot.memory.data = JSON.parse(decodeURI(btoa(args)));
+      bot.memory.data = JSON.parse(btoa(decodeURI(args)));
       bot.memory.save();
       ret.push('Imported and persisted succesfully!');
     };
