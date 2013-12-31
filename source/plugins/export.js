@@ -46,7 +46,7 @@ function explode(text, max) {
     return exploded + "\n" + explode(text);
 }
 
-  bot.addCommand(bot.CommunityCommand({
+  bot.addCommand({
     name : 'export',
     fun : function(args) {
         var mem = utf8_to_b64(JSON.stringify(bot.memory.data)),
@@ -57,5 +57,5 @@ function explode(text, max) {
       }, 
     permissions : { del : 'NONE', use : 'OWNER' },
     description : 'Blurts out a message with the persistent memory storage for export `/export`'
-  }));
+  });
 })();
