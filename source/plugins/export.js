@@ -1,13 +1,8 @@
 (function() {
   function export(args) {
     var ret = [];
-    
+    ret.push(encodeURI(btoa(JSON.stringify(bot.memory.data))));
     return ret;
-    
-    function export() {
-      ret.push(encodeURI(atob(JSON.stringify(bot.memory.data))));
-    };
-
   };
 
 
