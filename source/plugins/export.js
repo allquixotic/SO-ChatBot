@@ -51,7 +51,7 @@ function explode(text, max) {
     fun : function(args) {
         var mem = utf8_to_b64(JSON.stringify(bot.memory.data)),
         user_name = args.get( 'user_name' ),
-        maxSize = 498 - user_name.length,
+        maxSize = 498 - user_name.length;
 
         return explode(mem, maxSize);
       }, 
