@@ -5,7 +5,7 @@
     return decodeURIComponent(escape(window.atob( str )));
   }
 
-  bot.addCommand(bot.CommunityCommand({
+  bot.addCommand({
     name : 'import',
     fun : function (args) { 
       var request = new XMLHttpRequest();
@@ -20,5 +20,5 @@
     },
     permissions : { del : 'NONE', use : 'OWNER' },
     description : 'Imports the persistent memory described in args `/export <exported-content>`'
-  }));
+  });
 })();
