@@ -65,6 +65,18 @@ var bot = window.bot = {
 			this.info.invoked += 1;
 		}
 	},
+	
+	// Call this from console with a command string as you would use in chat
+	// and it should execute with owner privileges and all responses to console instead of chat.
+	interact : function ( msgString ) {
+		var consoleMsgObj = Object( msgString );
+		consoleMsgObj.content = msgString;
+		consoleMsgObj['findUserid'] = function(username) { return -1; }; // interactive console
+		consoleMsgObj['findUsername'] = function(id,cb) { return "CONSOLE"; };
+		consoleMsgObj['reply'] = function(resp, username) { console.log(resp); };
+		consoleMsgObj['directreply'] = function(resp) { console.log(resp); };
+		return invokeAction(consoleMsgObj);
+	},
 
 	//this conditionally calls execCommand or callListeners, depending on what
 	// the input. if the input begins with a command name, it's assumed to be a
@@ -544,6 +556,8 @@ bot.Message = function ( text, msgObj ) {
 };
 
 bot.isOwner = function ( usrid ) {
+	if (usrid == -1) // interactive console
+		return true;
 	var user = this.users[ usrid ];
 	return user && ( user.is_owner || user.is_moderator );
 };
