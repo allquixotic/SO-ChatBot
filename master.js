@@ -1895,7 +1895,7 @@ var commands = {
 
 	refresh : function() {
 		window.location.reload();
-    },
+	},
 
 	forget : function ( args ) {
 		var name = args.toLowerCase(),
@@ -2004,28 +2004,13 @@ var partition = function ( list, maxSize ) {
 
 return function ( args ) {
 	var commands = Object.keys( bot.commands ),
-		pagination = ' (page {0}/{1})',
 		user_name = args.get( 'user_name' ),
 		// 500 is the max, -2 for @ and space.
-		maxSize = 498 - pagination.length - user_name.length,
+		maxSize = 498 - user_name.length,
 		//TODO: only call this when commands were learned/forgotten since last
-		partitioned = partition( commands, maxSize ),
+		partitioned = partition( commands, maxSize );
 
-		valid = /^(\d+|$)/.test( args.content ),
-		page = Number( args.content ) || 0;
-
-	if ( page >= partitioned.length || !valid ) {
-		return args.codify( [
-			'StackOverflow: Could not access page.',
-			'IndexError: index out of range',
-			'java.lang.IndexOutOfBoundsException',
-			'IndexOutOfRangeException'
-		].random() );
-	}
-
-	var ret = partitioned[ page ].join( ', ' );
-
-	return ret + pagination.supplant( page, partitioned.length-1 );
+	return partitioned.invoke( 'join', ', ' ).join( '\n' );
 };
 })();
 
@@ -2122,7 +2107,7 @@ var descriptions = {
 		' `/help [cmdName]`',
 	info : 'Grabs some stats on my current instance or a command.' +
 		' `/info [cmdName]`',
-	listcommands : 'Lists commands. `/listcommands [page=0]`',
+	listcommands : 'Lists commands. `/listcommands`',
 	listen : 'Forwards the message to my ears (as if called without the /)',
 	refresh : 'Reloads the browser window I live in',
 	tell : 'Redirect command result to user/message.' +
@@ -2143,7 +2128,7 @@ var communal = {
 Object.iterate( commands, function ( cmdName, fun ) {
 	var cmd = {
 		name : cmdName,
-		fun  : fun,
+		fun	 : fun,
 		permissions : {
 			del : 'NONE',
 			use : privilegedCommands[ cmdName ] ? 'OWNER' : 'ALL'
@@ -2966,35 +2951,6 @@ bot.listen(
 bot.listen( /^bitch/i, bot.personality.bitch, bot.personality );
 
 ;
-
-;
-(function () {
-var hammers = {
-	STOP  : 'HAMMERTIME!',
-	STAHP : 'HAMMAHTIME!',
-	HALT  : 'HAMMERZEIT!',
-	STOY  : 'ZABIVAT\' VREMYA!',
-	CAESUM: 'MALLEUS TEMPUS!'
-};
-
-// /(STOP|STAHP|...)[\.!\?]?$/
-var re = new RegExp(
-	'(' +
-		Object.keys(hammers).map(RegExp.escape).join('|') +
-	')[\\.!?]?$' );
-
-IO.register( 'input', function STOP ( msgObj ) {
-	var sentence = msgObj.content.toUpperCase(),
-		res = re.exec( sentence );
-
-	if ( res ) {
-		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
-	}
-});
-
-})();
-
-;
 //solves #86, mostly written by @Shmiddty
 (function () {
 "use strict";
@@ -3150,7 +3106,8 @@ var commandHandler = function ( msg ) {
 	}
 
 	bot.memory.save( 'afk' );
-	msg.directreply( reply );
+	//msg.directreply( reply ); // disable direct replying on returning from AFK since it's annoying.
+	                            // keep the functionality in the background in the meantime.
 };
 
 bot.addCommand({
@@ -3339,8 +3296,6 @@ bot.addCommand({
 });
 
 })();
-
-;
 
 ;
 (function () {
@@ -4146,6 +4101,72 @@ bot.addCommand({
 
 ;
 (function () {
+"use strict";
+
+var defaults = {
+	message: 'fail,user,pro',
+	spaces: [25,14,1],
+	jitter: 4,
+	words: ['so','very','such','much','many']
+};
+
+function padd(str, n) {
+	n += Math.random() * (defaults.jitter * 2 ) - defaults.jitter;
+	
+	for( var i = 0; i < n; i++ ) {
+		str = ' ' + str;
+	}
+	return str;
+}
+
+function out(line) {
+	return '    ' + line + '\r';
+}
+
+function shuffle(arr) {
+	return arr.sort(function() {
+		return Math.random() - 0.5;
+	});
+}
+
+function doge(msg) {
+	
+	var input = (msg.length > 0 ? msg.toString() : defaults.message).split(',');
+	
+	var pre = shuffle(defaults.words.slice(0)),
+	output = out(padd('wow', 4 + Math.random() * 4 | 0));
+
+	while( input.length > pre.length ) {
+		pre = pre.concat(shuffle(defaults.words.slice(0))); // Don't hurt me Zirak... I'm sorry.
+	}
+	
+	while(input.length) {
+		var line = '';
+		if( pre.length ) {
+			line += pre.shift() + ' ';
+		}
+		line += input.shift();	
+		output += out(padd(line, defaults.spaces[(input.length%3) - 1]));
+	}
+
+	msg.send(output + '\r    ');
+}
+
+bot.addCommand({
+        fun : doge,
+        name : 'doge',
+        permissions : {
+                del : 'NONE'
+        },
+
+        description : 'so shibe, much doge, wow' + 
+		'`/doge one,two,three[,nth]'
+});
+
+}());
+
+;
+(function () {
 // This is a proxy to add padding to a JSON API
 // See: https://github.com/shea-sollars/sap
 var requestURI = 'http://www.lobby.ws/api/sap.js';
@@ -4436,8 +4457,6 @@ bot.addCommand({
 		'`/github repoName` or `/github username/reponame`',
 	async : true
 });
-
-;
 
 ;
 (function () {
@@ -5278,8 +5297,6 @@ bot.addCommand(bot.CommunityCommand({
 }));
 
 ;
-
-;
 (function () {
 
 function mdn ( args, cb ) {
@@ -5378,8 +5395,6 @@ function getMemeLink ( meme ) {
 }
 
 })();
-
-;
 
 ;
 (function () {
@@ -5513,8 +5528,6 @@ IO.register( 'userregister', function tracker ( user, room ) {
 });
 
 })();
-
-;
 
 ;
 (function () {
@@ -5701,8 +5714,6 @@ bot.addCommand({
 	description : 'Returns result of "parsing" message according to the my ' +
 		'mini-macro capabilities (see online docs)',
 });
-
-;
 
 ;
 (function () {
@@ -6120,6 +6131,33 @@ var statsCmd = Object.merge( cmd, { name : 'stats'} );
 bot.addCommand(statsCmd);
 
 }());
+
+;
+(function () {
+var hammers = {
+	STOP  : 'HAMMERTIME!',
+	STAHP : 'HAMMAHTIME!',
+	HALT  : 'HAMMERZEIT!',
+	STOY  : 'ZABIVAT\' VREMYA!',
+	CAESUM: 'MALLEUS TEMPUS!'
+};
+
+// /(STOP|STAHP|...)[\.!\?]?$/
+var re = new RegExp(
+	'(' +
+		Object.keys(hammers).map(RegExp.escape).join('|') +
+	')[\\.!?]?$' );
+
+IO.register( 'input', function STOP ( msgObj ) {
+	var sentence = msgObj.content.toUpperCase(),
+		res = re.exec( sentence );
+
+	if ( res ) {
+		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
+	}
+});
+
+})();
 
 ;
 (function () {
@@ -6616,6 +6654,69 @@ bot.addCommand({
 
 }());
 
+;
+(function () {
+	"use strict";
+	var unonebox = {
+		enablers: ['yes','on','true','start','1','enable'], // because people are bad at reading instructions
+		disablers: ['no','off','false','stop','0','disable'],// accept a wide range of values for the command
+		command: function (args) {
+			var state = args.toLowerCase();
+			if (this.enablers.indexOf(state) !== -1) {
+				this.enable();
+				args.reply(' un onebox enabled ');
+			} else if (this.disablers.indexOf(state) !== -1) {
+				this.disable();
+				args.reply(' un onebox disabled ');
+			} else {
+				args.reply(' That didn\'t make much sense. Please use `on` or `off` to toggle the command ');
+			}
+		},
+		enable: function () {
+			IO.register('input', this.unbox);
+			bot.memory.set('unonebox-state', 'enabled');
+		},
+		disable: function () {
+			IO.unregister('input', this.unbox);
+			bot.memory.set('unonebox-state', 'disabled');
+		},
+		unbox: function (msgObj) {
+			if (msgObj.user_id === bot.adapter.user_id) {
+				var frag = document.createElement('div');
+				frag.innerHTML = msgObj.content;
+				var link = frag.querySelector('.onebox a');
+				if (link) {
+					setTimeout(function () {
+						IO.xhr({
+							url: '/messages/' + msgObj.message_id,
+							data: fkey({
+								text: link.href + ' ... '
+							}),
+							method: 'POST',
+							complete: function (resp, xhr) {
+								// TODO 
+								// error checking
+							}
+						});
+					}, 90 * 1000);
+				}
+			}
+		}
+	};
+	var state = bot.memory.get('unbox-state');
+	if (state && state === 'enabled') {
+		unonebox.enable();
+	}
+	bot.addCommand({
+		fun: unonebox.command.bind(unonebox),
+		name: 'unonebox',
+		permissions: {
+			del: 'NONE'
+		},
+		description: 'Enable or Disable the unonebox listener' +
+			' `/unonebox on|off`'
+	});
+}());
 ;
 (function () {
 

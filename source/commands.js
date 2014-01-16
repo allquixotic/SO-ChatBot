@@ -40,7 +40,7 @@ var commands = {
 
 	refresh : function() {
 		window.location.reload();
-    },
+	},
 
 	forget : function ( args ) {
 		var name = args.toLowerCase(),
@@ -154,14 +154,8 @@ return function ( args ) {
 		maxSize = 498 - user_name.length,
 		//TODO: only call this when commands were learned/forgotten since last
 		partitioned = partition( commands, maxSize );
-    
-    var lines = [];
-    for (var i = 0; i < partitioned.length; i++) {
-        lines.push(partitioned[i].join(', '));
-    }
-    var ret = lines.join('\n');
 
-	return ret;
+	return partitioned.invoke( 'join', ', ' ).join( '\n' );
 };
 })();
 
@@ -258,7 +252,7 @@ var descriptions = {
 		' `/help [cmdName]`',
 	info : 'Grabs some stats on my current instance or a command.' +
 		' `/info [cmdName]`',
-	listcommands : 'Lists commands. `/listcommands [page=1]`',
+	listcommands : 'Lists commands. `/listcommands`',
 	listen : 'Forwards the message to my ears (as if called without the /)',
 	refresh : 'Reloads the browser window I live in',
 	tell : 'Redirect command result to user/message.' +
@@ -279,7 +273,7 @@ var communal = {
 Object.iterate( commands, function ( cmdName, fun ) {
 	var cmd = {
 		name : cmdName,
-		fun  : fun,
+		fun	 : fun,
 		permissions : {
 			del : 'NONE',
 			use : privilegedCommands[ cmdName ] ? 'OWNER' : 'ALL'
