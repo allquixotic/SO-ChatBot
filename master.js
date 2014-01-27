@@ -921,7 +921,7 @@ var bot = window.bot = {
 	},
 
 	callListeners : function ( msg ) {
-		return this.listeners.some(function callListener ( listener ) {
+		function callListener ( listener ) {
 			var match = msg.exec( listener.pattern ), resp;
 
 			if ( match ) {
@@ -933,7 +933,9 @@ var bot = window.bot = {
 				}
 				return resp !== false;
 			}
-		});
+		}
+
+		return this.listeners.some( callListener );
 	},
 
 	stoplog : false,
@@ -1045,6 +1047,7 @@ bot.Command = function ( cmd ) {
 	//make canUse and canDel
 	[ 'Use', 'Del' ].forEach(function ( perm ) {
 		var low = perm.toLowerCase();
+
 		cmd[ 'can' + perm ] = function ( usrid ) {
 			var canDo = this.permissions[ low ];
 
@@ -1074,12 +1077,14 @@ bot.Command = function ( cmd ) {
 
 	return cmd;
 };
+
 //a normally priviliged command which can be executed if enough people use it
 bot.CommunityCommand = function ( command, req ) {
 	var cmd = this.Command( command ),
 		used = {},
 		old_execute = cmd.exec,
 		old_canUse  = cmd.canUse;
+
 	req = req || 2;
 
 	cmd.canUse = function () {
@@ -1091,8 +1096,12 @@ bot.CommunityCommand = function ( command, req ) {
 			bot.log( err );
 			return err;
 		}
+
+		used = {};
+
 		return old_execute.apply( cmd, arguments );
 	};
+
 	return cmd;
 
 	//once again, a switched return statement: truthy means a message, falsy
@@ -1104,16 +1113,20 @@ bot.CommunityCommand = function ( command, req ) {
 
 		clean();
 		var count = Object.keys( used ).length,
-			needed = req - count - 1; //0 based indexing vs. 1 based humans
+			needed = req - count;
 		bot.log( used, count, req );
 
 		if ( usrid in used ) {
 			return 'Already registered; still need {0} more'.supplant( needed );
 		}
-		else if ( needed > 0 ) {
-			used[ usrid ] = new Date;
-			return 'Registered; need {0} more to execute'.supplant( needed-1 );
+
+		used[ usrid ] = new Date;
+		needed -= 1;
+
+		if ( needed > 0 ) {
+			return 'Registered; need {0} more to execute'.supplant( needed );
 		}
+
 		bot.log( 'should execute' );
 		return false; //huzzah!
 	}
@@ -2016,11 +2029,8 @@ return function ( args ) {
 
 commands.eval.async = commands.coffee.async = true;
 
-commands.tell = (function () {
-var invalidCommands = { tell : true, forget : true };
-
-return function ( args ) {
-	var parts = args.split( ' ');
+commands.tell = function ( args ) {
+	var parts = args.split( ' ' );
 	bot.log( args.valueOf(), parts, '/tell input' );
 
 	var replyTo = parts[ 0 ],
@@ -2037,8 +2047,8 @@ return function ( args ) {
 		return cmd.error;
 	}
 
-	if ( invalidCommands.hasOwnProperty(cmdName) ) {
-		return 'Command ' + cmdName + ' cannot be used in /tell.';
+	if ( cmd.unTellable ) {
+		return 'Command ' + cmdName + ' cannot be used in `/tell`.';
 	}
 
 	if ( !cmd.canUse(args.get('user_id')) ) {
@@ -2061,14 +2071,12 @@ return function ( args ) {
 		extended.user_name = replyTo;
 	}
 
-	var msgObj = Object.merge( args.get(), extended );
-	var cmdArgs = bot.Message(
-		parts.slice( 2 ).join( ' ' ),
-		msgObj );
+	var msgObj = Object.merge( args.get(), extended ),
+		cmdArgs = bot.Message( parts.slice(2).join(' '), msgObj );
 
-	//this is an ugly, but functional thing, much like your high-school prom date
-	//to make sure a command's output goes through us, we simply override the
-	// standard ways to do output
+	//this is an ugly, but functional thing, much like your high-school prom
+	// date to make sure a command's output goes through us, we simply override
+	// the standard ways to do output
 	var reply = cmdArgs.reply.bind( cmdArgs ),
 		directreply = cmdArgs.directreply.bind( cmdArgs );
 
@@ -2097,7 +2105,6 @@ return function ( args ) {
 		}
 	}
 };
-}());
 
 var descriptions = {
 	eval : 'Forwards message to javascript code-eval',
@@ -2124,6 +2131,10 @@ var privilegedCommands = {
 var communal = {
 	die : true, ban : true
 };
+//commands which can't be used with /tell
+var unTellable = {
+	tell : true, forget : true
+};
 
 Object.iterate( commands, function ( cmdName, fun ) {
 	var cmd = {
@@ -2134,6 +2145,7 @@ Object.iterate( commands, function ( cmdName, fun ) {
 			use : privilegedCommands[ cmdName ] ? 'OWNER' : 'ALL'
 		},
 		description : descriptions[ cmdName ],
+		unTellable : unTellable[ cmdName ],
 		async : commands[ cmdName ].async
 	};
 
@@ -2951,6 +2963,35 @@ bot.listen(
 bot.listen( /^bitch/i, bot.personality.bitch, bot.personality );
 
 ;
+
+;
+(function () {
+var hammers = {
+	STOP  : 'HAMMERTIME!',
+	STAHP : 'HAMMAHTIME!',
+	HALT  : 'HAMMERZEIT!',
+	STOY  : 'ZABIVAT\' VREMYA!',
+	SISTITE: 'MALLEUS TEMPUS!'
+};
+
+// /(STOP|STAHP|...)[\.!\?]?$/
+var re = new RegExp(
+	'(' +
+		Object.keys(hammers).map(RegExp.escape).join('|') +
+	')[\\.!?]?$' );
+
+IO.register( 'input', function STOP ( msgObj ) {
+	var sentence = msgObj.content.toUpperCase(),
+		res = re.exec( sentence );
+
+	if ( res ) {
+		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
+	}
+});
+
+})();
+
+;
 //solves #86, mostly written by @Shmiddty
 (function () {
 "use strict";
@@ -3117,7 +3158,8 @@ bot.addCommand({
 		del: 'NONE'
 	},
 	description : 'Set an afk message: `/afk <message>`. Invoke `/afk` ' +
-		'again to return.'
+		'again to return.',
+	unTellable : true
 });
 
 IO.register( 'input', function afkInputListener ( msgObj ) {
@@ -3296,6 +3338,8 @@ bot.addCommand({
 });
 
 })();
+
+;
 
 ;
 (function () {
@@ -4112,7 +4156,7 @@ var defaults = {
 
 function padd(str, n) {
 	n += Math.random() * (defaults.jitter * 2 ) - defaults.jitter;
-	
+
 	for( var i = 0; i < n; i++ ) {
 		str = ' ' + str;
 	}
@@ -4130,22 +4174,22 @@ function shuffle(arr) {
 }
 
 function doge(msg) {
-	
+
 	var input = (msg.length > 0 ? msg.toString() : defaults.message).split(',');
-	
+
 	var pre = shuffle(defaults.words.slice(0)),
 	output = out(padd('wow', 4 + Math.random() * 4 | 0));
 
 	while( input.length > pre.length ) {
 		pre = pre.concat(shuffle(defaults.words.slice(0))); // Don't hurt me Zirak... I'm sorry.
 	}
-	
+
 	while(input.length) {
 		var line = '';
 		if( pre.length ) {
 			line += pre.shift() + ' ';
 		}
-		line += input.shift();	
+		line += input.shift();
 		output += out(padd(line, defaults.spaces[(input.length%3) - 1]));
 	}
 
@@ -4153,14 +4197,15 @@ function doge(msg) {
 }
 
 bot.addCommand({
-        fun : doge,
-        name : 'doge',
-        permissions : {
-                del : 'NONE'
-        },
+    fun : doge,
+    name : 'doge',
+    permissions : {
+        del : 'NONE'
+    },
 
-        description : 'so shibe, much doge, wow' + 
-		'`/doge one,two,three[,nth]'
+    description : 'so shibe, much doge, wow' +
+		' `/doge one,two,three[,nth]',
+	unTellable : true
 });
 
 }());
@@ -4457,6 +4502,8 @@ bot.addCommand({
 		'`/github repoName` or `/github username/reponame`',
 	async : true
 });
+
+;
 
 ;
 (function () {
@@ -5297,6 +5344,8 @@ bot.addCommand(bot.CommunityCommand({
 }));
 
 ;
+
+;
 (function () {
 
 function mdn ( args, cb ) {
@@ -5395,6 +5444,8 @@ function getMemeLink ( meme ) {
 }
 
 })();
+
+;
 
 ;
 (function () {
@@ -5528,6 +5579,8 @@ IO.register( 'userregister', function tracker ( user, room ) {
 });
 
 })();
+
+;
 
 ;
 (function () {
@@ -5674,7 +5727,8 @@ bot.addCommand({
 	description : 'Register a nudge after an interval. ' +
 		'`/nudge intervalInMinutes message`, `/nudge remove id` to remove, ' +
         'or the listener, ' +
-		'`nudge|remind|poke me? in? intervalInMinutes message`'
+		'`nudge|remind|poke me? in? intervalInMinutes message`',
+	unTellable : true
 });
 
 bot.listen(/(?:nudge|remind|poke)\s(?:me\s)?(?:in\s)?(\d+m?)\s?(.*)$/,
@@ -5714,6 +5768,8 @@ bot.addCommand({
 	description : 'Returns result of "parsing" message according to the my ' +
 		'mini-macro capabilities (see online docs)',
 });
+
+;
 
 ;
 (function () {
@@ -6134,33 +6190,6 @@ bot.addCommand(statsCmd);
 
 ;
 (function () {
-var hammers = {
-	STOP  : 'HAMMERTIME!',
-	STAHP : 'HAMMAHTIME!',
-	HALT  : 'HAMMERZEIT!',
-	STOY  : 'ZABIVAT\' VREMYA!',
-	CAESUM: 'MALLEUS TEMPUS!'
-};
-
-// /(STOP|STAHP|...)[\.!\?]?$/
-var re = new RegExp(
-	'(' +
-		Object.keys(hammers).map(RegExp.escape).join('|') +
-	')[\\.!?]?$' );
-
-IO.register( 'input', function STOP ( msgObj ) {
-	var sentence = msgObj.content.toUpperCase(),
-		res = re.exec( sentence );
-
-	if ( res ) {
-		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
-	}
-});
-
-})();
-
-;
-(function () {
 /*
   ^\s*         #tolerate pre-whitespace
   s            #substitution prefix
@@ -6198,15 +6227,28 @@ function substitute ( msg ) {
 	}
 
 	var message = get_matching_message( re, msg.get('message_id') );
-	bot.log( message, 'substitution found message' );
 
 	if ( !message ) {
 		return 'No matching message (are you sure we\'re in the right room?)';
 	}
+	bot.log( message, 'substitution found message' );
 
 	var link = get_message_link( message );
-	return message.textContent.replace( re, replacement ) + ' ' +
-		msg.link( '(source)', link );
+
+	// #159, check if the message is a partial, has a "(see full text)" link.
+	if ( message.firstElementChild.classList.contains('partial') ) {
+		retrieve_full_text( message, finish );
+	}
+	else {
+		return finish( message.textContent );
+	}
+
+	function finish ( text ) {
+		var reply = text.replace( re, replacement ) + ' ' +
+			msg.link( '(source)', link );
+
+		msg.reply( reply );
+	}
 }
 
 function get_matching_message ( re, onlyBefore ) {
@@ -6233,6 +6275,23 @@ function get_message_link ( message ) {
 
 	return node.href;
 }
+
+// <div class="content">
+//  <div class="partial"> ... </div>
+//  <a class="more-data" href="what we want">(see full text)</a>
+// </div>
+function retrieve_full_text ( message, cb ) {
+	var href = message.children[ 1 ].href;
+	bot.log( href, 'substitution expanding message' );
+
+	IO.xhr({
+		method : 'GET',
+		url : href,
+		data : { plain : true },
+		complete : cb
+	});
+}
+
 }());
 
 ;
@@ -6656,67 +6715,120 @@ bot.addCommand({
 
 ;
 (function () {
-	"use strict";
-	var unonebox = {
-		enablers: ['yes','on','true','start','1','enable'], // because people are bad at reading instructions
-		disablers: ['no','off','false','stop','0','disable'],// accept a wide range of values for the command
-		command: function (args) {
-			var state = args.toLowerCase();
-			if (this.enablers.indexOf(state) !== -1) {
-				this.enable();
-				args.reply(' un onebox enabled ');
-			} else if (this.disablers.indexOf(state) !== -1) {
-				this.disable();
-				args.reply(' un onebox disabled ');
-			} else {
-				args.reply(' That didn\'t make much sense. Please use `on` or `off` to toggle the command ');
-			}
-		},
-		enable: function () {
-			IO.register('input', this.unbox);
-			bot.memory.set('unonebox-state', 'enabled');
-		},
-		disable: function () {
-			IO.unregister('input', this.unbox);
-			bot.memory.set('unonebox-state', 'disabled');
-		},
-		unbox: function (msgObj) {
-			if (msgObj.user_id === bot.adapter.user_id) {
-				var frag = document.createElement('div');
-				frag.innerHTML = msgObj.content;
-				var link = frag.querySelector('.onebox a');
-				if (link) {
-					setTimeout(function () {
-						IO.xhr({
-							url: '/messages/' + msgObj.message_id,
-							data: fkey({
-								text: link.href + ' ... '
-							}),
-							method: 'POST',
-							complete: function (resp, xhr) {
-								// TODO 
-								// error checking
-							}
-						});
-					}, 90 * 1000);
-				}
-			}
+"use strict";
+
+var memoryKey = 'unonebox-state',
+	unboxInterval = 90 * 1000; //1.5 minutes
+
+var unonebox = {
+	// because people are bad at reading instructions, accept a wide range of
+	// values for the command
+	enablers  : Object.TruthMap( ['yes','on','true','start','1','enable'] ),
+	disablers : Object.TruthMap( ['no','off','false','stop','0','disable'] ),
+
+	command : function unoneboxCommand ( args ) {
+		var state = args.toLowerCase(),
+			save = false,
+			reply;
+
+		if ( !state ) {
+			bot.log( '/unonebox getting state' );
+			reply = 'Functionality is ' +
+				bot.memory.get( memoryKey, 'disabled' );
 		}
-	};
-	var state = bot.memory.get('unbox-state');
-	if (state && state === 'enabled') {
-		unonebox.enable();
+		else if ( this.enablers[state] ) {
+			bot.log( '/unonebox enabling' );
+			this.enable();
+			reply = 'un-onebox enabled';
+			save = true;
+		}
+		else if ( this.disablers[state] ) {
+			bot.log( '/unonebox disabling' );
+			this.disable();
+			reply = 'un-onebox disabled';
+			save = true;
+		}
+		else {
+			bot.log( '/unonebox invalid input' );
+			reply = 'That didn\'t make much sense. Please use `on` or `off` ' +
+				'to toggle the command';
+		}
+
+		if ( save ) {
+			bot.memory.save( memoryKey );
+		}
+
+		args.reply( reply );
+	},
+
+	enable : function () {
+		IO.register( 'input', this.unbox );
+		bot.memory.set( memoryKey, 'enabled' );
+	},
+
+	disable : function () {
+		IO.unregister( 'input', this.unbox );
+		bot.memory.set( memoryKey, 'disabled' );
+	},
+
+	unbox : function ( msgObj ) {
+		// We only operate on our own messages.
+		if ( msgObj.user_id !== bot.adapter.user_id ) {
+			return;
+		}
+
+		var frag = document.createElement( 'div' );
+		frag.innerHTML = msgObj.content;
+		var link = frag.querySelector( '.onebox a' );
+
+		// No onebox, no un-oneboxing.
+		if ( !link ) {
+			return;
+		}
+
+		bot.log( msgObj, '/unonebox found matching message' );
+
+		setTimeout(function () {
+			unonebox.actuallyUnbox( msgObj.message_id, link.href );
+		}, unboxInterval );
+	},
+
+	actuallyUnbox : function ( msgId, href ) {
+		IO.xhr({
+			url: '/messages/' + msgId,
+			data: fkey({
+				text: href + ' ... '
+			}),
+			method: 'POST',
+
+			complete : function (resp, xhr) {
+				bot.log( xhr, '/unonebox done unboxing' );
+				// TODO
+				// error checking
+			}
+		});
 	}
-	bot.addCommand({
-		fun: unonebox.command.bind(unonebox),
-		name: 'unonebox',
-		permissions: {
-			del: 'NONE'
-		},
-		description: 'Enable or Disable the unonebox listener' +
-			' `/unonebox on|off`'
-	});
+};
+
+if ( bot.memory.get(memoryKey, 'disabled') === 'enabled' ) {
+	bot.log( 'enabling unonebox' );
+	unonebox.enable();
+}
+
+bot.addCommand({
+	name: 'unonebox',
+	fun: unonebox.command,
+	thisArg : unonebox,
+
+	permissions: {
+		del: 'NONE'
+	},
+	description: 'Get/toggle the unonebox listener. ' +
+		'`/unonebox [on|off]x`'
+});
+
 }());
+
 ;
 (function () {
 

@@ -235,7 +235,7 @@ var bot = window.bot = {
 	},
 
 	callListeners : function ( msg ) {
-		return this.listeners.some(function callListener ( listener ) {
+		function callListener ( listener ) {
 			var match = msg.exec( listener.pattern ), resp;
 
 			if ( match ) {
@@ -247,7 +247,9 @@ var bot = window.bot = {
 				}
 				return resp !== false;
 			}
-		});
+		}
+
+		return this.listeners.some( callListener );
 	},
 
 	stoplog : false,
@@ -359,6 +361,7 @@ bot.Command = function ( cmd ) {
 	//make canUse and canDel
 	[ 'Use', 'Del' ].forEach(function ( perm ) {
 		var low = perm.toLowerCase();
+
 		cmd[ 'can' + perm ] = function ( usrid ) {
 			var canDo = this.permissions[ low ];
 
@@ -388,12 +391,14 @@ bot.Command = function ( cmd ) {
 
 	return cmd;
 };
+
 //a normally priviliged command which can be executed if enough people use it
 bot.CommunityCommand = function ( command, req ) {
 	var cmd = this.Command( command ),
 		used = {},
 		old_execute = cmd.exec,
 		old_canUse  = cmd.canUse;
+
 	req = req || 2;
 
 	cmd.canUse = function () {
@@ -405,8 +410,12 @@ bot.CommunityCommand = function ( command, req ) {
 			bot.log( err );
 			return err;
 		}
+
+		used = {};
+
 		return old_execute.apply( cmd, arguments );
 	};
+
 	return cmd;
 
 	//once again, a switched return statement: truthy means a message, falsy
@@ -418,16 +427,20 @@ bot.CommunityCommand = function ( command, req ) {
 
 		clean();
 		var count = Object.keys( used ).length,
-			needed = req - count - 1; //0 based indexing vs. 1 based humans
+			needed = req - count;
 		bot.log( used, count, req );
 
 		if ( usrid in used ) {
 			return 'Already registered; still need {0} more'.supplant( needed );
 		}
-		else if ( needed > 0 ) {
-			used[ usrid ] = new Date;
-			return 'Registered; need {0} more to execute'.supplant( needed-1 );
+
+		used[ usrid ] = new Date;
+		needed -= 1;
+
+		if ( needed > 0 ) {
+			return 'Registered; need {0} more to execute'.supplant( needed );
 		}
+
 		bot.log( 'should execute' );
 		return false; //huzzah!
 	}
