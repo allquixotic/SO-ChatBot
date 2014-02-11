@@ -251,29 +251,6 @@ return function ( html ) {
 	};
 });
 
-//a very incomplete circular-buffer implementation, used for the bored responses
-IO.CBuffer = function ( size ) {
-	var ret = {
-		items : [],
-		pos : 0,
-		size : size
-	};
-
-	ret.add = function ( item ) {
-		if ( this.pos === size ) {
-			this.pos = 0;
-		}
-
-		this.items[ this.pos ] = item;
-		this.pos += 1;
-	};
-	ret.contains = function ( item ) {
-		return this.items.indexOf( item ) > -1;
-	};
-
-	return ret;
-};
-
 IO.relativeUrlToAbsolute = function ( url ) {
 	//the anchor's href *property* will always be absolute, unlike the href
 	// *attribute*
@@ -1260,14 +1237,6 @@ bot.isOwner = function ( usrid ) {
 };
 
 IO.register( 'input', bot.parseMessage, bot );
-
-bot.beatInterval = 5000; //once every 5 seconds is Good Enough ™
-(function beat () {
-	bot.beat = setTimeout(function () {
-		IO.fire( 'heartbeat' );
-		beat();
-	}, bot.beatInterval );
-}());
 
 //execute arbitrary js code in a relatively safe environment
 bot.eval = (function () {
@@ -4038,27 +4007,34 @@ bot.listen(
 
 var notFoundMsgs = [
 	'No definition found.',
-	'It means I aint got time to learn your $5 words',
+	'It means I aint got time to learn your $5 words.',
 	'My pocket dictionary just isn\'t good enough for you.'
 ];
+var wikiUrl = 'http://en.wiktionary.org';
+//I wish regexps had the x flag...
+/*
+  ( ... )    # the category: alternative spelling, common missspelling, etc
+   (of|for)  # alternative spelling of, aternative term for
+  (.+?)\.?   # what this shit is an alternative of, sometimes followed by a dot
+*/
+var alternativeRe = /(alternative (spelling|term)|common misspelling|informal form|archaic spelling) (of|for) (.+?)\.?$/i;
 
 var define = {
 	command : function defineCommand ( args, cb ) {
 		bot.log( args, '/define input' );
-		this.fetchData( args, finish );
+		this.fetchData( args.toString(), finish );
 
-		function finish ( results, pageid ) {
-			bot.log( results, '/define results' );
-			//TODO: format. so far we just be lazy and take the first one
-			var res = results[ 0 ];
+		function finish ( definition, pageid ) {
+			bot.log( definition, pageid, '/define result' );
+			var res;
 
-			if ( !res ) {
+			if ( pageid < 0 ) {
 				res = notFoundMsgs.random();
 			}
 			else {
 				res = bot.adapter.link(
-					args, 'http://en.wiktionary.org/wiki?curid=' + pageid
-				) + ' ' + res;
+					definition.name, wikiUrl + '/wiki?curid=' + pageid
+				) + ' ' + definition.text;
 			}
 
 			if ( cb && cb.call ) {
@@ -4073,18 +4049,99 @@ var define = {
 	handleResponse : function ( resp, cb ) {
 		var query = resp.query,
 			pageid = query.pageids[ 0 ],
-			html = query.pages[ pageid ].extract;
+			page = query.pages[ pageid ],
+			html = page.extract;
 
 		if ( pageid === '-1' ) {
-			cb( [], -1 );
+			cb( {}, -1 );
 			return;
 		}
 
 		var root = document.createElement( 'body' );
 		root.innerHTML = html; //forgive me...
+		var definition  = this.extractDefinition( root );
 
-		//the first ol has all the data we need
-		cb( getEvents(root.getElementsByTagName('ol')[0]), pageid );
+		//if this is an alternative definition (or spelling, or whatever),
+		// return the actual version.
+		if ( definition.alternative ) {
+			bot.log( definition.alternative, '/define found alternative' );
+			this.fetchData( definition.alternative, cb );
+		}
+		else {
+			cb({
+				name : page.title,
+				text : definition.text
+			});
+		}
+	},
+
+	extractDefinition : function ( root ) {
+		/*
+		Result of 42:
+			<ol>
+				<li>The cardinal number forty-two.</li>
+			</ol>
+
+		Result of plugin:
+			<ol>
+				<li>
+					<span class="use-with-mention">
+						Alternative spelling of
+						<i class="Latn mention" lang="en" xml:lang="en">
+							<a href="/wiki/plug-in#English" title="plug-in">
+								plug-in
+							</a>
+						</i>
+					</span>
+					.
+				</li>
+			</ol>
+
+		Result of puling:
+			<ol>
+				<li>
+					<span class="use-with-mention">
+						Present participle of
+						<i class="Latn mention" lang="en" xml:lang="en">
+							<a href="/wiki/pule#English" title="pule">
+								pule
+							</a>
+						</i>
+					</span>
+					.
+				</li>
+			</ol>
+		*/
+		var defList = root.getElementsByTagName( 'ol' )[ 0 ],
+			defElement = defList.firstElementChild,
+			links = defElement.getElementsByTagName( 'a' );
+
+		//before we start messing around with the element's innards, try and
+		// find if it's an alternative of something else.
+		var alternative = this.extractAlternative( defElement.textContent );
+
+		//be sure to replace links with formatted links.
+		while ( links.length ) {
+			replaceLink( links[0] );
+		}
+
+		return {
+			alternative : alternative,
+			text : defElement.textContent
+		};
+
+		function replaceLink ( link ) {
+			var href = wikiUrl + link.getAttribute( 'href' ),
+				textLink = bot.adapter.link( link.textContent, href ),
+
+				textNode = document.createTextNode( textLink );
+
+			link.parentNode.replaceChild( textNode, link );
+		}
+	},
+
+	extractAlternative : function ( definitionText ) {
+		return ( alternativeRe.exec(definitionText) || [] ).pop();
 	},
 
 	fetchData : function ( term, cb ) {
@@ -4095,7 +4152,7 @@ var define = {
 			jsonpName : 'callback',
 			data : {
 				action : 'query',
-				titles : term.toString(),
+				titles : term,
 				format : 'json',
 				prop : 'extracts',
 				indexpageids : true
@@ -4107,49 +4164,11 @@ var define = {
 	}
 };
 
-//example of partial extract:
-/*
-  <h2> Translingual</h2>\n\n
-  <p>Wikipedia</p>\n
-  <h3> Symbol</h3>\n
-  <p><b>42</b> (<i>previous</i>  <b>41</b>, <i>next</i>  <b>43</b>)</p>\n
-  <ol>
-      <li>The cardinal number forty-two.</li>\n</ol>
-*/
-//we just want the li data
-function getEvents ( root, stopNode ) {
-	var matches = [];
-
-	(function filterEvents (root) {
-		var node = root.firstElementChild;
-
-		for (; node; node = node.nextElementSibling) {
-			if (node === stopNode) {
-				return;
-			}
-			else if (node.tagName !== 'LI' ) {
-				continue;
-			}
-
-			matches.push( node );
-		}
-	})( root );
-
-	//we need to flatten out the resulting elements, and we're done!
-	return flatten(matches);
-}
-function flatten ( lis ) {
-	return [].map.call( lis, extract );
-
-	function extract ( li ) {
-		return li.firstChild.data;
-	}
-}
-
 bot.addCommand({
 	name : 'define',
 	fun : define.command,
 	thisArg : define,
+
 	permissions : {
 		del : 'NONE'
 	},
@@ -4929,7 +4948,7 @@ var history = {
 			data : {
 				format : 'json',
 				action : 'parse',
-				mobileformat : 'html',
+				mobileformat : true,
 				prop : 'text',
 				page : titles.join( ' ' )
 			},
@@ -5558,45 +5577,6 @@ bot.addCommand({
 }());
 
 ;
-(function () {
-//I wish you could use `default` as a variable name
-var def = {
-	895174 : [
-		'sbaaaang', 'badbetonbreakbutbedbackbone',
-		'okok', 'donotusetabtodigitthisnick' ]
-};
-
-var tracking = bot.memory.get( 'tracker', def );
-var message = '*→ {0} (also known as {1}) changed his name to {2}*',
-	messageNoAlias = '*→ {0} changed his name to {2}*';
-
-IO.register( 'userregister', function tracker ( user, room ) {
-	var names = tracking[ user.id ];
-
-	if ( !names ) {
-		return;
-	}
-	if ( names[0].toLowerCase() === user.name.toLowerCase() ) {
-		return;
-	}
-
-	bot.log( user, names, 'tracking found suspect' );
-
-	var userLink = bot.adapter.link(
-		names[0],
-		IO.relativeUrlToAbsolute( '/users/' + user.id ) );
-
-	var outFormat = names.length > 1 ? message : messageNoAlias,
-		out = outFormat.supplant(
-			userLink, names.slice(1), user.name );
-
-	bot.adapter.out.add( out, room );
-	names.unshift( user.name );
-});
-
-})();
-
-;
 
 ;
 (function () {
@@ -6088,6 +6068,52 @@ bot.addCommand({
 	description : 'Find a section in the ES5 spec'
 });
 }());
+
+;
+(function () {
+var re = /(which |what |give me a )?stargate|sg1( episode)?/i;
+
+var episodes; //will be filled in next line.
+//SG1 is seperated so Atlantis can be added in later.
+episodes = {"SG1":{"Season 1":["Children of the Gods","The Enemy Within","Emancipation","The Broca Divide","The First Commandment","Brief Candle","Cold Lazarus","Thor's Hammer","The Torment of Tantalus","Bloodlines","Fire and Water","The Nox","Hathor","Singularity","Cor-ai","Enigma","Tin Man","Solitudes","There But for the Grace of God ","Politics ","Within the Serpent's Grasp "],"Season 2":["The Serpent's Lair ","In the Line of Duty","Prisoners","The Gamekeeper","Need","Thor's Chariot","Message in a Bottle",
+"Family","Secrets","Bane","The Tok'ra","The Tok'ra (Part 2)","Spirits","Touchstone","A Matter of Time","The Fifth Race","Serpent's Song","Holiday","One False Step","Show and Tell","1969","Out of Mind "],"Season 3":["Into the Fire ","Seth","Fair Game","Legacy","Learning Curve","Point of View","Deadman Switch","Demons","Rules of Engagement","Forever in a Day","Past and Present","Jolinar's Memories ","The Devil You Know ","Foothold","Pretense","Urgo","A Hundred Days","Shades of Grey","New Ground","Maternal Instinct",
+"Crystal Skull","Nemesis "],"Season 4":["Small Victories ","The Other Side","Upgrades","Crossroads","Divide and Conquer","Window of Opportunity","Watergate","The First Ones","Scorched Earth","Beneath the Surface","Point of No Return","Tangent","The Curse","The Serpent's Venom","Chain Reaction","2010","Absolute Power","The Light","Prodigy","Entity","Double Jeopardy ","Exodus "],"Season 5":["Enemies ","Threshold ","Ascension","The Fifth Man","Red Sky","Rite of Passage","Beast of Burden","The Tomb",
+"Between Two Fires","2001","Desperate Measures","Wormhole X-Treme!","Proving Ground","48 Hours","Summit ","Last Stand ","Fail Safe","The Warrior","Menace","The Sentinel","Meridian","Revelations"],"Season 6":["Redemption","Redemption (Part 2)","Descent","Frozen","Nightwalkers","Abyss","Shadow Play","The Other Guys","Allegiance","Cure","Prometheus ","Unnatural Selection ","Sight Unseen","Smoke & Mirrors","Paradise Lost","Metamorphosis","Disclosure","Forsaken","The Changeling","Memento","Prophecy","Full Circle"],
+"Season 7":["Fallen ","Homecoming ","Fragile Balance","Orpheus","Revisions","Lifeboat","Enemy Mine","Space Race","Avenger 2.0","Birthright","Evolution","Evolution (Part 2)","Grace","Fallout","Chimera","Death Knell","Heroes","Heroes (Part 2)","Resurrection","Inauguration","Lost City","Lost City (Part 2)"],"Season 8":["New Order","New Order (Part 2)","Lockdown","Zero Hour","Icon","Avatar","Affinity","Covenant","Sacrifices","Endgame","Gemini","Prometheus Unbound","It's Good to Be King","Full Alert",
+"Citizen Joe","Reckoning","Reckoning (Part 2)","Threads","Moebius","Moebius (Part 2)"],"Season 9":["Avalon","Avalon (Part 2)","Origin ","The Ties That Bind","The Powers That Be","Beachhead","Ex Deus Machina","Babylon","Prototype","The Fourth Horseman","The Fourth Horseman (Part 2)","Collateral Damage","Ripple Effect","Stronghold","Ethon","Off the Grid","The Scourge","Arthur's Mantle","Crusade","Camelot "],"Season 10":["Flesh and Blood ","Morpheus","The Pegasus Project","Insiders","Uninvited","200",
+"Counterstrike","Memento Mori","Company of Thieves","The Quest","The Quest (Part 2)","Line in the Sand","The Road Not Taken","The Shroud","Bounty","Bad Guys","Talion","Family Ties","Dominion","Unending"]}};
+
+
+var selectStargateEpisode = function ( msg ) {
+	//no mention of episode, 5% chance of getting the movie
+	if ( msg.indexOf('episode') === -1 && Math.random() < 0.05 ) {
+		return 'Stargate (movie)';
+	}
+
+	var select = function ( arr ) {
+		var i = Math.rand( arr.length - 1 );
+
+		return {
+			value : arr[i],
+			index : i
+		};
+	};
+
+	var season  = select( Object.keys(episodes.SG1) ),
+		episode = select( episodes.SG1[season.value] );
+
+	var data = {
+		season  : season.value,
+		index   : episode.index + 1,
+		episode : episode.value
+	};
+
+
+	return '{season} episode #{index} - {episode}'.supplant( data );
+};
+
+bot.listen( re, selectStargateEpisode );
+})();
 
 ;
 (function () {
@@ -6899,6 +6925,12 @@ function urban ( args, cb ) {
 		else {
 			msg = formatTop( resp.list[resultIndex] );
 		}
+
+		//truncate the message if it's too long. yes, this creates a problem
+		// with formatted messages. yes, we take extra leeway. shut up.
+		if ( msg.length > 500 ) {
+			msg = msg.slice( 0, 450 ) + '(snip)';
+		}
 		cache[ args ] = msg;
 
 		finish( msg );
@@ -7251,17 +7283,77 @@ bot.addCommand({
 ;
 (function () {
 "use strict";
+//welcomes new users with a link to the room rules and a short message.
+
+var seen = bot.memory.get( 'users' );
 
 var message = "Welcome to the JavaScript chat! Please review the " +
 		bot.adapter.link(
 			"room pseudo-rules",
-			"http://rlemon.github.com/so-chat-javascript-rules/" ) + ". " +
-	"Please don't ask if you can ask or if anyone's around; just ask " +
-	"your question, and if anyone's free and interested they'll help.";
+			"http://rlemon.github.com/so-chat-javascript-rules/"
+		) +
+		". Please don't ask if you can ask or if anyone's around; just ask " +
+		"your question, and if anyone's free and interested they'll help.";
 
-function welcome ( name ) {
-	return bot.adapter.reply( name ) + " " + message;
+var messageCountRe = /transcript\/17(?:'|")>([\d\.]+)(k?)/i;
+
+function welcome ( name, room ) {
+	bot.adapter.out.add(
+		bot.adapter.reply( name ) + " " + message, room );
 }
+
+IO.register( 'userregister', function ( user, room ) {
+	var semiLegitUser = bot.isOwner( user.id ) ||
+		user.reputation > 1000 || user.reputation < 20;
+
+	if (
+		Number( room ) !== 17 || semiLegitUser  || seen[ user.id ]
+	) {
+		if ( semiLegitUser ) {
+			finish( true );
+		}
+		return;
+	}
+
+	IO.xhr({
+		method : 'GET',
+		url : '/users/' + user.id,
+
+		complete : complete
+	});
+
+	function complete ( resp ) {
+		//I'm parsing html with regexps. hopefully Cthulu won't eat me.
+		// <a href="/transcript/17">7</a>
+		// [..., "17", null]
+		// <a href="/transcript/17">2.1k</a>
+		// [..., "2.1", "k"]
+		var chatMessages = messageCountRe.exec( resp ),
+			newUser;
+
+		if ( chatMessages ) {
+			newUser = !chatMessages[ 2 ] && Number( chatMessages[1] ) < 2;
+		}
+		else {
+			newUser = true;
+		}
+
+		if ( newUser ) {
+			welcome( user.name, room );
+		}
+		finish();
+	}
+
+	function finish ( unsee ) {
+		if ( unsee ) {
+			delete seen[ user.id ];
+		}
+		else {
+			seen[ user.id ] = true;
+		}
+		bot.memory.save( 'users' );
+	}
+});
 
 bot.addCommand({
 	name : 'welcome',
@@ -7270,7 +7362,7 @@ bot.addCommand({
 			return message;
 		}
 
-		return args.send( welcome(args) );
+		welcome( args, args.get('roomid') );
 	},
 	permission : {
 		del : 'NONE'

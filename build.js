@@ -176,8 +176,9 @@ var minifiers = [
 			var cmd = [
 				'java -jar closure-compiler.jar',
 				'--language_in ECMASCRIPT5_STRICT',
-				'--compilation_level ADVANCED_OPTIMIZATIONS',
-				'--js master.js --js_output_file master.cc.js',
+				'--compilation_level SIMPLE_OPTIMIZATIONS',
+				'--js', sourceFile,
+				'--js_output_file', outFile,
 			].join( ' ' );
 
 			exec( cmd, cb );
