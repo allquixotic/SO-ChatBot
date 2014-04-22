@@ -176,7 +176,8 @@ commands.tell = function ( args ) {
 	cmdName = cmdName.toLowerCase();
 	cmd = bot.getCommand( cmdName );
 	if ( cmd.error ) {
-		return cmd.error;
+		return cmd.error +
+			' (note that /tell works on commands, it\'s not an echo.)';
 	}
 
 	if ( cmd.unTellable ) {
@@ -271,7 +272,7 @@ var unTellable = {
 Object.iterate( commands, function ( cmdName, fun ) {
 	var cmd = {
 		name : cmdName,
-		fun	 : fun,
+		fun  : fun,
 		permissions : {
 			del : 'NONE',
 			use : privilegedCommands[ cmdName ] ? 'OWNER' : 'ALL'
