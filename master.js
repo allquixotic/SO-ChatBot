@@ -1,3 +1,13 @@
+/** es5-sham.min.js from https://github.com/kriskowal/es5-shim and the minified version of this patch https://github.com/abe33/source-map/commit/61131e53ceb3b69d387da3c6daad6adbbaaae9b3 for PhantomJS 1.9.x. */
+if(!Function.prototype.bind) {Function.prototype.bind = function(scope){var self = this;return function(){return self.apply(scope, arguments);};}}
+(function(definition){if(typeof define=="function"){define(definition)}else if(typeof YUI=="function"){YUI.add("es5-sham",definition)}else{definition()}})(function(){var call=Function.prototype.call;var prototypeOfObject=Object.prototype;var owns=call.bind(prototypeOfObject.hasOwnProperty);var defineGetter;var defineSetter;var lookupGetter;var lookupSetter;var supportsAccessors;if(supportsAccessors=owns(prototypeOfObject,"__defineGetter__")){defineGetter=call.bind(prototypeOfObject.__defineGetter__);defineSetter=call.bind(prototypeOfObject.__defineSetter__);lookupGetter=call.bind(prototypeOfObject.__lookupGetter__);lookupSetter=call.bind(prototypeOfObject.__lookupSetter__)}if(!Object.getPrototypeOf){Object.getPrototypeOf=function getPrototypeOf(object){return object.__proto__||(object.constructor?object.constructor.prototype:prototypeOfObject)}}function doesGetOwnPropertyDescriptorWork(object){try{object.sentinel=0;return Object.getOwnPropertyDescriptor(object,"sentinel").value===0}catch(exception){}}if(Object.defineProperty){var getOwnPropertyDescriptorWorksOnObject=doesGetOwnPropertyDescriptorWork({});var getOwnPropertyDescriptorWorksOnDom=typeof document=="undefined"||doesGetOwnPropertyDescriptorWork(document.createElement("div"));if(!getOwnPropertyDescriptorWorksOnDom||!getOwnPropertyDescriptorWorksOnObject){var getOwnPropertyDescriptorFallback=Object.getOwnPropertyDescriptor}}if(!Object.getOwnPropertyDescriptor||getOwnPropertyDescriptorFallback){var ERR_NON_OBJECT="Object.getOwnPropertyDescriptor called on a non-object: ";Object.getOwnPropertyDescriptor=function getOwnPropertyDescriptor(object,property){if(typeof object!="object"&&typeof object!="function"||object===null){throw new TypeError(ERR_NON_OBJECT+object)}if(getOwnPropertyDescriptorFallback){try{return getOwnPropertyDescriptorFallback.call(Object,object,property)}catch(exception){}}if(!owns(object,property)){return}var descriptor={enumerable:true,configurable:true};if(supportsAccessors){var prototype=object.__proto__;object.__proto__=prototypeOfObject;var getter=lookupGetter(object,property);var setter=lookupSetter(object,property);object.__proto__=prototype;if(getter||setter){if(getter){descriptor.get=getter}if(setter){descriptor.set=setter}return descriptor}}descriptor.value=object[property];descriptor.writable=true;return descriptor}}if(!Object.getOwnPropertyNames){Object.getOwnPropertyNames=function getOwnPropertyNames(object){return Object.keys(object)}}if(!Object.create){var createEmpty;var supportsProto=Object.prototype.__proto__===null;if(supportsProto||typeof document=="undefined"){createEmpty=function(){return{__proto__:null}}}else{createEmpty=function(){var iframe=document.createElement("iframe");var parent=document.body||document.documentElement;iframe.style.display="none";parent.appendChild(iframe);iframe.src="javascript:";var empty=iframe.contentWindow.Object.prototype;parent.removeChild(iframe);iframe=null;delete empty.constructor;delete empty.hasOwnProperty;delete empty.propertyIsEnumerable;delete empty.isPrototypeOf;delete empty.toLocaleString;delete empty.toString;delete empty.valueOf;empty.__proto__=null;function Empty(){}Empty.prototype=empty;createEmpty=function(){return new Empty};return new Empty}}Object.create=function create(prototype,properties){var object;function Type(){}if(prototype===null){object=createEmpty()}else{if(typeof prototype!=="object"&&typeof prototype!=="function"){throw new TypeError("Object prototype may only be an Object or null")}Type.prototype=prototype;object=new Type;object.__proto__=prototype}if(properties!==void 0){Object.defineProperties(object,properties)}return object}}function doesDefinePropertyWork(object){try{Object.defineProperty(object,"sentinel",{});return"sentinel"in object}catch(exception){}}if(Object.defineProperty){var definePropertyWorksOnObject=doesDefinePropertyWork({});var definePropertyWorksOnDom=typeof document=="undefined"||doesDefinePropertyWork(document.createElement("div"));if(!definePropertyWorksOnObject||!definePropertyWorksOnDom){var definePropertyFallback=Object.defineProperty,definePropertiesFallback=Object.defineProperties}}if(!Object.defineProperty||definePropertyFallback){var ERR_NON_OBJECT_DESCRIPTOR="Property description must be an object: ";var ERR_NON_OBJECT_TARGET="Object.defineProperty called on non-object: ";var ERR_ACCESSORS_NOT_SUPPORTED="getters & setters can not be defined "+"on this javascript engine";Object.defineProperty=function defineProperty(object,property,descriptor){if(typeof object!="object"&&typeof object!="function"||object===null){throw new TypeError(ERR_NON_OBJECT_TARGET+object)}if(typeof descriptor!="object"&&typeof descriptor!="function"||descriptor===null){throw new TypeError(ERR_NON_OBJECT_DESCRIPTOR+descriptor)}if(definePropertyFallback){try{return definePropertyFallback.call(Object,object,property,descriptor)}catch(exception){}}if(owns(descriptor,"value")){if(supportsAccessors&&(lookupGetter(object,property)||lookupSetter(object,property))){var prototype=object.__proto__;object.__proto__=prototypeOfObject;delete object[property];object[property]=descriptor.value;object.__proto__=prototype}else{object[property]=descriptor.value}}else{if(!supportsAccessors){throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED)}if(owns(descriptor,"get")){defineGetter(object,property,descriptor.get)}if(owns(descriptor,"set")){defineSetter(object,property,descriptor.set)}}return object}}if(!Object.defineProperties||definePropertiesFallback){Object.defineProperties=function defineProperties(object,properties){if(definePropertiesFallback){try{return definePropertiesFallback.call(Object,object,properties)}catch(exception){}}for(var property in properties){if(owns(properties,property)&&property!="__proto__"){Object.defineProperty(object,property,properties[property])}}return object}}if(!Object.seal){Object.seal=function seal(object){return object}}if(!Object.freeze){Object.freeze=function freeze(object){return object}}try{Object.freeze(function(){})}catch(exception){Object.freeze=function freeze(freezeObject){return function freeze(object){if(typeof object=="function"){return object}else{return freezeObject(object)}}}(Object.freeze)}if(!Object.preventExtensions){Object.preventExtensions=function preventExtensions(object){return object}}if(!Object.isSealed){Object.isSealed=function isSealed(object){return false}}if(!Object.isFrozen){Object.isFrozen=function isFrozen(object){return false}}if(!Object.isExtensible){Object.isExtensible=function isExtensible(object){if(Object(object)!==object){throw new TypeError}var name="";while(owns(object,name)){name+="?"}object[name]=true;var returnValue=owns(object,name);delete object[name];return returnValue}}});
+
+/** Determine if the Blob constructor works. This helps out PhantomJS 1.9.x. Should return true on modern browsers. */
+function doesBlobConstructorWork(){try{return !!new Blob();}catch(e){return false;}}
+
+/** BlobBuilder shim. We fall back to BlobBuilder if Blob constructor doesn't work. This helps out PhantomJS 1.9.x. */
+var BlobBuilder=BlobBuilder||self.WebKitBlobBuilder||self.MozBlobBuilder||(function(view){"use strict";var get_class=function(object){return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1]},FakeBlobBuilder=function(){},FakeBlob=function(data,type){this.data=data;this.size=data.length;this.type=type},FBB_proto=FakeBlobBuilder.prototype=[],FB_proto=FakeBlob.prototype,FileReaderSync=view.FileReaderSync,FileException=function(type){this.code=this[this.name=type]},file_ex_codes=("NOT_FOUND_ERR SECURITY_ERR ABORT_ERR NOT_READABLE_ERR ENCODING_ERR "+"NO_MODIFICATION_ALLOWED_ERR INVALID_STATE_ERR SYNTAX_ERR").split(" "),file_ex_code=file_ex_codes.length,URL=view.URL=view.URL||view.webkitURL||view,real_create_object_url,real_revoke_object_url,btoa=view.btoa,can_apply_typed_arrays=false,can_apply_typed_arrays_test=function(pass){can_apply_typed_arrays=!pass},ArrayBuffer=view.ArrayBuffer,Uint8Array=view.Uint8Array;while(file_ex_code--){FileException.prototype[file_ex_codes[file_ex_code]]=file_ex_code+1}try{if(Uint8Array){can_apply_typed_arrays_test.apply(0,new Uint8Array(1))}}catch(ex){}if(!URL.createObjectURL){URL={}}real_create_object_url=URL.createObjectURL;real_revoke_object_url=URL.revokeObjectURL;URL.createObjectURL=function(blob){var type=blob.type;if(type===null){type="application/octet-stream"}if(blob instanceof FakeBlob){if(btoa){return"data:"+type+";base64,"+btoa(blob.data)}else{return"data:"+type+","+encodeURIComponent(blob.data)}}else if(real_create_object_url){return real_create_object_url.call(URL,blob)}};URL.revokeObjectURL=function(object_url){if(object_url.substring(0,5)!=="data:"&&real_revoke_object_url){real_revoke_object_url.call(URL,object_url)}};FBB_proto.append=function(data){var bb=this;if(Uint8Array&&data instanceof ArrayBuffer){if(can_apply_typed_arrays){bb.push(String.fromCharCode.apply(String,new Uint8Array(data)))}else{var str="",buf=new Uint8Array(data),i=0,buf_len=buf.length;for(;i<buf_len;i++){str+=String.fromCharCode(buf[i])}}}else if(get_class(data)==="Blob"||get_class(data)==="File"){if(FileReaderSync){var fr=new FileReaderSync;bb.push(fr.readAsBinaryString(data))}else{throw new FileException("NOT_READABLE_ERR")}}else if(data instanceof FakeBlob){bb.push(data.data)}else{if(typeof data!=="string"){data+=""}bb.push(unescape(encodeURIComponent(data)))}};FBB_proto.getBlob=function(type){if(!arguments.length){type=null}return new FakeBlob(this.join(""),type)};FBB_proto.toString=function(){return"[object BlobBuilder]"};FB_proto.slice=function(start,end,type){var args=arguments.length;if(args<3){type=null}return new FakeBlob(this.data.slice(start,args>1?end:this.data.length),type)};FB_proto.toString=function(){return"[object Blob]"};return FakeBlobBuilder}(self));
+
 var IO = window.IO = {
 	//event handling
 	events : {},
@@ -288,17 +298,17 @@ IO.xhr = function ( params ) {
 	var xhr = new XMLHttpRequest();
 	xhr.open( params.method, params.url );
 
-	xhr.addEventListener( 'readystatechange', function () {
-		if ( xhr.readyState === 4 ) {
-			params.complete.call(
-				params.thisArg, xhr.responseText, xhr
-			);
-		}
+	if ( params.document ) {
+		xhr.responseType = 'document';
+	}
+
+	xhr.addEventListener( 'load', function () {
+		params.complete.call(
+			params.thisArg, xhr.response, xhr
+		);
 	});
 
-	Object.iterate( params.headers, function ( header, value ) {
-		xhr.setRequestHeader( header, value );
-	});
+	Object.iterate( params.headers, xhr.setRequestHeader.bind(xhr) );
 
 	xhr.send( params.data );
 
@@ -358,6 +368,12 @@ IO.jsonp.google = function ( query, cb ) {
 ;
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 //small utility functions
+
+//takes n objects, and merges them into one super-object, which'll one day rule
+// the galaxy. Non-mutative. The merging, not the galaxy ruling.
+//
+// > Object.merge( {a : 4, b : 5}, {a : 6, c : 7} )
+// { a : 6, b : 5, c : 7 }
 Object.merge = function () {
 	return [].reduce.call( arguments, function ( ret, merger ) {
 
@@ -369,12 +385,17 @@ Object.merge = function () {
 	}, {} );
 };
 
+//iterates over an object. the callback receives the key, value and the obejct.
+// > Object.iterate( {a : 4, b : 5}, console.log.bind(console) )
+// a 4 { a: 4, b: 5 }
+// b 5 { a: 4, b: 5 }
 Object.iterate = function ( obj, cb, thisArg ) {
 	Object.keys( obj ).forEach(function (key) {
 		cb.call( thisArg, key, obj[key], obj );
 	});
 };
 
+//takes an array, and turns it into the truth map (item[i] => true)
 Object.TruthMap = function ( props ) {
 	return ( props || [] ).reduce( assignTrue, Object.create(null) );
 
@@ -390,7 +411,7 @@ Array.from = function ( arrayLike, start ) {
 };
 
 //SO chat uses an unfiltered for...in to iterate over an array somewhere, so
-// that I have to use Object.defineProperty to make these non-enumerable
+// that we have to use Object.defineProperty to make these non-enumerable
 Object.defineProperty( Array.prototype, 'invoke', {
 	value : function ( funName ) {
 		var args = Array.from( arguments, 1 );
@@ -405,6 +426,25 @@ Object.defineProperty( Array.prototype, 'invoke', {
 			}
 
 			return res;
+		}
+	},
+
+	configurable : true,
+	writable : true
+});
+
+Object.defineProperty( Array.prototype, 'pluck', {
+	value : function ( propName ) {
+		return this.map( pluck );
+
+		function pluck ( item, index, arr ) {
+			//protection aganst null/undefined.
+			try {
+				return item[ propName ];
+			}
+			catch (e) {
+				return item;
+			}
 		}
 	},
 
@@ -657,7 +697,9 @@ Date.timeSince = function ( d0, d1 ) {
 		//anything else is ms
 	];
 
-	while ( delay = delays.shift() ) {
+	while ( delays.length ) {
+		delay = delays.shift()
+
 		if ( ms >= delay.delta ) {
 			return format( ms / delay.delta, delay.suffix );
 		}
@@ -686,7 +728,7 @@ var bot = window.bot = {
 		invoked   : 0,
 		learned   : 0,
 		forgotten : 0,
-		start     : new Date
+		start     : new Date()
 	},
 	users : {}, //will be filled in build
 
@@ -705,7 +747,7 @@ var bot = window.bot = {
 
 			//tell the user he's banned only if he hasn't already been told
 			if ( !this.banlist[id].told ) {
-				msg.reply( 'You iz in mindjail' );
+				//msg.reply( 'You iz in mindjail' );
 				this.banlist[ id ].told = true;
 			}
 			return;
@@ -739,6 +781,18 @@ var bot = window.bot = {
 		finally {
 			this.info.invoked += 1;
 		}
+	},
+	
+	// Call this from console with a command string as you would use in chat
+	// and it should execute with owner privileges and all responses to console instead of chat.
+	interact : function ( msgString ) {
+		var consoleMsgObj = Object( msgString );
+		consoleMsgObj.content = msgString;
+		consoleMsgObj['findUserid'] = function(username) { return -1; }; // interactive console
+		consoleMsgObj['findUsername'] = function(id,cb) { return "CONSOLE"; };
+		consoleMsgObj['reply'] = function(resp, username) { console.log(resp); };
+		consoleMsgObj['directreply'] = function(resp) { console.log(resp); };
+		return invokeAction(consoleMsgObj);
 	},
 
 	//this conditionally calls execCommand or callListeners, depending on what
@@ -1012,6 +1066,7 @@ bot.banlist.remove = function ( id ) {
 //some sort of pseudo constructor
 bot.Command = function ( cmd ) {
 	cmd.name = cmd.name.toLowerCase();
+	cmd.thisArg = cmd.thisArg || cmd;
 
 	cmd.permissions = cmd.permissions || {};
 	cmd.permissions.use = cmd.permissions.use || 'ALL';
@@ -1043,6 +1098,7 @@ bot.Command = function ( cmd ) {
 
 	cmd.exec = function () {
 		this.invoked += 1;
+
 		return this.fun.apply( this.thisArg, arguments );
 	};
 
@@ -1097,7 +1153,7 @@ bot.CommunityCommand = function ( command, req ) {
 			return 'Already registered; still need {0} more'.supplant( needed );
 		}
 
-		used[ usrid ] = new Date;
+		used[ usrid ] = new Date();
 		needed -= 1;
 
 		if ( needed > 0 ) {
@@ -1109,7 +1165,7 @@ bot.CommunityCommand = function ( command, req ) {
 	}
 
 	function clean () {
-		var tenMinsAgo = new Date;
+		var tenMinsAgo = new Date();
 		tenMinsAgo.setMinutes( tenMinsAgo.getMinutes() - 10 );
 
 		Object.keys( used ).reduce( rm, used );
@@ -1148,16 +1204,19 @@ bot.Message = function ( text, msgObj ) {
 		//parse( msgToParse ) parses msgToParse
 		//parse( msgToParse, true ) combination of the above
 		parse : function ( msg, map ) {
-			if ( !!msg === msg ) {
+			// parse( true )
+			if ( Boolean(msg) === msg ) {
 				map = msg;
 				msg = text;
 			}
 			var parsed = bot.parseCommandArgs( msg || text );
 
+			// parse( msgToParse )
 			if ( !map ) {
 				return parsed;
 			}
 
+			// parse( msgToParse, true )
 			return parsed.map(function ( part ) {
 				return bot.Message( part, msgObj );
 			});
@@ -1166,45 +1225,13 @@ bot.Message = function ( text, msgObj ) {
 		//execute a regexp against the text, saving it inside the object
 		exec : function ( regexp ) {
 			var match = regexp.exec( text );
-			this.matches = match ? match : [];
+			this.matches = match || [];
 
 			return match;
 		},
 
-		findUserid : function ( username ) {
-			username = username.toLowerCase().replace( /\s/g, '' );
-			var ids = Object.keys( bot.users );
-
-			return ids.first(function ( id ) {
-				var name = bot.users[ id ].name
-					.toLowerCase().replace( /\s/g, '' );
-
-				return name === username;
-			}) || -1;
-		}.memoize(),
-
-		findUsername : (function () {
-			var cache = {};
-
-			return function ( id, cb ) {
-				if ( cache[id] ) {
-					finish( cache[id] );
-				}
-				else if ( bot.users[id] ) {
-					finish( bot.users[id].name );
-				}
-				else {
-					bot.users.request( bot.adapter.roomid, id, reqFinish );
-				}
-
-				function reqFinish ( user ) {
-					finish( user.name );
-				}
-				function finish ( name ) {
-					cb( cache[id] = name );
-				}
-			};
-		})(),
+		findUserId   : bot.users.findUserId,
+		findUsername : bot.users.findUsername,
 
 		codify : bot.adapter.codify.bind( bot.adapter ),
 		escape : bot.adapter.escape.bind( bot.adapter ),
@@ -1232,6 +1259,8 @@ bot.Message = function ( text, msgObj ) {
 };
 
 bot.isOwner = function ( usrid ) {
+	if (usrid == -1) // interactive console
+		return true;
 	var user = this.users[ usrid ];
 	return user && ( user.is_owner || user.is_moderator );
 };
@@ -1240,22 +1269,23 @@ IO.register( 'input', bot.parseMessage, bot );
 
 //execute arbitrary js code in a relatively safe environment
 bot.eval = (function () {
-window.URL = window.URL || window.webkitURL || window.mozURL || null;
 
 //translation tool: http://tinkerbin.heroku.com/84dPpGFr
-var worker_code = atob( 'dmFyIGdsb2JhbCA9IHRoaXM7CgovKm1vc3QgZXh0cmEgZnVuY3Rpb25zIGNvdWxkIGJlIHBvc3NpYmx5IHVuc2FmZSovCnZhciB3aGl0ZXkgPSB7CgknQXJyYXknICAgICAgICAgICAgICA6IDEsCgknQm9vbGVhbicgICAgICAgICAgICA6IDEsCgknY29uc29sZScgICAgICAgICAgICA6IDEsCgknRGF0ZScgICAgICAgICAgICAgICA6IDEsCgknRXJyb3InICAgICAgICAgICAgICA6IDEsCgknRXZhbEVycm9yJyAgICAgICAgICA6IDEsCgknZXhlYycgICAgICAgICAgICAgICA6IDEsCgknRnVuY3Rpb24nICAgICAgICAgICA6IDEsCgknSW5maW5pdHknICAgICAgICAgICA6IDEsCgknSlNPTicgICAgICAgICAgICAgICA6IDEsCgknTWF0aCcgICAgICAgICAgICAgICA6IDEsCgknTmFOJyAgICAgICAgICAgICAgICA6IDEsCgknTnVtYmVyJyAgICAgICAgICAgICA6IDEsCgknT2JqZWN0JyAgICAgICAgICAgICA6IDEsCgknUmFuZ2VFcnJvcicgICAgICAgICA6IDEsCgknUmVmZXJlbmNlRXJyb3InICAgICA6IDEsCgknUmVnRXhwJyAgICAgICAgICAgICA6IDEsCgknU3RyaW5nJyAgICAgICAgICAgICA6IDEsCgknU3ludGF4RXJyb3InICAgICAgICA6IDEsCgknVHlwZUVycm9yJyAgICAgICAgICA6IDEsCgknVVJJRXJyb3InICAgICAgICAgICA6IDEsCgknYXRvYicgICAgICAgICAgICAgICA6IDEsCgknYnRvYScgICAgICAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJJyAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZW5jb2RlVVJJJyAgICAgICAgICA6IDEsCgknZW5jb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZXZhbCcgICAgICAgICAgICAgICA6IDEsCgknZ2xvYmFsJyAgICAgICAgICAgICA6IDEsCgknaXNGaW5pdGUnICAgICAgICAgICA6IDEsCgknaXNOYU4nICAgICAgICAgICAgICA6IDEsCgknb25tZXNzYWdlJyAgICAgICAgICA6IDEsCgkncGFyc2VGbG9hdCcgICAgICAgICA6IDEsCgkncGFyc2VJbnQnICAgICAgICAgICA6IDEsCgkncG9zdE1lc3NhZ2UnICAgICAgICA6IDEsCgknc2VsZicgICAgICAgICAgICAgICA6IDEsCgkndW5kZWZpbmVkJyAgICAgICAgICA6IDEsCgknd2hpdGV5JyAgICAgICAgICAgICA6IDEsCgoJLyogdHlwZWQgYXJyYXlzIGFuZCBzaGl0ICovCgknQXJyYXlCdWZmZXInICAgICAgIDogMSwKCSdCbG9iJyAgICAgICAgICAgICAgOiAxLAoJJ0Zsb2F0MzJBcnJheScgICAgICA6IDEsCgknRmxvYXQ2NEFycmF5JyAgICAgIDogMSwKCSdJbnQ4QXJyYXknICAgICAgICAgOiAxLAoJJ0ludDE2QXJyYXknICAgICAgICA6IDEsCgknSW50MzJBcnJheScgICAgICAgIDogMSwKCSdVaW50OEFycmF5JyAgICAgICAgOiAxLAoJJ1VpbnQxNkFycmF5JyAgICAgICA6IDEsCgknVWludDMyQXJyYXknICAgICAgIDogMSwKCSdVaW50OENsYW1wZWRBcnJheScgOiAxLAoKCS8qCgl0aGVzZSBwcm9wZXJ0aWVzIGFsbG93IEZGIHRvIGZ1bmN0aW9uLiB3aXRob3V0IHRoZW0sIGEgZnVja2Zlc3Qgb2YKCWluZXhwbGljYWJsZSBlcnJvcnMgZW51c2VzLiB0b29rIG1lIGFib3V0IDQgaG91cnMgdG8gdHJhY2sgdGhlc2UgZnVja2VycwoJZG93bi4KCWZ1Y2sgaGVsbCBpdCBpc24ndCBmdXR1cmUtcHJvb2YsIGJ1dCB0aGUgZXJyb3JzIHRocm93biBhcmUgdW5jYXRjaGFibGUKCWFuZCB1bnRyYWNhYmxlLiBzbyBhIGhlYWRzLXVwLiBlbmpveSwgZnV0dXJlLW1lIQoJKi8KCSdET01FeGNlcHRpb24nIDogMSwKCSdFdmVudCcgICAgICAgIDogMSwKCSdNZXNzYWdlRXZlbnQnIDogMSwKCSdXb3JrZXJNZXNzYWdlRXZlbnQnOiAxCn07CgpbIGdsb2JhbCwgT2JqZWN0LmdldFByb3RvdHlwZU9mKGdsb2JhbCkgXS5mb3JFYWNoKGZ1bmN0aW9uICggb2JqICkgewoJT2JqZWN0LmdldE93blByb3BlcnR5TmFtZXMoIG9iaiApLmZvckVhY2goZnVuY3Rpb24oIHByb3AgKSB7CgkJaWYoIHdoaXRleS5oYXNPd25Qcm9wZXJ0eShwcm9wKSApIHsKICAgICAgICAgICAgcmV0dXJuOwoJCX0KCiAgICAgICAgdHJ5IHsKICAgICAgICAgICAgT2JqZWN0LmRlZmluZVByb3BlcnR5KCBvYmosIHByb3AsIHsKICAgICAgICAgICAgICAgIGdldCA6IGZ1bmN0aW9uICgpIHsKICAgICAgICAgICAgICAgICAgICAvKiBURUUgSEVFICovCiAgICAgICAgICAgICAgICAgICAgdGhyb3cgbmV3IFJlZmVyZW5jZUVycm9yKCBwcm9wICsgJyBpcyBub3QgZGVmaW5lZCcgKTsKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICBjb25maWd1cmFibGUgOiBmYWxzZSwKICAgICAgICAgICAgICAgIGVudW1lcmFibGUgOiBmYWxzZQogICAgICAgICAgICB9KTsKICAgICAgICB9CiAgICAgICAgY2F0Y2ggKCBlICkgewogICAgICAgICAgICBkZWxldGUgb2JqWyBwcm9wIF07CgogICAgICAgICAgICBpZiAoIG9ialsgcHJvcCBdICE9PSB1bmRlZmluZWQgKSB7CiAgICAgICAgICAgICAgICBvYmpbIHByb3AgXSA9IG51bGw7CiAgICAgICAgICAgIH0KICAgICAgICB9Cgl9KTsKfSk7CgpPYmplY3QuZGVmaW5lUHJvcGVydHkoIEFycmF5LnByb3RvdHlwZSwgJ2pvaW4nLCB7Cgl3cml0YWJsZTogZmFsc2UsCgljb25maWd1cmFibGU6IGZhbHNlLAoJZW51bXJhYmxlOiBmYWxzZSwKCgl2YWx1ZTogKGZ1bmN0aW9uICggb2xkICkgewoJCXJldHVybiBmdW5jdGlvbiAoIGFyZyApIHsKCQkJaWYgKCB0aGlzLmxlbmd0aCA+IDUwMCB8fCAoYXJnICYmIGFyZy5sZW5ndGggPiA1MDApICkgewoJCQkJdGhyb3cgJ0V4Y2VwdGlvbjogdG9vIG1hbnkgaXRlbXMnOwoJCQl9CgoJCQlyZXR1cm4gb2xkLmFwcGx5KCB0aGlzLCBhcmd1bWVudHMgKTsKCQl9OwoJfSggQXJyYXkucHJvdG90eXBlLmpvaW4gKSkKfSk7CgovKiB3ZSBkZWZpbmUgaXQgb3V0c2lkZSBzbyBpdCdsbCBub3QgYmUgaW4gc3RyaWN0IG1vZGUgKi8KdmFyIGV4ZWMgPSBmdW5jdGlvbiAoIGNvZGUgKSB7CglyZXR1cm4gZXZhbCggJ3VuZGVmaW5lZDtcbicgKyBjb2RlICk7Cn0KdmFyIGNvbnNvbGUgPSB7CglfaXRlbXMgOiBbXSwKCWxvZyA6IGZ1bmN0aW9uKCkgewoJCWNvbnNvbGUuX2l0ZW1zLnB1c2guYXBwbHkoIGNvbnNvbGUuX2l0ZW1zLCBhcmd1bWVudHMgKTsKCX0KfTsKY29uc29sZS5lcnJvciA9IGNvbnNvbGUuaW5mbyA9IGNvbnNvbGUuZGVidWcgPSBjb25zb2xlLmxvZzsKCihmdW5jdGlvbigpewoJInVzZSBzdHJpY3QiOwoKCWdsb2JhbC5vbm1lc3NhZ2UgPSBmdW5jdGlvbiAoIGV2ZW50ICkgewoJCXBvc3RNZXNzYWdlKHsKCQkJZXZlbnQgOiAnc3RhcnQnCgkJfSk7CgoJCXZhciBqc29uU3RyaW5naWZ5ID0gSlNPTi5zdHJpbmdpZnksIC8qYmFja3VwKi8KCQkJcmVzdWx0OwoKCQl0cnkgewoJCQlyZXN1bHQgPSBleGVjKCBldmVudC5kYXRhICk7CgkJfQoJCWNhdGNoICggZSApIHsKCQkJcmVzdWx0ID0gZS50b1N0cmluZygpOwoJCX0KCgkJLypKU09OIGRvZXMgbm90IGxpa2UgYW55IG9mIHRoZSBmb2xsb3dpbmcqLwoJCXZhciBzdHJ1bmcgPSB7CgkJCUZ1bmN0aW9uICA6IHRydWUsIEVycm9yICA6IHRydWUsCgkJCVVuZGVmaW5lZCA6IHRydWUsIFJlZ0V4cCA6IHRydWUKCQl9OwoJCXZhciBzaG91bGRfc3RyaW5nID0gZnVuY3Rpb24gKCB2YWx1ZSApIHsKCQkJdmFyIHR5cGUgPSAoIHt9ICkudG9TdHJpbmcuY2FsbCggdmFsdWUgKS5zbGljZSggOCwgLTEgKTsKCgkJCWlmICggdHlwZSBpbiBzdHJ1bmcgKSB7CgkJCQlyZXR1cm4gdHJ1ZTsKCQkJfQoJCQkvKm5laXRoZXIgZG9lcyBpdCBmZWVsIGNvbXBhc3Npb25hdGUgYWJvdXQgTmFOIG9yIEluZmluaXR5Ki8KCQkJcmV0dXJuIHZhbHVlICE9PSB2YWx1ZSB8fCB2YWx1ZSA9PT0gSW5maW5pdHk7CgkJfTsKCgkJdmFyIHJldml2ZXIgPSBmdW5jdGlvbiAoIGtleSwgdmFsdWUgKSB7CgkJCXZhciBvdXRwdXQ7CgoJCQlpZiAoIHNob3VsZF9zdHJpbmcodmFsdWUpICkgewoJCQkJb3V0cHV0ID0gJycgKyB2YWx1ZTsKCQkJfQoJCQllbHNlIHsKCQkJCW91dHB1dCA9IHZhbHVlOwoJCQl9CgoJCQlyZXR1cm4gb3V0cHV0OwoJCX07CgoJCXBvc3RNZXNzYWdlKHsKCQkJYW5zd2VyIDoganNvblN0cmluZ2lmeSggcmVzdWx0LCByZXZpdmVyICksCgkJCWxvZyAgICA6IGpzb25TdHJpbmdpZnkoIGNvbnNvbGUuX2l0ZW1zLCByZXZpdmVyICkuc2xpY2UoIDEsIC0xICkKCQl9KTsKCX07Cn0pKCk7Cg==' );
-var blob = new Blob( [worker_code], { type : 'application/javascript' } ),
-	code_url = window.URL.createObjectURL( blob );
+//just a base64 encode of codeWorker.js
+var workerCode = atob( 'dmFyIGdsb2JhbCA9IHRoaXM7CgovKm1vc3QgZXh0cmEgZnVuY3Rpb25zIGNvdWxkIGJlIHBvc3NpYmx5IHVuc2FmZSovCnZhciB3aGl0ZXkgPSB7CgknQXJyYXknICAgICAgICAgICAgICA6IDEsCgknQm9vbGVhbicgICAgICAgICAgICA6IDEsCgknRGF0ZScgICAgICAgICAgICAgICA6IDEsCgknRXJyb3InICAgICAgICAgICAgICA6IDEsCgknRXZhbEVycm9yJyAgICAgICAgICA6IDEsCgknRnVuY3Rpb24nICAgICAgICAgICA6IDEsCgknSW5maW5pdHknICAgICAgICAgICA6IDEsCgknSlNPTicgICAgICAgICAgICAgICA6IDEsCgknTWFwJyAgICAgICAgICAgICAgICA6IDEsCgknTWF0aCcgICAgICAgICAgICAgICA6IDEsCgknTmFOJyAgICAgICAgICAgICAgICA6IDEsCgknTnVtYmVyJyAgICAgICAgICAgICA6IDEsCgknT2JqZWN0JyAgICAgICAgICAgICA6IDEsCgknUHJvbWlzZScgICAgICAgICAgICA6IDEsCgknUHJveHknICAgICAgICAgICAgICA6IDEsCgknUmFuZ2VFcnJvcicgICAgICAgICA6IDEsCgknUmVmZXJlbmNlRXJyb3InICAgICA6IDEsCgknUmVnRXhwJyAgICAgICAgICAgICA6IDEsCgknU2V0JyAgICAgICAgICAgICAgICA6IDEsCgknU3RyaW5nJyAgICAgICAgICAgICA6IDEsCgknU3ludGF4RXJyb3InICAgICAgICA6IDEsCgknVHlwZUVycm9yJyAgICAgICAgICA6IDEsCgknVVJJRXJyb3InICAgICAgICAgICA6IDEsCgknV2Vha01hcCcgICAgICAgICAgICA6IDEsCgknV2Vha1NldCcgICAgICAgICAgICA6IDEsCgknYXRvYicgICAgICAgICAgICAgICA6IDEsCgknYnRvYScgICAgICAgICAgICAgICA6IDEsCgknY29uc29sZScgICAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJJyAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZW5jb2RlVVJJJyAgICAgICAgICA6IDEsCgknZW5jb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZXZhbCcgICAgICAgICAgICAgICA6IDEsCgknZXhlYycgICAgICAgICAgICAgICA6IDEsIC8qIG91ciBvd24gZnVuY3Rpb24gKi8KCSdnbG9iYWwnICAgICAgICAgICAgIDogMSwKCSdpc0Zpbml0ZScgICAgICAgICAgIDogMSwKCSdpc05hTicgICAgICAgICAgICAgIDogMSwKCSdvbm1lc3NhZ2UnICAgICAgICAgIDogMSwKCSdwYXJzZUZsb2F0JyAgICAgICAgIDogMSwKCSdwYXJzZUludCcgICAgICAgICAgIDogMSwKCSdwb3N0TWVzc2FnZScgICAgICAgIDogMSwKCSdzZWxmJyAgICAgICAgICAgICAgIDogMSwKCSd1bmRlZmluZWQnICAgICAgICAgIDogMSwKCSd3aGl0ZXknICAgICAgICAgICAgIDogMSwKCgkvKiB0eXBlZCBhcnJheXMgYW5kIHNoaXQgKi8KCSdBcnJheUJ1ZmZlcicgICAgICAgOiAxLAoJJ0Jsb2InICAgICAgICAgICAgICA6IDEsCgknRmxvYXQzMkFycmF5JyAgICAgIDogMSwKCSdGbG9hdDY0QXJyYXknICAgICAgOiAxLAoJJ0ludDhBcnJheScgICAgICAgICA6IDEsCgknSW50MTZBcnJheScgICAgICAgIDogMSwKCSdJbnQzMkFycmF5JyAgICAgICAgOiAxLAoJJ1VpbnQ4QXJyYXknICAgICAgICA6IDEsCgknVWludDE2QXJyYXknICAgICAgIDogMSwKCSdVaW50MzJBcnJheScgICAgICAgOiAxLAoJJ1VpbnQ4Q2xhbXBlZEFycmF5JyA6IDEsCgoJLyoKCSB0aGVzZSBwcm9wZXJ0aWVzIGFsbG93IEZGIHRvIGZ1bmN0aW9uLiB3aXRob3V0IHRoZW0sIGEgZnVja2Zlc3Qgb2YKCSBpbmV4cGxpY2FibGUgZXJyb3JzIGVudXNlcy4gdG9vayBtZSBhYm91dCA0IGhvdXJzIHRvIHRyYWNrIHRoZXNlIGZ1Y2tlcnMKCSBkb3duLgoJIGZ1Y2sgaGVsbCBpdCBpc24ndCBmdXR1cmUtcHJvb2YsIGJ1dCB0aGUgZXJyb3JzIHRocm93biBhcmUgdW5jYXRjaGFibGUKCSBhbmQgdW50cmFjYWJsZS4gc28gYSBoZWFkcy11cC4gZW5qb3ksIGZ1dHVyZS1tZSEKCSAqLwoJJ0RPTUV4Y2VwdGlvbicgICAgICA6IDEsCgknRXZlbnQnICAgICAgICAgICAgIDogMSwKCSdNZXNzYWdlRXZlbnQnICAgICAgOiAxLAoJJ1dvcmtlck1lc3NhZ2VFdmVudCc6IDEKfTsKClsgZ2xvYmFsLCBPYmplY3QuZ2V0UHJvdG90eXBlT2YoZ2xvYmFsKSBdLmZvckVhY2goZnVuY3Rpb24gKCBvYmogKSB7CglPYmplY3QuZ2V0T3duUHJvcGVydHlOYW1lcyggb2JqICkuZm9yRWFjaChmdW5jdGlvbiggcHJvcCApIHsKCQlpZiggd2hpdGV5Lmhhc093blByb3BlcnR5KHByb3ApICkgewoJCQlyZXR1cm47CgkJfQoKCQl0cnkgewoJCQlPYmplY3QuZGVmaW5lUHJvcGVydHkoIG9iaiwgcHJvcCwgewoJCQkJZ2V0IDogZnVuY3Rpb24gKCkgewoJCQkJCS8qIFRFRSBIRUUgKi8KCQkJCQl0aHJvdyBuZXcgUmVmZXJlbmNlRXJyb3IoIHByb3AgKyAnIGlzIG5vdCBkZWZpbmVkJyApOwoJCQkJfSwKCQkJCWNvbmZpZ3VyYWJsZSA6IGZhbHNlLAoJCQkJZW51bWVyYWJsZSA6IGZhbHNlCgkJCX0pOwoJCX0KCQljYXRjaCAoIGUgKSB7CgkJCWRlbGV0ZSBvYmpbIHByb3AgXTsKCgkJCWlmICggb2JqWyBwcm9wIF0gIT09IHVuZGVmaW5lZCApIHsKCQkJCW9ialsgcHJvcCBdID0gbnVsbDsKCQkJfQoJCX0KCX0pOwp9KTsKCk9iamVjdC5kZWZpbmVQcm9wZXJ0eSggQXJyYXkucHJvdG90eXBlLCAnam9pbicsIHsKCXdyaXRhYmxlOiBmYWxzZSwKCWNvbmZpZ3VyYWJsZTogZmFsc2UsCgllbnVtcmFibGU6IGZhbHNlLAoKCXZhbHVlOiAoZnVuY3Rpb24gKCBvbGQgKSB7CgkJcmV0dXJuIGZ1bmN0aW9uICggYXJnICkgewoJCQlpZiAoIHRoaXMubGVuZ3RoID4gNTAwIHx8IChhcmcgJiYgYXJnLmxlbmd0aCA+IDUwMCkgKSB7CgkJCQl0aHJvdyAnRXhjZXB0aW9uOiB0b28gbWFueSBpdGVtcyc7CgkJCX0KCgkJCXJldHVybiBvbGQuYXBwbHkoIHRoaXMsIGFyZ3VtZW50cyApOwoJCX07Cgl9KCBBcnJheS5wcm90b3R5cGUuam9pbiApKQp9KTsKCgovKiB3ZSBkZWZpbmUgaXQgb3V0c2lkZSBzbyBpdCdsbCBub3QgYmUgaW4gc3RyaWN0IG1vZGUgKi8KdmFyIGV4ZWMgPSBmdW5jdGlvbiAoIGNvZGUgKSB7CglyZXR1cm4gZXZhbCggJ3VuZGVmaW5lZDtcbicgKyBjb2RlICk7Cn07CnZhciBjb25zb2xlID0gewoJX2l0ZW1zIDogW10sCglsb2cgOiBmdW5jdGlvbigpIHsKCQljb25zb2xlLl9pdGVtcy5wdXNoLmFwcGx5KCBjb25zb2xlLl9pdGVtcywgYXJndW1lbnRzICk7Cgl9Cn07CmNvbnNvbGUuZXJyb3IgPSBjb25zb2xlLmluZm8gPSBjb25zb2xlLmRlYnVnID0gY29uc29sZS5sb2c7CgooZnVuY3Rpb24oKSB7CgkidXNlIHN0cmljdCI7CgoJZ2xvYmFsLm9ubWVzc2FnZSA9IGZ1bmN0aW9uICggZXZlbnQgKSB7CgkJZ2xvYmFsLnBvc3RNZXNzYWdlKHsKCQkJZXZlbnQgOiAnc3RhcnQnCgkJfSk7CgoJCXZhciBqc29uU3RyaW5naWZ5ID0gSlNPTi5zdHJpbmdpZnksIC8qYmFja3VwKi8KCQkJcmVzdWx0LAoKCQkJb3JpZ2luYWxTZXRUaW1lb3V0ID0gc2V0VGltZW91dCwKCQkJdGltZW91dENvdW50ZXIgPSAwOwoKCQl2YXIgc2VuZFJlc3VsdCA9IGZ1bmN0aW9uICggcmVzdWx0ICkgewoJCQlnbG9iYWwucG9zdE1lc3NhZ2UoewoJCQkJYW5zd2VyIDoganNvblN0cmluZ2lmeSggcmVzdWx0LCByZXZpdmVyICksCgkJCQlsb2cgICAgOiBqc29uU3RyaW5naWZ5KCBjb25zb2xlLl9pdGVtcywgcmV2aXZlciApLnNsaWNlKCAxLCAtMSApCgkJCX0pOwoJCX07CgkJdmFyIGRvbmUgPSBmdW5jdGlvbiAoIHJlc3VsdCApIHsKCQkJaWYgKCB0aW1lb3V0Q291bnRlciA8IDEgKSB7CgkJCQlzZW5kUmVzdWx0KCByZXN1bHQgKTsKCQkJfQoJCX07CgoJCXZhciByZXZpdmVyID0gZnVuY3Rpb24gKCBrZXksIHZhbHVlICkgewoJCQl2YXIgb3V0cHV0OwoKCQkJaWYgKCBzaG91bGRTdHJpbmcodmFsdWUpICkgewoJCQkJb3V0cHV0ID0gJycgKyB2YWx1ZTsKCQkJfQoJCQllbHNlIHsKCQkJCW91dHB1dCA9IHZhbHVlOwoJCQl9CgoJCQlyZXR1cm4gb3V0cHV0OwoJCX07CgoJCS8qSlNPTiBkb2VzIG5vdCBsaWtlIGFueSBvZiB0aGUgZm9sbG93aW5nKi8KCQl2YXIgc3RydW5nID0gewoJCQlGdW5jdGlvbiAgOiB0cnVlLCBFcnJvcgkgOiB0cnVlLAoJCQlVbmRlZmluZWQgOiB0cnVlLCBSZWdFeHAgOiB0cnVlCgkJfTsKCQl2YXIgc2hvdWxkU3RyaW5nID0gZnVuY3Rpb24gKCB2YWx1ZSApIHsKCQkJdmFyIHR5cGUgPSAoIHt9ICkudG9TdHJpbmcuY2FsbCggdmFsdWUgKS5zbGljZSggOCwgLTEgKTsKCgkJCWlmICggdHlwZSBpbiBzdHJ1bmcgKSB7CgkJCQlyZXR1cm4gdHJ1ZTsKCQkJfQoJCQkvKm5laXRoZXIgZG9lcyBpdCBmZWVsIGNvbXBhc3Npb25hdGUgYWJvdXQgTmFOIG9yIEluZmluaXR5Ki8KCQkJcmV0dXJuIHZhbHVlICE9PSB2YWx1ZSB8fCB2YWx1ZSA9PT0gSW5maW5pdHk7CgkJfTsKCgkJc2VsZi5zZXRUaW1lb3V0ID0gZnVuY3Rpb24gKGNiKSB7CgkJCS8qYmVjYXVzZSBvZiBTb21lS2l0dGVucyovCgkJCWlmICghY2IpIHsKCQkJCXJldHVybjsKCQkJfQoKCQkJdmFyIGFyZ3MgPSBbXS5zbGljZS5jYWxsKCBhcmd1bWVudHMgKTsKCQkJYXJnc1sgMCBdID0gd3JhcHBlcjsKCQkJdGltZW91dENvdW50ZXIgKz0gMTsKCgkJCW9yaWdpbmFsU2V0VGltZW91dC5hcHBseSggc2VsZiwgYXJncyApOwoKCQkJZnVuY3Rpb24gd3JhcHBlciAoKSB7CgkJCQl0aW1lb3V0Q291bnRlciAtPSAxOwoJCQkJY2IuYXBwbHkoIHNlbGYsIGFyZ3VtZW50cyApOwoKCQkJCWRvbmUoKTsKCQkJfQoJCX07CgoJCXRyeSB7CgkJCXJlc3VsdCA9IGV4ZWMoIGV2ZW50LmRhdGEgKTsKCQl9CgkJY2F0Y2ggKCBlICkgewoJCQlyZXN1bHQgPSBlLnRvU3RyaW5nKCk7CgkJfQoKCQkvKmhhbmRsZSBwcm9taXNlcyBhcHByb3ByaWF0ZWx5Ki8KCQlpZiAoIHJlc3VsdCAmJiByZXN1bHQudGhlbiAmJiByZXN1bHQuY2F0Y2ggKSB7CgkJCXJlc3VsdC50aGVuKCBkb25lICkuY2F0Y2goIGRvbmUgKTsKCQl9CgkJZWxzZSB7CgkJCWRvbmUoIHJlc3VsdCApOwoJCX0KCX07Cn0pKCk7Cg==' );
+
+var blob = new Blob( [workerCode], { type : 'application/javascript' } ),
+	codeUrl = window.URL.createObjectURL( blob );
 
 setTimeout(function () {
-    if (bot.devMode) {
-        return;
-    }
-    IO.injectScript( 'https://raw.github.com/jashkenas/coffee-script/master/extras/coffee-script.js' );
+	if (bot.devMode) {
+		return;
+	}
+	IO.injectScript( 'https://raw.github.com/jashkenas/coffee-script/master/extras/coffee-script.js' );
 }, 1000);
 
 return function ( code, cb ) {
-	var worker = new Worker( code_url ),
+	var worker = new Worker( codeUrl ),
 		timeout;
 
 	if ( code[0] === 'c' ) {
@@ -1276,8 +1306,8 @@ return function ( code, cb ) {
 	};
 
 	worker.onerror = function ( error ) {
-        bot.log( error, 'eval worker.onerror' );
-		finish( error.toString() );
+		bot.log( error, 'eval worker.onerror' );
+		finish( error.message );
 	};
 
 	//and it all boils down to this...
@@ -1327,11 +1357,12 @@ function dressUpAnswer ( answerObj ) {
 
 	return result;
 }
+
 function snipAndCodify ( str ) {
 	var ret;
 
 	if ( str.length > 400 ) {
-		ret = '`' +  str.slice(0, 400) + '` (snip)';
+		ret = '`' +	 str.slice(0, 400) + '` (snip)';
 	}
 	else {
 		ret = '`' + str +'`';
@@ -2013,7 +2044,8 @@ commands.tell = function ( args ) {
 	cmdName = cmdName.toLowerCase();
 	cmd = bot.getCommand( cmdName );
 	if ( cmd.error ) {
-		return cmd.error;
+		return cmd.error +
+			' (note that /tell works on commands, it\'s not an echo.)';
 	}
 
 	if ( cmd.unTellable ) {
@@ -2108,7 +2140,7 @@ var unTellable = {
 Object.iterate( commands, function ( cmdName, fun ) {
 	var cmd = {
 		name : cmdName,
-		fun	 : fun,
+		fun  : fun,
 		permissions : {
 			del : 'NONE',
 			use : privilegedCommands[ cmdName ] ? 'OWNER' : 'ALL'
@@ -2340,12 +2372,14 @@ var linkTemplate = '[{text}]({url})';
 
 bot.adapter = {
 	//the following two only used in the adapter; you can change & drop at will
-	roomid : null,
-	fkey   : null,
+	roomid  : null,
+	fkey    : null,
 	//used in commands calling the SO API
-	site   : null,
+	site    : null,
 	//our user id
 	user_id : null,
+
+	maxLineLength : 500,
 
 	//not a necessary function, used in here to set some variables
 	init : function () {
@@ -2355,9 +2389,9 @@ bot.adapter = {
 			return;
 		}
 
-		this.fkey = fkey.value;
-		this.roomid = Number( /\d+/.exec(location)[0] );
-		this.site = this.getCurrentSite();
+		this.fkey    = fkey.value;
+		this.roomid  = Number( /\d+/.exec(location)[0] );
+		this.site    = this.getCurrentSite();
 		this.user_id = CHAT.user.current().id;
 
 		this.in.init();
@@ -2849,7 +2883,46 @@ function requestInfo ( room, ids, cb ) {
 		cb( user );
 	}
 }
+
 bot.users.request = requestInfo;
+
+bot.users.findUserId = function ( username ) {
+	var ids = Object.keys( bot.users );
+	username = normaliseName( username );
+
+	return ids.first( nameMatches ) || -1;
+
+	function nameMatches ( id ) {
+		return normaliseName( bot.users[id].name ) === username;
+	}
+
+	function normaliseName ( name ) {
+		return name.toLowerCase().replace( /\s/g, '' );
+	}
+}.memoize();
+
+bot.users.findUsername = (function () {
+var cache = {};
+
+return function ( id, cb ) {
+	if ( cache[id] ) {
+		finish( cache[id] );
+	}
+	else if ( bot.users[id] ) {
+		finish( bot.users[id].name );
+	}
+	else {
+		bot.users.request( bot.adapter.roomid, id, reqFinish );
+	}
+
+	function reqFinish ( user ) {
+		finish( user.name );
+	}
+	function finish ( name ) {
+		cb( cache[id] = name );
+	}
+};
+})();
 
 function loadUsers () {
 	if ( window.users ) {
@@ -2934,7 +3007,7 @@ bot.personality = {
 	},
 
 	isThatTimeOfTheMonth : function () {
-		var day = (new Date).getDate();
+		var day = (new Date()).getDate();
 		//based on a true story
 		return day < 2 || day > 27;
 	}
@@ -2946,35 +3019,6 @@ bot.listen(
 	/(I('m| am))?\s*sorry/i,
 	bot.personality.apologize, bot.personality );
 bot.listen( /^bitch/i, bot.personality.bitch, bot.personality );
-
-;
-
-;
-(function () {
-var hammers = {
-	STOP  : 'HAMMERTIME!',
-	STAHP : 'HAMMAHTIME!',
-	HALT  : 'HAMMERZEIT!',
-	STOY  : 'ZABIVAT\' VREMYA!',
-	SISTITE: 'MALLEUS TEMPUS!'
-};
-
-// /(STOP|STAHP|...)[\.!\?]?$/
-var re = new RegExp(
-	'(' +
-		Object.keys(hammers).map(RegExp.escape).join('|') +
-	')[\\.!?]?$' );
-
-IO.register( 'input', function STOP ( msgObj ) {
-	var sentence = msgObj.content.toUpperCase(),
-		res = re.exec( sentence );
-
-	if ( res ) {
-		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
-	}
-});
-
-})();
 
 ;
 //solves #86, mostly written by @Shmiddty
@@ -3132,8 +3176,6 @@ var commandHandler = function ( msg ) {
 	}
 
 	bot.memory.save( 'afk' );
-	//msg.directreply( reply ); // disable direct replying on returning from AFK since it's annoying.
-	                            // keep the functionality in the background in the meantime.
 };
 
 bot.addCommand({
@@ -3235,96 +3277,135 @@ bot.addCommand({
 
 ;
 (function () {
+"use strict";
 
-function ban ( args ) {
-	var ret = [];
-	if ( args.content ) {
-		args.parse().forEach( ban );
-	}
-	else {
-		ret = Object.keys( bot.banlist ).filter( Number ).map( format );
-	}
+//status codes for (un)ban.
+var codes = {
+	added : 0,
+	0 : '{0} added to mindjail.',
 
-	return ret.join( ' ' ) || 'Nothing to show/do.';
+	notFound : 1,
+	1 : 'I couldn\'t find {0}.',
 
-	function ban ( usrid ) {
-		var id = Number( usrid ),
-		    msg;
-		if ( isNaN(id) ) {
-			id = args.findUserid( usrid.replace(/^@/, '') );
+	owner : 2,
+	2 : 'I can\'t mindjail {0}, they\'re an owner.',
+
+	alreadyIn : 3,
+	3 : '{0} is already in mindjail.',
+
+	notIn : 4,
+	4 : '{0} isn\'t in mindjail.',
+
+	freed : 5,
+	5 : '{0} freed from mindjail!'
+};
+
+var ban = {
+	name : 'ban',
+
+	fun : function ( msg ) {
+		return this.format( this.logic(msg.toString()) );
+	},
+
+	//takes a username or userid or the empty string. if the last is given,
+	// an array of banned user ids. under regular conditions, an object with
+	// the message code (see codes above) and the argument is given.
+	logic : function ( arg ) {
+		if ( !arg ) {
+			return Object.keys( bot.banlist ).filter( Number );
 		}
+
+		var id = Number( arg ),
+			code;
+
+		if ( isNaN(id) ) {
+			id = bot.users.findUserId( arg.replace(/^@/, '') );
+		}
+
+		bot.log( arg, id, '/ban argument' );
 
 		if ( id < 0 ) {
-			msg = 'Cannot find user {0}.';
+			code = codes.notFound;
 		}
 		else if ( bot.isOwner(id) ) {
-			msg = 'Cannot mindjail owner {0}.';
+			code = codes.owner;
 		}
 		else if ( bot.banlist.contains(id) ) {
-			msg = 'User {0} already in mindjail.';
+			code = codes.alreadyIn;
 		}
 		else {
 			bot.banlist.add( id );
-			msg = 'User {0} added to mindjail.';
+			code = codes.added;
 		}
 
-		ret.push( msg.supplant(usrid) );
-	}
+		return { code : code, usrid : arg };
+	},
 
-	function format ( id ) {
-		var user = bot.users[ id ],
-		name = user ? user.name : '?';
+	//res is either an array of userids, or a success/error code with the userid
+	format : function ( res ) {
+		if ( Array.isArray(res) ) {
+			return res.map( this.formatUser ).join( ', ' )
+				|| 'Nothing to show.';
+		}
 
-		return '{0} ({1})'.supplant( id, name );
-	}
-}
+		return codes[ res.code ].supplant( res.usrid );
+	},
 
-function unban ( args ) {
-	var ret = [];
-	args.parse().forEach( unban );
+	formatUser : function ( usrid ) {
+		var user = bot.users[ usrid ],
+			name = user ? user.name : '?';
 
-	return ret.join( ' ' );
+		return '{0} ({1})'.supplant( usrid, name );
+	},
 
-	function unban ( usrid ) {
-		var id = Number( usrid ),
-		    msg;
+	permissions : { del : 'NONE', use : 'OWNER' },
+	description : 'Bans a user from using me. Lacking arguments, prints the ' +
+		'ban list. `/ban [usr_id|usr_name]`'
+};
+
+var unban = {
+	name : 'unban',
+
+	fun : function ( msg ) {
+		return this.format( this.logic(msg.toString()) );
+	},
+
+	logic : function ( arg ) {
+		var id = Number( arg ),
+			code;
 
 		if ( isNaN(id) ) {
-			id = args.findUserid( usrid.replace(/^@/, '') );
+			id = bot.users.findUserId( arg.replace(/^@/, '') );
 		}
 
+		bot.log( arg, id, '/unban argument' );
+
 		if ( id < 0 ) {
-			msg = 'Cannot find user {0}.';
+			code = codes.notFound;
 		}
 		else if ( !bot.banlist.contains(id) ) {
-			msg = 'User {0} isn\'t in mindjail.';
+			code = codes.notIn;
 		}
 		else {
 			bot.banlist.remove( id );
-			msg = 'User {0} freed from mindjail!';
+			code = codes.freed;
 		}
 
-		ret.push( msg.supplant(usrid) );
-	}
-}
-bot.addCommand(bot.CommunityCommand({
-	name : 'ban',
-	fun : ban,
-	permissions : { del : 'NONE', use : 'OWNER' },
-	description : 'Bans user(s) from using me. Lacking arguments, prints the ' +
-		'banlist. `/ban [usr_id|usr_name, [...]]`'
-}));
+		return { code : code, usrid : arg };
+	},
 
-bot.addCommand({
-	name : 'unban',
-	fun : unban,
+	format : function ( res ) {
+		return codes[ res.code ].supplant( res.usrid );
+	},
+
 	permissions : { del : 'NONE', use : 'OWNER' },
-	description : 'Removes a user from my mindjail. `/unban usr_id|usr_name`'
-});
+	description : 'Frees a user from my mindjail. `/unban usr_id|usr_name`'
+};
+
+bot.addCommand( bot.CommunityCommand(ban) );
+bot.addCommand( unban );
 
 })();
-
-;
 
 ;
 (function () {
@@ -4024,9 +4105,10 @@ var define = {
 		bot.log( args, '/define input' );
 		this.fetchData( args.toString(), finish );
 
-		function finish ( definition, pageid ) {
-			bot.log( definition, pageid, '/define result' );
-			var res;
+		function finish ( definition ) {
+			bot.log( definition, '/define result' );
+			var pageid = definition.pageid,
+				res;
 
 			if ( pageid < 0 ) {
 				res = notFoundMsgs.random();
@@ -4053,7 +4135,10 @@ var define = {
 			html = page.extract;
 
 		if ( pageid === '-1' ) {
-			cb( {}, -1 );
+			cb({
+				pageid : -1
+			});
+
 			return;
 		}
 
@@ -4069,8 +4154,9 @@ var define = {
 		}
 		else {
 			cb({
-				name : page.title,
-				text : definition.text
+				name   : page.title,
+				text   : definition.text,
+				pageid : pageid
 			});
 		}
 	},
@@ -4333,6 +4419,69 @@ bot.addCommand({
 }());
 
 ;
+(function() {
+  "use strict";
+  
+  function utf8_to_b64( str ) {
+  return window.btoa(unescape(encodeURIComponent( str )));
+}
+
+function explode(text, max) {
+    // clean the text
+    //text = text.replace(/  +/g, " ").replace(/^ /, "").replace(/ $/, "");
+    // return empty string if text is undefined
+    if (typeof text === "undefined") return "";
+    // if max hasn't been defined, max = 50
+    if (typeof max === "undefined") max = 50;
+    // return the initial text if already less than max
+    if (text.length <= max) return text;
+    // get the first part of the text
+    var exploded = text.substring(0, max);
+    // get the next part of the text
+    text = text.substring(max);
+    // if next part doesn't start with a space
+    if (text.charAt(0) !== " ") {
+        // while the first part doesn't end with a space && the first part still has at least one char
+        while (exploded.charAt(exploded.length - 1) !== " " && exploded.length > 0) {
+            // add the last char of the first part at the beginning of the next part
+            text = exploded.charAt(exploded.length - 1) + text;
+            // remove the last char of the first part
+            exploded = exploded.substring(0, exploded.length - 1);
+        }
+        // if the first part has been emptied (case of a text bigger than max without any space)
+        if (exploded.length == 0) {
+            // re-explode the text without caring about spaces
+            exploded = text.substring(0, max);
+            text = text.substring(max);
+        // if the first part isn't empty
+        } else {
+            // remove the last char of the first part, because it's a space
+            exploded = exploded.substring(0, exploded.length - 1);
+        }
+    // if the next part starts with a space
+    } else {
+        // remove the first char of the next part
+        text = text.substring(1);
+    }
+    // return the first part and the exploded next part, concatenated by \n
+    return exploded + "\n" + explode(text);
+}
+
+  bot.addCommand({
+    name : 'export',
+    fun : function(args) {
+        var mem = utf8_to_b64(JSON.stringify(bot.memory.data)),
+        user_name = args.get( 'user_name' ),
+        maxSize = 498 - user_name.length;
+
+        return explode(mem, maxSize);
+      }, 
+    permissions : { del : 'NONE', use : 'OWNER' },
+    description : 'Blurts out a message with the persistent memory storage for export `/export`'
+  });
+})();
+
+;
 (function () {
 var findCommand = function ( args ) {
     var input = args.toString().toLowerCase(),
@@ -4409,32 +4558,73 @@ bot.listen( /(which |what |give me a )?firefly( episode)?/i, function ( msg ) {
 });
 
 ;
-// issue #51 https://github.com/Zirak/SO-ChatBot/issues/51
+(function () {
+"use strict";
+//Forgets all the users it's seen.
+
+bot.addCommand({
+	name : 'forgetSeen',
+	fun : function ( args ) {
+		bot.memory.get('users').length = 0;
+	},
+	permission : {
+		del : 'NONE',
+		use : 'OWNER'
+	},
+	description : 'Gives the bot a serious case of amnesia. Who are you again? (Only wipes out the list of known users)'
+});
+}());
+
+;
+// issue #51 introduced this feature; #97 added user search.
 
 //valid args are one of the following:
 // /github reponame
 //which searches for a repository `reponame`
+// /github username/
+//which searches for a usernam `username`
 // /github username/reponame
 //which searches for a repository `reponame` under `username`
 var github = {
-
 	command : function ( args, cb ) {
-		var parts = /^([\S]+?)(?:\/([\S]+))?$/.exec( args ),
-			format = this.formatCb( finish );
+		var parts = /^([\S]+?)(?:(\/)([\S]+)?)?$/.exec( args ) || [],
+			self = this;
 
-		bot.log( parts, '/github input' );
+		parts = parts.filter( Boolean ).map( encodeURIComponent );
+		bot.log( args, parts, '/github input' );
 
-		if ( !parts ) {
+		if ( !parts.length ) {
 			finish( 'I can\'t quite understand that format. ' +
 					'See `/help github` for, well...help.' );
 		}
-		else if ( !parts[2] ) {
+		// username/reponame
+		else if ( parts[3] ) {
+			this.searchUserRepo( parts[1], parts[3], format );
+		}
+		// username/
+		else if ( parts[2] ) {
+			this.searchUser( parts[1], format );
+		}
+		// reponame
+		else {
 			this.searchRepo( parts[1], format );
 		}
-		else {
-			this.searchUserRepo( parts[1], parts[2], format );
-		}
 
+		function format ( obj ) {
+			var res;
+
+			if ( obj.error ) {
+				res = obj.error;
+			}
+			else if ( obj.type === 'user' ) {
+				res = self.userFormat( obj );
+			}
+			else {
+				res = self.repoFormat( obj );
+			}
+
+			finish( res );
+		}
 		function finish ( res ) {
 			bot.log( res, '/github finish' );
 
@@ -4447,37 +4637,22 @@ var github = {
 		}
 	},
 
-	formatCb : function ( cb ) {
-		var repoFullName = '{owner}/{name}';
+	repoFormat : function ( repo ) {
+		var name = repo.full_name, url = repo.html_url;
 
-		return function format ( repo ) {
-			if ( repo.error ) {
-				cb( repo.error );
-				return;
-			}
+		return bot.adapter.link( name, url ) + ' ' + repo.description;
+	},
 
-			//there are inconsistensies between the data returned from one
-			// API call and another. there're two important ones here:
-			//1. we have a full repo name (user/repoName) in one, but not
-			//     the other (and different property names can be used to
-			//     construct it)
-			//2. the link to the repo is called html_url in one, and
-			//      url in the other (in the former, url means something else)
-			var fullName = repo.full_name ?
-				repo.full_name : repoFullName.supplant( repo ),
-				url = repo.html_url || repo.url;
-
-			cb(
-				bot.adapter.link(fullName, url ) + ' ' + repo.description
-			);
-		};
+	userFormat : function ( user ) {
+		return bot.adapter.link( user.login, user.html_url );
 	},
 
 	searchRepo : function ( repoName, cb ) {
-		var keyword = encodeURIComponent( repoName );
-
 		IO.jsonp({
-			url : 'https://api.github.com/legacy/repos/search/' + keyword,
+			url : 'https://api.github.com/search/repositories',
+			data : {
+				q : repoName
+			},
 			jsonpName : 'callback',
 
 			fun : finish
@@ -4485,44 +4660,41 @@ var github = {
 
 		function finish ( resp ) {
 			bot.log( resp, '/github searchRepo response' );
-			var repo = resp.data.repositories[ 0 ];
+			var repo = ( resp.data.items || [] )[ 0 ];
 
-			if ( !repo ) {
-				repo = {
-					error : 'No results found'
-				};
-			}
+			repo = repo || { error : 'No results found' };
+			repo.type = 'repo';
 
 			cb( repo );
 		}
 	},
 
-	searchUserRepo : function ( userName, repoName, cb ) {
-		var keyword = encodeURIComponent( userName );
-		repoName = encodeURIComponent(
-			repoName.replace( / /g, '-' ).toLowerCase() );
-
-		var url = 'https://api.github.com/repos/{0}/{1}';
-		IO.jsonp({
-			url : url.supplant( keyword, repoName ),
-			jsonpName : 'callback',
-
-			fun : finish
-		});
+	searchUser : function ( username, cb ) {
+		this.sendAPIQuery( '/search/users', { q : username }, finish );
 
 		function finish ( resp ) {
-			bot.log( resp, '/github searchUserRepo response' );
+			bot.log( resp, '/github searchUser response' );
+			var user = ( resp.data.items || [] )[ 0 ];
 
-			var data = resp.data;
+			user = user || { error : 'No results found.' };
+			user.type = 'user';
 
-			if ( data.message === 'Not Found' ) {
-				data = {
-					error : 'User/Repo not found'
-				};
-			}
-
-			cb( data );
+			cb( user );
 		}
+	},
+
+	searchUserRepo : function ( userName, repoName, cb ) {
+		this.searchRepo( repoName + ' user:' + userName, cb );
+	},
+
+	sendAPIQuery : function ( path, data, cb ) {
+		IO.jsonp({
+			url : 'https://api.github.com' + path,
+			data : data,
+			jsonpName : 'callback',
+
+			fun : cb
+		});
 	}
 };
 
@@ -4533,86 +4705,94 @@ bot.addCommand({
 	permissions : {
 		del : 'NONE'
 	},
-	description : 'Search github for a repo.' +
-		'`/github repoName` or `/github username/reponame`',
+	description : 'Search github for a user or repo.' +
+		'`/github repoName` or `/github username/reponame` or ' +
+		'`/github username/`',
 	async : true
 });
 
 ;
-
-;
 (function () {
+
 var nulls = [
 	'The Google contains no such knowledge',
 	'There are no search results. Run.',
-	'My Google Fu has failed.'];
+	'My Google Fu has failed.' ];
 
-function google ( args, cb ) {
-	IO.jsonp.google( args.toString() + ' -site:w3schools.com', finishCall );
+var command = {
+	name : 'google',
 
-	function finishCall ( resp ) {
-		bot.log( resp, '/google response' );
-		if ( resp.responseStatus !== 200 ) {
-			finish( 'My Google-Fu is on vacation; status ' +
-					resp.responseStatus );
-			return;
+	fun : function ( msg, cb ) {
+		var self = this;
+
+		this.logic( msg, finishedLogic );
+
+		function finishedLogic ( obj ) {
+			var res = self.format( obj );
+
+			if ( cb && cb.call ) {
+				cb( res );
+			}
+			else {
+				msg.directreply( res );
+			}
 		}
+	},
 
-		//TODO: change hard limit to argument
-		var results = resp.responseData.results.slice( 0, 3 );
-		bot.log( results, '/google results' );
+	logic : function ( query, cb ) {
+		IO.jsonp.google( String(query) + ' -site:w3schools.com', finishCall );
 
+		function finishCall ( resp ) {
+			bot.log( resp, '/google response' );
+			if ( resp.responseStatus !== 200 ) {
+				finish( 'My Google-Fu is on vacation; status ' +
+						resp.responseStatus );
+				return;
+			}
+
+			//TODO: change hard limit to argument
+			var results = resp.responseData.results.slice( 0, 3 );
+			results.query = query;
+			bot.log( results, '/google results' );
+
+			cb( results );
+		}
+	},
+
+	format : function format ( results ) {
 		if ( !results.length ) {
-			finish( nulls.random() );
-			return;
+			return nulls.random();
 		}
-		finish( format(args.content, results) );
-	}
 
-	function format ( query, results ) {
-		var res = formatLink( query ) + ' ' +
+		var res = formatLink( results.query ) + ' ' +
 			results.map( formatResult ).join( ' ; ' );
 
-		if ( res.length > 200 ) {
-			res = results.map(function (r) {
-				return r.unescapedUrl;
-			}).join( ' ; ' );
+		if ( res.length > bot.adapter.maxLineLength ) {
+			res = results.pluck( 'unescapedUrl' ).join( ' ; ' );
 		}
 
 		return res;
-	}
 
-	function formatResult ( result ) {
-		var title = IO.decodehtmlEntities( result.titleNoFormatting );
-		return args.link( title, result.unescapedUrl );
-	}
-	function formatLink ( query ) {
-		return args.link(
-			'*',
-			'http://google.com/search?q=' +
-				encodeURIComponent( query ) );
-	}
-
-	function finish ( res ) {
-		bot.log( res, '/google final' );
-		if ( cb && cb.call ) {
-			cb( res );
+		function formatResult ( result ) {
+			var title = IO.decodehtmlEntities( result.titleNoFormatting );
+			return bot.adapter.link( title, result.unescapedUrl );
 		}
-		else {
-			args.reply( res );
-		}
-	}
-}
+		function formatLink ( query ) {
+			var link =
+				'http://google.com/search?q=' + encodeURIComponent( query );
 
-bot.addCommand({
-	name : 'google',
-	fun  : google,
+			return bot.adapter.link( '*', link );
+		}
+	},
+
 	permissions : {
 		del : 'NONE'
 	},
 	description : 'Search Google. `/google query`',
 	async : true
-});
+};
+
+bot.addCommand( command );
 }());
 
 ;
@@ -5067,6 +5247,32 @@ bot.addCommand({
 })();
 
 ;
+(function() {
+  "use strict";
+  
+  function b64_to_utf8( str ) {
+    return decodeURIComponent(escape(window.atob( str )));
+  }
+
+  bot.addCommand({
+    name : 'import',
+    fun : function (args) { 
+      var request = new XMLHttpRequest();
+      request.open('GET', args, false);
+      request.send(null);
+      if (request.status === 200) {
+        bot.memory.data = JSON.parse(b64_to_utf8(request.responseText.replace(/\s/g,"")));
+        bot.memory.save();
+      }
+      
+      return "Imported and persisted successfully";
+    },
+    permissions : { del : 'NONE', use : 'OWNER' },
+    description : 'Imports the persistent memory described in args `/export <exported-content>`'
+  });
+})();
+
+;
 (function () {
 var baseURL = 'http://api.jquery.com/';
 
@@ -5379,8 +5585,6 @@ bot.addCommand(bot.CommunityCommand({
 }));
 
 ;
-
-;
 (function () {
 
 function mdn ( args, cb ) {
@@ -5428,6 +5632,8 @@ var urlBase = 'http://cdn.alltheragefaces.com/img/faces/png/',
 
 var memes = {
 	deskflip : 'angry-desk-flip',
+	fuu : 'rage-classic',
+	iseewhatyoudidthere : 'happy-i-see-what-you-did-there-(clean)',
 	no : 'angry-no',
 	notbad : 'obama-not-bad',
 	ohyou : 'happy-oh-stop-it-you',
@@ -5463,15 +5669,18 @@ bot.addCommand({
 	fun : function ( args ) {
 		var name = args.replace( /\.\w+$/, '' );
 
-		if ( !memes[name] ) {
+		if ( !name || name === 'list' ) {
+			return Object.keys( memes ).join( ', ' );
+		}
+		else if ( !memes.hasOwnProperty(name) ) {
 			return 'Sorry, I don\'t know that one.';
 		}
-		//TODO: list possible memes (reply with Object.keys(meme))
 
 		args.directreply( getMemeLink(name) );
 	},
 	permissions : { del : 'NONE' },
-	description : 'Return a simple meme link. `/meme memeName`'
+	description : 'Return a simple meme link. Pass no arguments or `list` to ' +
+		'get a list of known memes. `/meme [memeName]`.'
 });
 
 function getMemeLink ( meme ) {
@@ -5481,13 +5690,11 @@ function getMemeLink ( meme ) {
 })();
 
 ;
-
-;
 (function () {
 "use strict";
 
-var unexisto = 'User {0} was not found (if the user is not in room {1}, pass ' +
-		'a user-id instead of a username).';
+var unexisto = 'User {0} was not found in room {1} (sorry, mustache only ' +
+		'works there).';
 
 function mustachify ( args ) {
 	var props = parseArgs( args ),
@@ -5504,7 +5711,7 @@ function mustachify ( args ) {
 		usrid = args.get( 'user_id' );
 	}
 	else if ( /\D/.test(usrid) ) {
-		usrid = args.findUserid( usrid );
+		usrid = args.findUserId( usrid );
 	}
 
 	bot.log( usrid, '/mustache mapped' );
@@ -5543,7 +5750,7 @@ function mustachify ( args ) {
 			ret = {};
 
 		// /mustache usrid mustache
-		// /mustache user name mustache
+		// /mustache user-name mustache
 		//we've already `.pop`ed the mustache part, so we need to account for it
 		if ( parts.length > 0 && !(/\D/).test(last) ) {
 			ret.usrid = parts.join( ' ' );
@@ -5563,7 +5770,7 @@ function linkCheck ( suspect ) {
 	return suspect.startsWith( 'http' ) || suspect.startsWith( 'www' );
 }
 
-bot.addCommand({
+var cmd = {
 	name : 'mustache',
 	fun : mustachify,
 	privileges : {
@@ -5572,11 +5779,15 @@ bot.addCommand({
 
 	description : 'Mustachifies a user. ' +
 		'`/mustache [link|usrid|username] [mustache=rand(0,5)]`'
-});
+};
+
+bot.addCommand( cmd );
+
+// #176, alias moustache to mustache
+var moustache = Object.merge( cmd, { name : 'moustache' });
+bot.addCommand( moustache );
 
 }());
-
-;
 
 ;
 (function () {
@@ -5766,8 +5977,6 @@ bot.addCommand({
 });
 
 ;
-
-;
 (function () {
 "use strict";
 var ownerRoom = 17;
@@ -5786,6 +5995,8 @@ function checkMuted () {
 			giveVoice( id );
 		}
 	});
+
+    galleryMode.unlockIfNeeded();
 
 	setTimeout( checkMuted, 60 * 1000 );
 }
@@ -5866,6 +6077,73 @@ function takeVoice ( params, cb ) {
 	}
 }
 
+var galleryMode = {
+	lockIfNeeded : function () {
+		if ( this.roomInGallery() ) {
+			bot.log('room already in gallery');
+			return;
+		}
+
+		bot.log('locking room');
+		this.lockRoom();
+	},
+
+	lockRoom : function () {
+		IO.xhr({
+			method : 'POST',
+			url : '/rooms/save',
+			data : fkey({
+				defaultAccess : 'read-only',
+				roomId : ownerRoom // implied state. change to variable?
+			}),
+
+			complete : finish
+		});
+
+		// Not much to do here, tbh...we'd probably get a refresh by the time
+		//this fires. Should probably do error checking.
+		function finish () {}
+	},
+
+	// Room should get locked if it's not already in gallery mode.
+	roomInGallery : function () {
+		var lockButtonClass = 'sprite-sec-gallery';
+		return document.getElementsByClassName( lockButtonClass ).length;
+	},
+
+	unlockIfNeeded : function () {
+		if ( !this.shouldUnlockRoom() ) {
+			bot.log('not unlocking room');
+			return;
+		}
+
+		bot.log( 'unlocking room' );
+		this.unlockRoom();
+	},
+
+	unlockRoom : function () {
+		IO.xhr({
+			method : 'POST',
+			url : '/rooms/save',
+			data : fkey({
+				defaultAccess : 'read-write',
+				roomId : ownerRoom // Again implied state.
+			}),
+
+			complete : finish
+		});
+
+		// Again, not much to do.
+		function finish () {}
+	},
+
+	// Room should be unlocked if there aren't any more muted users and we're
+    //locked.
+	shouldUnlockRoom : function () {
+		return this.roomInGallery() && !( Object.keys(muted).length );
+	}
+};
+
 IO.register( 'userregister', function permissionCb ( user, room ) {
 	bot.log( user, room, 'permissionCb' );
 	var id = user.id;
@@ -5905,7 +6183,7 @@ function userInfoFromParam ( param, args ) {
 	};
 
 	if ( /\D/.test(param) ) {
-		ret.id = args.findUserid( param );
+		ret.id = args.findUserId( param );
 	}
 
 	if ( ret.id < 0 ) {
@@ -5969,7 +6247,7 @@ bot.addCommand({
 			return userInfo.error;
 		}
 		else if ( userInfo.id === bot.adapter.user_id ) {
-			return 'Never try and mute a bot who can own your ass.';
+			return 'Never try and mute a bot which can own your ass.';
 		}
 		else if ( bot.isOwner(userInfo.id) ) {
 			return 'You probably didn\'t want to mute a room owner.';
@@ -5989,6 +6267,7 @@ bot.addCommand({
 		function finish () {
 			args.reply(
 				'Muted user {0} for {1}'.supplant(userInfo.id, duration) );
+			galleryMode.lockIfNeeded();
 		}
 	},
 
@@ -6021,6 +6300,7 @@ bot.addCommand({
 
 		function finish () {
 			args.reply( 'Unmuted user ' + userID.id );
+			galleryMode.unlockIfNeeded();
 		}
 	},
 
@@ -6117,40 +6397,81 @@ bot.listen( re, selectStargateEpisode );
 
 ;
 (function () {
+"use strict";
 
-var template = '[{display_name}]({link}) '           +
-		'has {reputation} reputation, '              +
+//how an API response looks like:
+/*
+  {
+    "badge_counts": {
+      "bronze": 54,
+      "silver": 31,
+      "gold": 3
+    },
+    "answer_count": 181,
+    "question_count": 15,
+    "reputation_change_day": 0,
+    "reputation": 11847,
+    "user_id": 617762,
+    "link": "http://stackoverflow.com/users/617762/zirak",
+    "display_name": "Zirak"
+  }
+*/
+//the query filter we use is:
+/*
+  .wrapper.error_id
+           error_message
+           error_name
+           items
+           quota_max
+           quota_remaining
+  badge_count.* (gold, silver, bronze)
+  user.answer_count
+       badge_counts
+       display_name
+       link
+       question_count
+       reputation
+       reputation_change_day
+       user_id
+*/
+
+
+var template = '{display_name} ({link}) '            +
+		'{indicative} {reputation} reputation, '     +
 		'earned {reputation_change_day} rep today, ' +
 		'asked {question_count} questions, '         +
-		'gave {answer_count} answers. ' +
-        'avg. rep/post: {avg_rep_post}. ' +
-		'Badges: {gold}g {silver}s {bronze}b ';
+		'gave {answer_count} answers, '              +
+		'for a q:a ratio of {ratio}.\n'              +
+		'avg. rep/post: {avg_rep_post}. Badges: '    +
+		'{gold}g {silver}s {bronze}b ';
 
 function stat ( msg, cb ) {
-	var id = msg.toString();
+	var args = msg.parse(),
+		id = args[ 0 ];
 
 	if ( !id ) {
 		id = msg.get( 'user_id' );
 	}
 	else if ( !/^\d+$/.test(id) ) {
-		id = msg.findUserid( id );
+		id = msg.findUserId( args.length > 1 ? id : args.join(' ') );
 	}
 
 	if ( id < 0 ) {
 		return 'User Elusio proved elusive.';
 	}
 
-	//~5% chance
-	if ( Math.random() <= 0.05 ) {
+	//~10% chance
+	if ( Math.random() <= 0.1 ) {
 		finish( 'That dude sucks' );
 		return;
 	}
 
 	IO.jsonp({
-		url : 'https://api.stackexchange.com/2.0/users/' + id,
+		url : 'https://api.stackexchange.com/2.2/users/' + id,
 		data : {
 			site   : bot.adapter.site,
-			filter :  '!G*klMsSp1IcBUKxXMwhRe8TaI(' //ugh, don't ask...
+			//see top of file.
+			filter :  '!P)usXx8OGi3Eq5LdDJke7ybvCSm_vuVGrSDZs3)UmEI'
 		},
 		fun : done
 	});
@@ -6166,7 +6487,7 @@ function stat ( msg, cb ) {
 			res = 'User ' + id + ' not found';
 		}
 		else {
-			res = handleUserObject( user );
+			res = handle_user_object( user, msg );
 		}
 
 		finish( res );
@@ -6182,23 +6503,36 @@ function stat ( msg, cb ) {
 	}
 }
 
-function handleUserObject ( user ) {
-	var res = template.supplant( normalizeStats(user) );
+function handle_user_object ( user, msg ) {
+	user = normalize_stats( user );
 
-	bot.log( res, '/stat templated' );
-	return res;
+	//#177: Decode html entities in user names, and special-case a user asking
+	// about themselves.
+	if ( user.user_id === msg.get('user_id') ) {
+		// You (link) have ...
+		user.display_name = 'You';
+		user.indicative = 'have';
+	}
+	else {
+		// Bob (link) has ...
+		user.display_name = IO.decodehtmlEntities( user.display_name );
+		user.indicative = 'has';
+	}
+
+	return template.supplant( user );
 }
 
-function normalizeStats ( stats ) {
+function normalize_stats ( stats ) {
 	stats = Object.merge({
-		question_count        : 0,
-		answer_count          : 0,
-		reputation_change_day : 0
-	}, stats );
+			question_count        : 0,
+			answer_count          : 0,
+			reputation_change_day : 0
+		}, stats.badge_counts, stats );
 
-    stats = Object.merge( stats.badge_counts, stats );
+	stats = Object.merge( stats.badge_counts, stats );
 
-    stats.avg_rep_post = (
+	//avg = rep / (questions + answers)
+	stats.avg_rep_post = (
 		stats.reputation / ( stats.question_count + stats.answer_count )
 	).maxDecimal( 2 );
 
@@ -6207,10 +6541,33 @@ function normalizeStats ( stats ) {
 		stats.avg_rep_post = 'T͎͍̘͙̖̤̉̌̇̅ͯ͋͢͜͝H̖͙̗̗̺͚̱͕̒́͟E̫̺̯͖͎̗̒͑̅̈ ̈ͮ̽ͯ̆̋́͏͙͓͓͇̹<̩̟̳̫̪̇ͩ̑̆͗̽̇͆́ͅC̬͎ͪͩ̓̑͊ͮͪ̄̚̕Ě̯̰̤̗̜̗͓͛͝N̶̴̞͇̟̲̪̅̓ͯͅT͍̯̰͓̬͚̅͆̄E̠͇͇̬̬͕͖ͨ̔̓͞R͚̠̻̲̗̹̀>̇̏ͣ҉̳̖̟̫͕ ̧̛͈͙͇͂̓̚͡C͈̞̻̩̯̠̻ͥ̆͐̄ͦ́̀͟A̛̪̫͙̺̱̥̞̙ͦͧ̽͛̈́ͯ̅̍N̦̭͕̹̤͓͙̲̑͋̾͊ͣŅ̜̝͌͟O̡̝͍͚̲̝ͣ̔́͝Ť͈͢ ̪̘̳͔̂̒̋ͭ͆̽͠H̢͈̤͚̬̪̭͗ͧͬ̈́̈̀͌͒͡Ơ̮͍͇̝̰͍͚͖̿ͮ̀̍́L͐̆ͨ̏̎͡҉̧̱̯̤̹͓̗̻̭ͅḐ̲̰͙͑̂̒̐́̊';
 	}
 
-    //TODO: find out what people want out of Q/A ratio, and do it.
+	stats.ratio = calc_qa_ratio( stats.question_count, stats.answer_count );
 
+	bot.log( stats, '/stat normalized' );
 	return stats;
 }
+
+function calc_qa_ratio ( questions, answers ) {
+	//for teh lulz
+	if ( !questions && answers ) {
+		return "H̸̡̪̯ͨ͊̽̅̾̎Ȩ̬̩̾͛ͪ̈́̀́͘ ̶̧̨̱̹̭̯ͧ̾ͬC̷̙̲̝͖ͭ̏ͥͮ͟Oͮ͏̮̪̝͍M̲̖͊̒ͪͩͬ̚̚͜Ȇ̴̟̟͙̞ͩ͌͝S̨̥̫͎̭ͯ̿̔̀ͅ";
+	}
+	else if ( !answers && questions ) {
+		return "TO͇̹̺ͅƝ̴ȳ̳ TH̘Ë͖́̉ ͠P̯͍̭O̚​N̐Y̡";
+	}
+	else if ( !answers && !questions ) {
+		return 'http://i.imgur.com/F79hP.png';
+	}
+
+	// #196:
+	// 1. GCD of 1.
+	// 2. Either the antecedent or the consequent are 1
+	//(in A:B, A is the antecedent, B is the consequent)
+	var gcd = Math.gcd( questions, answers );
+
+	return Math.ratio( questions, answers );
+}
+
 var cmd = {
 	name : 'stat',
 	fun : stat,
@@ -6219,16 +6576,44 @@ var cmd = {
 	},
 
 	description : 'Gives useless stats on a user. ' +
-		'`/stat [usrid|usrname]`',
+		'`/stat usrid|usrname [extended]`',
 	async : true
 };
+
 bot.addCommand( cmd );
 
-// alias for stupid rlemon
+// alias for rlemon.
 var statsCmd = Object.merge( cmd, { name : 'stats'} );
-bot.addCommand(statsCmd);
+bot.addCommand( statsCmd );
 
 }());
+
+;
+(function () {
+var hammers = {
+	STOP  : 'HAMMERTIME!',
+	STAHP : 'HAMMAHTIME!',
+	HALT  : 'HAMMERZEIT!',
+	STOY  : 'ZABIVAT\' VREMYA!',
+	SISTITE: 'MALLEUS TEMPUS!'
+};
+
+// /(STOP|STAHP|...)[\.!\?]?$/
+var re = new RegExp(
+	'(' +
+		Object.keys(hammers).map(RegExp.escape).join('|') +
+	')[\\.!?]?$' );
+
+IO.register( 'input', function STOP ( msgObj ) {
+	var sentence = msgObj.content.toUpperCase(),
+		res = re.exec( sentence );
+
+	if ( res ) {
+		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
+	}
+});
+
+})();
 
 ;
 (function () {
@@ -6337,66 +6722,6 @@ function retrieve_full_text ( message, cb ) {
 }());
 
 ;
-(function () {
-"use strict";
-
-var summon = function ( args ) {
-	var room = Number( args );
-
-	if ( !room ) {
-		return 'That aint no room I ever heard of! ' +
-			'`/help summon` for usage info';
-	}
-
-	bot.adapter.in.init( room );
-};
-var unsummon = function ( args, cb ) {
-	var room = args.content ? Number( args ) : args.get( 'room_id' );
-
-	if ( !room ) {
-		return 'That aint no room I ever heard of! ' +
-			'`/help unsummon` for usage info';
-	}
-
-	bot.adapter.in.leaveRoom( room, function ( err ) {
-		if ( err === 'base_room' ) {
-			finish( 'I can\'t leave my home.' );
-		}
-	});
-
-	function finish ( res ) {
-		if ( cb && cb.call ) {
-			cb( res );
-		}
-		else {
-			args.reply( res );
-		}
-	}
-};
-
-bot.addCommand( bot.CommunityCommand({
-	name : 'summon',
-	fun : summon,
-	permissions : {
-		del : 'NONE',
-		use : 'OWNER'
-	},
-	description : 'Say boopidi bee and in the room I shall appear. '+
-		'`/summon roomid`'
-}));
-
-bot.addCommand( bot.CommunityCommand({
-	name : 'unsummon',
-	fun : unsummon,
-	permissions : {
-		del : 'NONE',
-		use : 'OWNER'
-	},
-	description : 'Chant zippidi dee and from the room I shall take my leave. ' +
-		'`/unsummon [roomid=your_roomid]`'
-}));
-
-})();
 
 ;
 (function () {
@@ -6821,10 +7146,13 @@ var unonebox = {
 
 		var frag = document.createElement( 'div' );
 		frag.innerHTML = msgObj.content;
-		var link = frag.querySelector( '.onebox a' );
+		// do not un-onebox youtube videos and quotes 
+		var link = frag.querySelector( '.onebox:not(.ob-youtube):not(.ob-message):not(.ob-wikipedia) a' );
 
 		// No onebox, no un-oneboxing.
-		if ( !link ) {
+		// ugly fix for quoted messages as well.
+		// TODO - think of a better solution for this.
+		if ( !link || link.parentNode.parentNode.classList.contains('quote') ) {
 			return;
 		}
 
@@ -6872,125 +7200,10 @@ bot.addCommand({
 }());
 
 ;
-(function () {
-
-var cache = {};
-
-function urban ( args, cb ) {
-	if ( cache[args] ) {
-		return finish( cache[args] );
-	}
-
-	var parts = args.parse(),
-		query, resultIndex;
-
-	if ( !parts.length ) {
-		return 'Y U NO PROVIDE ARGUMENTS!?';
-	}
-
-	// /urban query in several words
-	if ( isNaN(parts[1]) ) {
-		bot.log( '/urban input isNaN' );
-		query = args.toString();
-		resultIndex = 0;
-	}
-	// /urban query index
-	else {
-		bot.log( '/urban input isn\'t NaN' );
-		query = parts[ 0 ];
-		resultIndex = Number( parts[1] );
-	}
-
-	bot.log( query, resultIndex, '/urban input' );
-
-	IO.jsonp({
-		url : 'http://api.urbandictionary.com/v0/define',
-		data : {
-			term : query
-		},
-		jsonpName : 'callback',
-		fun : complete
-	});
-
-	function complete ( resp ) {
-		var msg;
-
-		if ( resp.result_type === 'no_results' ) {
-			msg = 'No definition found for ' + query;
-		}
-		else if ( resultIndex > resp.list.length ) {
-			msg = 'Nothing in that index. The last one is:\n' +
-				formatTop( resp.list.pop() );
-		}
-		else {
-			msg = formatTop( resp.list[resultIndex] );
-		}
-
-		//truncate the message if it's too long. yes, this creates a problem
-		// with formatted messages. yes, we take extra leeway. shut up.
-		if ( msg.length > 500 ) {
-			msg = msg.slice( 0, 450 ) + '(snip)';
-		}
-		cache[ args ] = msg;
-
-		finish( msg );
-	}
-
-	function finish ( def ) {
-		if ( cb && cb.call ) {
-			cb( def );
-		}
-		else {
-			args.reply( def );
-		}
-	}
-
-	function formatTop ( top ) {
-		//replace [tag] in definition with links
-		var def = top.definition.replace( /\[([^\]]+)\]/g, formatTag );
-
-		return args.link( top.word, top.permalink ) + ' ' + def;
-	}
-	function formatTag ( $0, $1 ) {
-		var href =
-			'http://urbandictionary.com/define.php?term=' +
-			encodeURIComponent( $1 );
-
-		return args.link( $0, href );
-	}
-}
-
-bot.addCommand({
-	name : 'urban',
-	fun : urban,
-
-	permissions : { del : 'NONE', use : 'ALL' },
-
-	description : 'Fetches UrbanDictionary definition. ' +
-		'`/urban query [resultIndex=0]`',
-	async : true
-});
-
-})();
-
-;
 bot.addCommand({
 	name : 'user',
-	fun : function ( args ) {
-		var props = args.parse(),
-			usrid = props[ 0 ] || args.get( 'user_id' ),
-			id = usrid;
-
-		//check for searching by username
-		if ( !(/^\d+$/.test(usrid)) ) {
-			id = args.findUserid( usrid );
-
-			if ( id < 0 ) {
-				return 'Can\'t find user ' + usrid + ' in this chatroom.';
-			}
-		}
-
-		args.directreply( 'http://stackoverflow.com/users/' + id );
+	fun : function () {
+		return 'Command deprecated. If you want it to stay, ping Zirak.';
 	},
 	permissions : { del : 'NONE', use : 'ALL' },
 	description : 'Fetches user-link for specified user. ' +
@@ -7040,7 +7253,7 @@ undecided=["SSdtIG5vdCBzdXJl", "RVJST1IgQ0FMQ1VMQVRJTkcgUkVTVUxU","SSBrbm93IGp1c
 sameness=["VGhhdCdzIG5vdCByZWFsbHkgYSBjaG9pY2UsIG5vdyBpcyBpdD8=","U291bmRzIGxpa2UgeW91IGhhdmUgYWxyZWFkeSBkZWNpZGVk","Q2hlYXRlciBjaGVhdGVyIHlvdXIgaG91c2UgaXMgYSBoZWF0ZXI="].map(atob);
 
 //now for the juicy part
-answers=["QWJzb2x1dGVseSBub3Q=","QWJzb2x1dGVseSBub3Q=","QWJzb2x1dGVseSBub3Q=","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QnV0IG9mIGNvdXJzZQ==","QnV0IG9mIGNvdXJzZQ==","QnV0IG9mIGNvdXJzZQ==","QnkgYWxsIG1lYW5z","QnkgYWxsIG1lYW5z","QnkgYWxsIG1lYW5z","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5","Q2VydGFpbmx5","Q2VydGFpbmx5","RGVmaW5pdGVseQ==","RGVmaW5pdGVseQ==","RGVmaW5pdGVseQ==","RG91YnRmdWxseQ==","RG91YnRmdWxseQ==","RG91YnRmdWxseQ==","RnJhbmtseSBteSBkZWFyLCBJIGRvbid0IGdpdmUgYSBkZWFu", "RnJhbmtseSBteSBkZWFyLCBJIGRvbid0IGdpdmUgYSBkZWFu", "SSBjYW4gbmVpdGhlciBjb25maXJtIG5vciBkZW55","SSBleHBlY3Qgc28=","SSBleHBlY3Qgc28=","SSBleHBlY3Qgc28=","SSdtIG5vdCBzbyBzdXJlIGFueW1vcmUuIEl0IGNhbiBnbyBlaXRoZXIgd2F5","SW1wb3NzaWJsZQ==","SW1wb3NzaWJsZQ==","SW1wb3NzaWJsZQ==","SW5kZWVk","SW5kZWVk","SW5kZWVk","SW5kdWJpdGFibHk=","SW5kdWJpdGFibHk=","SW5kdWJpdGFibHk=","Tm8gd2F5","Tm8gd2F5","Tm8gd2F5","Tm8=","Tm8=","Tm8=","Tm8=","Tm9wZQ==","Tm9wZQ==","Tm9wZQ==","Tm90IGEgY2hhbmNl","Tm90IGEgY2hhbmNl","Tm90IGEgY2hhbmNl","Tm90IGF0IGFsbA==","Tm90IGF0IGFsbA==","Tm90IGF0IGFsbA==","TnVoLXVo","TnVoLXVo","TnVoLXVo","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIQ==","T2YgY291cnNlIQ==","T2YgY291cnNlIQ==","UHJvYmFibHk=","UHJvYmFibHk=","UHJvYmFibHk=","WWVzIQ==","WWVzIQ==","WWVzIQ==","WWVzIQ==","WWVzLCBhYnNvbHV0ZWx5","WWVzLCBhYnNvbHV0ZWx5","WWVzLCBhYnNvbHV0ZWx5"].map(atob)
+answers=["QWJzb2x1dGVseSBub3Q=","QWJzb2x1dGVseSBub3Q=","QWJzb2x1dGVseSBub3Q=","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIG5v","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QWxsIHNpZ25zIHBvaW50IHRvIHllcw==","QnV0IG9mIGNvdXJzZQ==","QnV0IG9mIGNvdXJzZQ==","QnV0IG9mIGNvdXJzZQ==","QnkgYWxsIG1lYW5z","QnkgYWxsIG1lYW5z","QnkgYWxsIG1lYW5z","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5IG5vdA==","Q2VydGFpbmx5","Q2VydGFpbmx5","Q2VydGFpbmx5","RGVmaW5pdGVseQ==","RGVmaW5pdGVseQ==","RGVmaW5pdGVseQ==","RG91YnRmdWxseQ==","RG91YnRmdWxseQ==","RG91YnRmdWxseQ==","RnJhbmtseSBteSBkZWFyLCBJIGRvbid0IGdpdmUgYSBkZWFu", "RnJhbmtseSBteSBkZWFyLCBJIGRvbid0IGdpdmUgYSBkZWFu", "SSBjYW4gbmVpdGhlciBjb25maXJtIG5vciBkZW55","SSBleHBlY3Qgc28=","SSBleHBlY3Qgc28=","SSBleHBlY3Qgc28=","SSdtIG5vdCBzbyBzdXJlIGFueW1vcmUuIEl0IGNhbiBnbyBlaXRoZXIgd2F5","SW1wb3NzaWJsZQ==","SW1wb3NzaWJsZQ==","SW1wb3NzaWJsZQ==","SW5kZWVk","SW5kZWVk","SW5kZWVk","SW5kdWJpdGFibHk=","SW5kdWJpdGFibHk=","SW5kdWJpdGFibHk=","Tm8gd2F5","Tm8gd2F5","Tm8gd2F5","Tm8=","Tm8=","Tm8=","Tm8=","Tm9wZQ==","Tm9wZQ==","Tm9wZQ==","Tm90IGEgY2hhbmNl","Tm90IGEgY2hhbmNl","Tm90IGEgY2hhbmNl","Tm90IGF0IGFsbA==","Tm90IGF0IGFsbA==","Tm90IGF0IGFsbA==","TnVoLXVo","TnVoLXVo","TnVoLXVo","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIG5vdA==","T2YgY291cnNlIQ==","T2YgY291cnNlIQ==","T2YgY291cnNlIQ==","UHJvYmFibHk=","UHJvYmFibHk=","UHJvYmFibHk=","WWVzIQ==","WWVzIQ==","WWVzIQ==","WWVzIQ==","WWVzLCBhYnNvbHV0ZWx5","WWVzLCBhYnNvbHV0ZWx5","WWVzLCBhYnNvbHV0ZWx5"].map(atob);
 //can you feel the nectar?
 
 
@@ -7283,77 +7496,13 @@ bot.addCommand({
 ;
 (function () {
 "use strict";
-//welcomes new users with a link to the room rules and a short message.
 
-var seen = bot.memory.get( 'users' );
+var message = "Welcome to the Root Access chat for Super Users! Please don't ask if you can ask or if anyone's around; just ask " +
+	"your question, and if anyone's free and interested they'll help.";
 
-var message = "Welcome to the JavaScript chat! Please review the " +
-		bot.adapter.link(
-			"room pseudo-rules",
-			"http://rlemon.github.com/so-chat-javascript-rules/"
-		) +
-		". Please don't ask if you can ask or if anyone's around; just ask " +
-		"your question, and if anyone's free and interested they'll help.";
-
-var messageCountRe = /transcript\/17(?:'|")>([\d\.]+)(k?)/i;
-
-function welcome ( name, room ) {
-	bot.adapter.out.add(
-		bot.adapter.reply( name ) + " " + message, room );
+function welcome ( name ) {
+	return bot.adapter.reply( name ) + " " + message;
 }
-
-IO.register( 'userregister', function ( user, room ) {
-	var semiLegitUser = bot.isOwner( user.id ) ||
-		user.reputation > 1000 || user.reputation < 20;
-
-	if (
-		Number( room ) !== 17 || semiLegitUser  || seen[ user.id ]
-	) {
-		if ( semiLegitUser ) {
-			finish( true );
-		}
-		return;
-	}
-
-	IO.xhr({
-		method : 'GET',
-		url : '/users/' + user.id,
-
-		complete : complete
-	});
-
-	function complete ( resp ) {
-		//I'm parsing html with regexps. hopefully Cthulu won't eat me.
-		// <a href="/transcript/17">7</a>
-		// [..., "17", null]
-		// <a href="/transcript/17">2.1k</a>
-		// [..., "2.1", "k"]
-		var chatMessages = messageCountRe.exec( resp ),
-			newUser;
-
-		if ( chatMessages ) {
-			newUser = !chatMessages[ 2 ] && Number( chatMessages[1] ) < 2;
-		}
-		else {
-			newUser = true;
-		}
-
-		if ( newUser ) {
-			welcome( user.name, room );
-		}
-		finish();
-	}
-
-	function finish ( unsee ) {
-		if ( unsee ) {
-			delete seen[ user.id ];
-		}
-		else {
-			seen[ user.id ] = true;
-		}
-		bot.memory.save( 'users' );
-	}
-});
 
 bot.addCommand({
 	name : 'welcome',
@@ -7362,7 +7511,7 @@ bot.addCommand({
 			return message;
 		}
 
-		welcome( args, args.get('roomid') );
+		return args.send( welcome(args) );
 	},
 	permission : {
 		del : 'NONE'
@@ -7503,6 +7652,9 @@ function getXKCD( args, cb ) {
 
 	function finish( res ) {
 		bot.log( res, '/xkcd finish' );
+
+		// because chat does not onebox https xkcd links
+		res = res.replace( /^https:/, 'http:' );
 
 		if ( cb && cb.call ) {
 			cb( res );
