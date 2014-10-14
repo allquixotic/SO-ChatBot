@@ -1,24 +1,36 @@
 (function() {
-  "use strict";
-  
-  function b64_to_utf8( str ) {
-    return decodeURIComponent(escape(window.atob( str )));
-  }
+    "use strict";
 
-  bot.addCommand({
-    name : 'import',
-    fun : function (args) { 
-      var request = new XMLHttpRequest();
-      request.open('GET', args, false);
-      request.send(null);
-      if (request.status === 200) {
-        bot.memory.data = JSON.parse(b64_to_utf8(request.responseText.replace(/\s/g,"")));
-        bot.memory.save();
-      }
-      
-      return "Imported and persisted successfully";
-    },
-    permissions : { del : 'NONE', use : 'OWNER' },
-    description : 'Imports the persistent memory described in args `/export <exported-content>`'
-  });
+    bot.addCommand({
+        name : 'import',
+        fun : function (args) { 
+            if (args.trim() === 'clear') {
+                bot.memory.clear();
+                
+                return 'Bot memory cleared. Please restart the bot.';
+            }
+        
+            var req = new XMLHttpRequest();
+            req.open('GET', 'https://api.github.com/gists/' + args, false);
+            req.send(null);
+            
+            if (req.status !== 200) {
+                var resp = '';
+                if (req.responseText) {
+                    resp = '\n' + req.responseText.match(/.{1,400}/g).join('\n');
+                }
+                return 'Failed: ' + req.status + ': ' + req.statusText + resp;
+            }
+            
+            var resp = JSON.parse(req.responseText);
+            
+            bot.memory.data = JSON.parse(resp.files['bot.json'].content);
+            bot.memory.save();
+
+            return "Imported and persisted successfully. Please restart the bot.";
+        },
+        permissions : { del : 'NONE', use : 'OWNER' },
+        description : 'Imports the persistent memory described in args `/export <exported-content>`'
+    });
 })();
+

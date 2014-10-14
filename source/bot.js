@@ -65,18 +65,6 @@ var bot = window.bot = {
 			this.info.invoked += 1;
 		}
 	},
-	
-	// Call this from console with a command string as you would use in chat
-	// and it should execute with owner privileges and all responses to console instead of chat.
-	interact : function ( msgString ) {
-		var consoleMsgObj = Object( msgString );
-		consoleMsgObj.content = msgString;
-		consoleMsgObj['findUserid'] = function(username) { return -1; }; // interactive console
-		consoleMsgObj['findUsername'] = function(id,cb) { return "CONSOLE"; };
-		consoleMsgObj['reply'] = function(resp, username) { console.log(resp); };
-		consoleMsgObj['directreply'] = function(resp) { console.log(resp); };
-		return invokeAction(consoleMsgObj);
-	},
 
 	//this conditionally calls execCommand or callListeners, depending on what
 	// the input. if the input begins with a command name, it's assumed to be a
@@ -171,6 +159,8 @@ var bot = window.bot = {
 		return (
 			//make sure we don't process our own messages,
 			msgObj.user_id !== bot.adapter.user_id &&
+			//make sure we don't process Feeds
+			msgObj.user_id > 0 &&
 			//and the message begins with the invocationPattern
 			msg.startsWith( this.invocationPattern ) );
 	},
@@ -324,6 +314,15 @@ bot.memory = {
 	saveLoop : function () {
 		clearTimeout( this.saveIntervalId );
 		setTimeout( this.saveLoop.bind(this), this.saveInterval );
+	},
+	
+	clear : function () {
+		Object.iterate( localStorage, function ( key, val ) {
+			if ( key.startsWith('bot_') ) {
+				localStorage.removeItem(key);
+			}
+		});
+		this.data = {};
 	}
 };
 
@@ -542,8 +541,6 @@ bot.Message = function ( text, msgObj ) {
 };
 
 bot.isOwner = function ( usrid ) {
-	if (usrid == -1) // interactive console
-		return true;
 	var user = this.users[ usrid ];
 	return user && ( user.is_owner || user.is_moderator );
 };
@@ -559,3 +556,4 @@ IO.register( 'input', bot.parseMessage, bot );
 //#build commands.js
 //#build listeners.js
 }());
+

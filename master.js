@@ -782,18 +782,6 @@ var bot = window.bot = {
 			this.info.invoked += 1;
 		}
 	},
-	
-	// Call this from console with a command string as you would use in chat
-	// and it should execute with owner privileges and all responses to console instead of chat.
-	interact : function ( msgString ) {
-		var consoleMsgObj = Object( msgString );
-		consoleMsgObj.content = msgString;
-		consoleMsgObj['findUserid'] = function(username) { return -1; }; // interactive console
-		consoleMsgObj['findUsername'] = function(id,cb) { return "CONSOLE"; };
-		consoleMsgObj['reply'] = function(resp, username) { console.log(resp); };
-		consoleMsgObj['directreply'] = function(resp) { console.log(resp); };
-		return invokeAction(consoleMsgObj);
-	},
 
 	//this conditionally calls execCommand or callListeners, depending on what
 	// the input. if the input begins with a command name, it's assumed to be a
@@ -888,6 +876,8 @@ var bot = window.bot = {
 		return (
 			//make sure we don't process our own messages,
 			msgObj.user_id !== bot.adapter.user_id &&
+			//make sure we don't process Feeds
+			msgObj.user_id > 0 &&
 			//and the message begins with the invocationPattern
 			msg.startsWith( this.invocationPattern ) );
 	},
@@ -1041,6 +1031,15 @@ bot.memory = {
 	saveLoop : function () {
 		clearTimeout( this.saveIntervalId );
 		setTimeout( this.saveLoop.bind(this), this.saveInterval );
+	},
+	
+	clear : function () {
+		Object.iterate( localStorage, function ( key, val ) {
+			if ( key.startsWith('bot_') ) {
+				localStorage.removeItem(key);
+			}
+		});
+		this.data = {};
 	}
 };
 
@@ -1259,8 +1258,6 @@ bot.Message = function ( text, msgObj ) {
 };
 
 bot.isOwner = function ( usrid ) {
-	if (usrid == -1) // interactive console
-		return true;
 	var user = this.users[ usrid ];
 	return user && ( user.is_owner || user.is_moderator );
 };
@@ -2249,6 +2246,7 @@ what              #simply the word what
 
 }());
 
+
 ;
 //follows is an explanation of how SO's chat does things. you may want to skip
 // this gigantuous comment.
@@ -3019,6 +3017,33 @@ bot.listen(
 	/(I('m| am))?\s*sorry/i,
 	bot.personality.apologize, bot.personality );
 bot.listen( /^bitch/i, bot.personality.bitch, bot.personality );
+
+;
+(function () {
+var hammers = {
+	STOP  : 'HAMMERTIME!',
+	STAHP : 'HAMMAHTIME!',
+	HALT  : 'HAMMERZEIT!',
+	STOY  : 'ZABIVAT\' VREMYA!',
+	SISTITE: 'MALLEUS TEMPUS!'
+};
+
+// /(STOP|STAHP|...)[\.!\?]?$/
+var re = new RegExp(
+	'(' +
+		Object.keys(hammers).map(RegExp.escape).join('|') +
+	')[\\.!?]?$' );
+
+IO.register( 'input', function STOP ( msgObj ) {
+	var sentence = msgObj.content.toUpperCase(),
+		res = re.exec( sentence );
+
+	if ( res ) {
+		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
+	}
+});
+
+})();
 
 ;
 //solves #86, mostly written by @Shmiddty
@@ -4420,66 +4445,38 @@ bot.addCommand({
 
 ;
 (function() {
-  "use strict";
-  
-  function utf8_to_b64( str ) {
-  return window.btoa(unescape(encodeURIComponent( str )));
-}
+    "use strict";
 
-function explode(text, max) {
-    // clean the text
-    //text = text.replace(/  +/g, " ").replace(/^ /, "").replace(/ $/, "");
-    // return empty string if text is undefined
-    if (typeof text === "undefined") return "";
-    // if max hasn't been defined, max = 50
-    if (typeof max === "undefined") max = 50;
-    // return the initial text if already less than max
-    if (text.length <= max) return text;
-    // get the first part of the text
-    var exploded = text.substring(0, max);
-    // get the next part of the text
-    text = text.substring(max);
-    // if next part doesn't start with a space
-    if (text.charAt(0) !== " ") {
-        // while the first part doesn't end with a space && the first part still has at least one char
-        while (exploded.charAt(exploded.length - 1) !== " " && exploded.length > 0) {
-            // add the last char of the first part at the beginning of the next part
-            text = exploded.charAt(exploded.length - 1) + text;
-            // remove the last char of the first part
-            exploded = exploded.substring(0, exploded.length - 1);
-        }
-        // if the first part has been emptied (case of a text bigger than max without any space)
-        if (exploded.length == 0) {
-            // re-explode the text without caring about spaces
-            exploded = text.substring(0, max);
-            text = text.substring(max);
-        // if the first part isn't empty
-        } else {
-            // remove the last char of the first part, because it's a space
-            exploded = exploded.substring(0, exploded.length - 1);
-        }
-    // if the next part starts with a space
-    } else {
-        // remove the first char of the next part
-        text = text.substring(1);
-    }
-    // return the first part and the exploded next part, concatenated by \n
-    return exploded + "\n" + explode(text);
-}
-
-  bot.addCommand({
-    name : 'export',
-    fun : function(args) {
-        var mem = utf8_to_b64(JSON.stringify(bot.memory.data)),
-        user_name = args.get( 'user_name' ),
-        maxSize = 498 - user_name.length;
-
-        return explode(mem, maxSize);
-      }, 
-    permissions : { del : 'NONE', use : 'OWNER' },
-    description : 'Blurts out a message with the persistent memory storage for export `/export`'
-  });
+    bot.addCommand({
+        name : 'export',
+        fun : function(args) {
+            var req = new XMLHttpRequest();
+            req.open('POST', 'https://api.github.com/gists', false);
+            req.send(JSON.stringify({
+                files: {
+                    'bot.json': {
+                        content: JSON.stringify(bot.memory.data)
+                    }
+                }
+            }));
+            
+            if (req.status !== 201) {
+                var resp = '';
+                if (req.responseText) {
+                    resp = '\n' + req.responseText.match(/.{1,400}/g).join('\n');
+                }
+                return 'Failed: ' + req.status + ': ' + req.statusText + resp;
+            }
+            
+            var resp = JSON.parse(req.responseText);
+            
+            return 'Exported to gist, id: `' + resp.id + '` viewable at ' + resp.html_url;
+        }, 
+        permissions : { del : 'NONE', use : 'OWNER' },
+        description : 'Blurts out a message with the persistent memory storage for export `/export`'
+    });
 })();
+
 
 ;
 (function () {
@@ -5248,29 +5245,41 @@ bot.addCommand({
 
 ;
 (function() {
-  "use strict";
-  
-  function b64_to_utf8( str ) {
-    return decodeURIComponent(escape(window.atob( str )));
-  }
+    "use strict";
 
-  bot.addCommand({
-    name : 'import',
-    fun : function (args) { 
-      var request = new XMLHttpRequest();
-      request.open('GET', args, false);
-      request.send(null);
-      if (request.status === 200) {
-        bot.memory.data = JSON.parse(b64_to_utf8(request.responseText.replace(/\s/g,"")));
-        bot.memory.save();
-      }
-      
-      return "Imported and persisted successfully";
-    },
-    permissions : { del : 'NONE', use : 'OWNER' },
-    description : 'Imports the persistent memory described in args `/export <exported-content>`'
-  });
+    bot.addCommand({
+        name : 'import',
+        fun : function (args) { 
+            if (args.trim() === 'clear') {
+                bot.memory.clear();
+                
+                return 'Bot memory cleared.';
+            }
+        
+            var req = new XMLHttpRequest();
+            req.open('GET', 'https://api.github.com/gists/' + args, false);
+            req.send(null);
+            
+            if (req.status !== 200) {
+                var resp = '';
+                if (req.responseText) {
+                    resp = '\n' + req.responseText.match(/.{1,400}/g).join('\n');
+                }
+                return 'Failed: ' + req.status + ': ' + req.statusText + resp;
+            }
+            
+            var resp = JSON.parse(req.responseText);
+            
+            bot.memory.data = JSON.parse(resp.files['bot.json'].content);
+            bot.memory.save();
+
+            return "Imported and persisted successfully. Please restart the bot.";
+        },
+        permissions : { del : 'NONE', use : 'OWNER' },
+        description : 'Imports the persistent memory described in args `/export <exported-content>`'
+    });
 })();
+
 
 ;
 (function () {
@@ -6587,33 +6596,6 @@ var statsCmd = Object.merge( cmd, { name : 'stats'} );
 bot.addCommand( statsCmd );
 
 }());
-
-;
-(function () {
-var hammers = {
-	STOP  : 'HAMMERTIME!',
-	STAHP : 'HAMMAHTIME!',
-	HALT  : 'HAMMERZEIT!',
-	STOY  : 'ZABIVAT\' VREMYA!',
-	SISTITE: 'MALLEUS TEMPUS!'
-};
-
-// /(STOP|STAHP|...)[\.!\?]?$/
-var re = new RegExp(
-	'(' +
-		Object.keys(hammers).map(RegExp.escape).join('|') +
-	')[\\.!?]?$' );
-
-IO.register( 'input', function STOP ( msgObj ) {
-	var sentence = msgObj.content.toUpperCase(),
-		res = re.exec( sentence );
-
-	if ( res ) {
-		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
-	}
-});
-
-})();
 
 ;
 (function () {
