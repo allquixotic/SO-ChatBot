@@ -1373,207 +1373,78 @@ function snipAndCodify ( str ) {
 (function () {
 "use strict";
 
-var target;
-if ( typeof bot !== 'undefined' ) {
-	target = bot;
-}
-else if ( typeof exports !== 'undefined' ) {
-	target = exports;
-}
-else {
-	target = window;
-}
+var argParser = {
+	create : function () {
+		var ret = Object.create(this);
 
-target.parseCommandArgs = (function () {
+		ret.separator = ' ';
+		ret.escape = '\\';
+		ret.quote = '"';
 
-//the different states, not nearly enough to represent a female humanoid
-//you know you're building something fancy when it has constants with
-// undescores in their name
-var S_DATA         = 0,
-	S_SINGLE_QUOTE = 1,
-	S_DOUBLE_QUOTE = 2,
-	S_NEW          = 3;
-
-//and constants representing constant special chars (why aren't I special? ;_;)
-var CH_SINGLE_QUOTE = '\'',
-	CH_DOUBLE_QUOTE = '\"';
-
-/*
-the "scheme" roughly looks like this:
-  args -> arg <sep> arg <sep> arg ... | Ø
-  arg  -> singleQuotedString | doubleQuotedString | string | Ø
-
-  singleQuotedString -> 'string'
-  doubleQuotedString -> "string"
-  string -> char char char ... | Ø
-  char -> anyCharacter | <escaper>anyCharacter | Ø
-
-Ø is the empty string
-*/
-
-//the bad boy in the hood
-//I dunno what kind of parser this is, so I can't flaunt it or taunt with it,
-// but it was fun to make
-var parser = {
-
-	parse : function ( source, sep, esc ) {
-		//initializations are safe fun for the whole family!
-		//later-edit: the above comment is one of the weirdest I've ever
-		// written
-		this.source = source;
-		this.pos = 0;
-		this.length = source.length;
-		this.state = S_DATA;
-		this.lookahead = '';
-
-		this.escaper = esc || '~';
-		this.separator = sep || ' ';
-
-		var args = this.tokenize();
-
-		//oh noez! errorz!
-		if ( this.state !== S_DATA ) {
-			this.throwFinishError();
-		}
-
-		return args;
+		return ret;
 	},
 
-	tokenize : function () {
-		var arg, ret = [];
+	parse : function (source) {
+		this.source = source;
+		this.pos = 0;
 
-		//let the parsing commence!
-		while ( this.pos < this.length ) {
-			arg = this.nextArg();
+		var ret = [];
 
-			//only add the next arg if it's actually something
-			if ( arg ) {
-				ret.push( arg );
-			}
+		while (!this.done()) {
+			ret.push(this.nextArg());
 		}
 
 		return ret;
 	},
 
-	//fetches the next argument (see the "scheme" at the top)
 	nextArg : function () {
-		var lexeme = '', ch;
-		this.state = S_DATA;
+		var endChar = this.separator;
 
-		while ( true ) {
-			ch = this.nextChar();
-			if ( ch === null || this.state === S_NEW ) {
-				break;
+		if (this.peek() === this.quote) {
+			this.nextChar();
+			endChar = this.quote;
+		}
+
+		return this.consumeUntil(endChar);
+	},
+
+	consumeUntil : function (endChar) {
+		var char = this.nextChar(),
+			escape = false,
+			ret = '';
+
+		while (char && char !== endChar) {
+			if (char === this.escape && !escape) {
+				escape = true;
+			}
+			else {
+				ret += char;
 			}
 
-			lexeme += ch;
+			char = this.nextChar();
 		}
 
-		return lexeme;
+		return ret;
 	},
 
-	nextChar : function ( escape ) {
-		var ch = this.lookahead = this.source[ this.pos ];
-		this.pos++;
-
-		if ( !ch ) {
-			return null;
-		}
-
-		if ( escape ) {
-			return ch;
-		}
-
-		//l'escaping!
-		else if ( ch === this.escaper ) {
-			return this.nextChar( true );
-		}
-
-		//encountered a separator and you're in data-mode!? ay digity!
-		else if ( ch === this.separator && this.state === S_DATA ) {
-			this.state = S_NEW;
-			return ch;
-		}
-
-		return this.string();
+	nextChar : function () {
+		var ret = this.source[this.pos];
+		this.pos += 1;
+		return ret;
 	},
 
-	//IM IN YO STRINGZ EATING YO CHARS
-	// a.k.a string handling starts roughly here
-	string : function () {
-		var ch = this.lookahead;
-
-		//single quotes are teh rulez
-		if ( ch === CH_SINGLE_QUOTE ) {
-			return this.singleQuotedString();
-		}
-
-		//exactly the same, just with double-quotes, which aren't quite as teh
-		// rulez
-		else if ( ch === CH_DOUBLE_QUOTE ) {
-			return this.doubleQuotedString();
-		}
-
-		return ch;
+	peek : function () {
+		return this.source[this.pos];
 	},
 
-	singleQuotedString : function () {
-		//we're already inside a double-quoted string, it's just another
-		// char for us
-		if ( this.state === S_DOUBLE_QUOTE ) {
-			return this.lookahead;
-		}
-
-		//start your stringines!
-		else if ( this.state !== S_SINGLE_QUOTE ) {
-			this.state = S_SINGLE_QUOTE;
-		}
-
-		//end your stringiness!
-		else {
-			this.state = S_DATA;
-		}
-
-		return this.nextChar();
-	},
-
-	doubleQuotedString : function () {
-		if ( this.state === S_SINGLE_QUOTE ) {
-			return this.lookahead;
-		}
-
-		else if ( this.state !== S_DOUBLE_QUOTE ) {
-			this.state = S_DOUBLE_QUOTE;
-		}
-
-		else {
-			this.state = S_DATA;
-		}
-
-		return this.nextChar();
-	},
-
-	throwFinishError : function () {
-		var errMsg = '';
-
-		if ( this.state === S_SINGLE_QUOTE ) {
-			errMsg = 'Expected ' + CH_SINGLE_QUOTE;
-		}
-		else if ( this.state === S_DOUBLE_QUOTE ) {
-			errMsg = 'Expected ' + CH_DOUBLE_QUOTE;
-		}
-
-		var up = new Error( 'Unexpected end of input: ' + errMsg );
-		up.column = this.pos;
-
-		throw up; //problem?
+	done : function () {
+		return this.pos >= this.source.length;
 	}
 };
 
-return function () {
-	return parser.parse.apply( parser, arguments );
-};
-}());
+
+var parser = bot.commandArgsParser = argParser.create();
+bot.parseCommandArgs = parser.parse.bind(parser);
 
 }());
 
@@ -2390,7 +2261,7 @@ bot.adapter = {
 		this.fkey    = fkey.value;
 		this.roomid  = Number( /\d+/.exec(location)[0] );
 		this.site    = this.getCurrentSite();
-		this.user_id = CHAT.user.current().id;
+		this.user_id = CHAT.CURRENT_USER_ID;
 
 		this.in.init();
 		this.out.init();
@@ -2923,9 +2794,9 @@ return function ( id, cb ) {
 })();
 
 function loadUsers () {
-	if ( window.users ) {
-		bot.users = Object.merge( bot.users, window.users );
-	}
+	CHAT.RoomUsers.all().forEach(function (user) {
+		bot.users[user.id] = user;
+	});
 }
 
 loadUsers();
@@ -4125,10 +3996,24 @@ var wikiUrl = 'http://en.wiktionary.org';
 */
 var alternativeRe = /(alternative (spelling|term)|common misspelling|informal form|archaic spelling) (of|for) (.+?)\.?$/i;
 
+//this object is not planned out well.
+//I do not apologise. Except that I do. Sorry future me.
+//btw, how did that trip to Iceland go? Awesome! Hope you (we?) had fun.
 var define = {
 	command : function defineCommand ( args, cb ) {
-		bot.log( args, '/define input' );
-		this.fetchData( args.toString(), finish );
+		var parts = args.parse(),
+			definitionIndex = Number( parts.pop() ),
+			definee = parts.join(' ');
+
+		if ( !definitionIndex ) {
+			definitionIndex = 0;
+			definee = args.toString();
+		}
+
+		bot.log( args, definee, definitionIndex, '/define input' );
+		var self = this;
+
+		this.fetchDefinition( definee, definitionIndex, finish );
 
 		function finish ( definition ) {
 			bot.log( definition, '/define result' );
@@ -4144,6 +4029,10 @@ var define = {
 				) + ' ' + definition.text;
 			}
 
+			if ( definition.overflow ) {
+				res = 'Index too large; showing last definition. ' + res;
+			}
+
 			if ( cb && cb.call ) {
 				cb( res );
 			}
@@ -4153,40 +4042,57 @@ var define = {
 		}
 	},
 
-	handleResponse : function ( resp, cb ) {
-		var query = resp.query,
-			pageid = query.pageids[ 0 ],
-			page = query.pages[ pageid ],
-			html = page.extract;
+	fetchDefinition : function ( term, definitionIndex, cb ) {
+		var self = this;
+		this.fetchData( term, gotData );
 
-		if ( pageid === '-1' ) {
-			cb({
-				pageid : -1
-			});
+		function gotData ( resp ) {
+			var query = resp.query,
+				pageid = query.pageids[ 0 ],
+				page = query.pages[ pageid ],
+				html = page.extract;
 
-			return;
-		}
+			if ( pageid === '-1' ) {
+				cb({
+					pageid : -1
+				});
 
-		var root = document.createElement( 'body' );
-		root.innerHTML = html; //forgive me...
-		var definition  = this.extractDefinition( root );
+				return;
+			}
 
-		//if this is an alternative definition (or spelling, or whatever),
-		// return the actual version.
-		if ( definition.alternative ) {
-			bot.log( definition.alternative, '/define found alternative' );
-			this.fetchData( definition.alternative, cb );
-		}
-		else {
+			var root = document.createElement( 'body' );
+			root.innerHTML = html; //forgive me...
+			var definitions = self.extractDefinitions( root ),
+				definition = definitions[0],
+				overflow = false;
+
+			bot.log( definitions, '/define got definitions' );
+
+			// before fetching the actual definition, we first need to check for
+			//alternatives.
+			if ( definition.alternative ) {
+				bot.log( definition.alternative, '/define found alternative' );
+				self.fetchData( definition.alternative, gotData );
+				return;
+			}
+
+			definition = definitions[ definitionIndex ];
+
+			if ( !definition ) {
+				definition = definitions[definitions.length - 1];
+				overflow = true;
+			}
+
 			cb({
 				name   : page.title,
 				text   : definition.text,
-				pageid : pageid
+				pageid : pageid,
+				overflow : overflow
 			});
 		}
 	},
 
-	extractDefinition : function ( root ) {
+	extractDefinitions : function ( root ) {
 		/*
 		Result of 42:
 			<ol>
@@ -4223,14 +4129,26 @@ var define = {
 				</li>
 			</ol>
 		*/
-		var defList = root.getElementsByTagName( 'ol' )[ 0 ],
-			defElement = defList.firstElementChild,
-			links = defElement.getElementsByTagName( 'a' );
+		var defList = root.getElementsByTagName( 'ol' )[ 0 ];
+		console.log( defList, '/define definition list' );
 
+		return Array.from( defList.children )
+			.map( this.extractSingleDefinition, this );
+	},
+
+	extractSingleDefinition : function ( root ) {
 		//before we start messing around with the element's innards, try and
 		// find if it's an alternative of something else.
-		var alternative = this.extractAlternative( defElement.textContent );
+		var alternative = this.extractAlternative( root.textContent );
 
+		//remove any quotations
+		Array.from(root.children).forEach(function (child) {
+			if (child.tagName === 'UL') {
+				root.removeChild(child);
+			}
+		});
+
+		var links = root.getElementsByTagName( 'a' );
 		//be sure to replace links with formatted links.
 		while ( links.length ) {
 			replaceLink( links[0] );
@@ -4238,7 +4156,7 @@ var define = {
 
 		return {
 			alternative : alternative,
-			text : defElement.textContent
+			text : root.textContent
 		};
 
 		function replaceLink ( link ) {
@@ -4269,7 +4187,7 @@ var define = {
 				indexpageids : true
 			},
 			fun : function ( resp ) {
-				self.handleResponse( resp, cb );
+				cb.call( self, resp );
 			}
 		});
 	}
@@ -5253,7 +5171,7 @@ bot.addCommand({
             if (args.trim() === 'clear') {
                 bot.memory.clear();
                 
-                return 'Bot memory cleared.';
+                return 'Bot memory cleared. Please restart the bot.';
             }
         
             var req = new XMLHttpRequest();
@@ -5984,343 +5902,6 @@ bot.addCommand({
 	description : 'Returns result of "parsing" message according to the my ' +
 		'mini-macro capabilities (see online docs)',
 });
-
-;
-(function () {
-"use strict";
-var ownerRoom = 17;
-
-if ( bot.adapter.roomid !== ownerRoom ) {
-	return;
-}
-
-var muted = bot.memory.get( 'muted' );
-
-function checkMuted () {
-	var now = Date.now();
-
-	Object.iterate( muted, function ( id, obj ) {
-		if ( obj.endDate < now ) {
-			giveVoice( id );
-		}
-	});
-
-    galleryMode.unlockIfNeeded();
-
-	setTimeout( checkMuted, 60 * 1000 );
-}
-setTimeout( checkMuted, 60 * 1000 );
-
-function giveVoice ( id, cb ) {
-	bot.log( 'giving voice to ' + id );
-
-	IO.xhr({
-		method : 'POST',
-		url : '/rooms/setuseraccess/' + ownerRoom,
-		data : {
-			aclUserId : id,
-			fkey : bot.adapter.fkey,
-			userAccess : 'read-write'
-		},
-
-		complete : finish
-	});
-
-	function finish () {
-		var args = Array.from( arguments );
-		args.unshift( id );
-
-		delete muted[ id ];
-
-		if ( cb ) {
-			bot.memory.save( 'muted' );
-			cb && ( cb.apply(null, args) );
-		}
-	}
-}
-function takeVoice ( params, cb ) {
-	bot.log( 'taking voice', params );
-
-	IO.xhr({
-		method : 'POST',
-		url : '/rooms/setuseraccess/' + ownerRoom,
-		data : {
-			aclUserId : params.id,
-			fkey : bot.adapter.fkey,
-			userAccess : 'remove'
-		},
-
-		complete : finish
-	});
-
-	function finish () {
-		muted[ params.id ] = {
-			name : params.name,
-			invokingId : params.invokingId,
-			endDate : calcEndDate( params.duration ).getTime()
-		};
-
-		bot.memory.save( 'muted' );
-		cb.apply( null, arguments );
-	}
-
-	function calcEndDate ( duration ) {
-		var ret = new Date(),
-			mod = duration.slice( -1 ),
-			delta = Number( duration.slice(0, -1) );
-
-		var modifiers = {
-			m : function ( offset ) {
-				ret.setMinutes( ret.getMinutes() + offset );
-			},
-			h : function ( offset ) {
-				ret.setHours( ret.getHours() + offset );
-			},
-			d : function ( offset ) {
-				ret.setDate( ret.getDate() + offset );
-			}
-		};
-		modifiers[ mod ]( delta );
-
-		return ret;
-	}
-}
-
-var galleryMode = {
-	lockIfNeeded : function () {
-		if ( this.roomInGallery() ) {
-			bot.log('room already in gallery');
-			return;
-		}
-
-		bot.log('locking room');
-		this.lockRoom();
-	},
-
-	lockRoom : function () {
-		IO.xhr({
-			method : 'POST',
-			url : '/rooms/save',
-			data : fkey({
-				defaultAccess : 'read-only',
-				roomId : ownerRoom // implied state. change to variable?
-			}),
-
-			complete : finish
-		});
-
-		// Not much to do here, tbh...we'd probably get a refresh by the time
-		//this fires. Should probably do error checking.
-		function finish () {}
-	},
-
-	// Room should get locked if it's not already in gallery mode.
-	roomInGallery : function () {
-		var lockButtonClass = 'sprite-sec-gallery';
-		return document.getElementsByClassName( lockButtonClass ).length;
-	},
-
-	unlockIfNeeded : function () {
-		if ( !this.shouldUnlockRoom() ) {
-			bot.log('not unlocking room');
-			return;
-		}
-
-		bot.log( 'unlocking room' );
-		this.unlockRoom();
-	},
-
-	unlockRoom : function () {
-		IO.xhr({
-			method : 'POST',
-			url : '/rooms/save',
-			data : fkey({
-				defaultAccess : 'read-write',
-				roomId : ownerRoom // Again implied state.
-			}),
-
-			complete : finish
-		});
-
-		// Again, not much to do.
-		function finish () {}
-	},
-
-	// Room should be unlocked if there aren't any more muted users and we're
-    //locked.
-	shouldUnlockRoom : function () {
-		return this.roomInGallery() && !( Object.keys(muted).length );
-	}
-};
-
-IO.register( 'userregister', function permissionCb ( user, room ) {
-	bot.log( user, room, 'permissionCb' );
-	var id = user.id;
-
-	if ( Number(room) !== ownerRoom || bot.isOwner(id) || muted[id] ) {
-		bot.log( 'not giving voice', user, room );
-		return;
-	}
-
-	giveVoice( id );
-});
-
-function stringMuteList () {
-	var users = Object.keys( muted );
-
-	if ( !users.length ) {
-		return 'Nobody is muted';
-	}
-
-	var base = 'http://chat.stackoverflow.com/transcript/message/';
-
-	return users.map(function ( user ) {
-		var info = muted[ user ],
-
-			remaining = remainingDuration( info.endDate ),
-			strung = remaining ? '(' + remaining + ')' : '',
-
-			text = user + strung;
-
-		return bot.adapter.link( text, base + info.invokingId );
-	}).join( '; ' );
-}
-
-function userInfoFromParam ( param, args ) {
-	var ret = {
-		id : param
-	};
-
-	if ( /\D/.test(param) ) {
-		ret.id = args.findUserId( param );
-	}
-
-	if ( ret.id < 0 ) {
-		ret.error = 'User ' + param + ' not found';
-	}
-
-	return ret;
-}
-
-function parseDuration ( str ) {
-	var parts = /\d+([dhm]?)/.exec( str );
-	if ( !parts ) {
-		return null;
-	}
-
-	if ( !parts[1] ) {
-		parts[ 0 ] += 'm';
-	}
-	return parts[ 0 ];
-}
-
-function remainingDuration ( future ) {
-	var now = Date.now();
-
-	if ( future < now ) {
-		return;
-	}
-	var delta	= new Date( future - now ),
-		days	= delta.getUTCDate(),
-		hours	= delta.getUTCHours(),
-		minutes = delta.getUTCMinutes(),
-		seconds = delta.getUTCSeconds();
-
-	if ( days > 1 ) {
-		return ( days - 1 ) + 'd ' + hours + 'h';
-	}
-	else if ( hours > 0 ) {
-		return hours + 'h ' + minutes + 'm';
-	}
-
-	return minutes + 'm ' + seconds + 's';
-}
-
-bot.addCommand({
-	name : 'mute',
-	fun : function mute ( args ) {
-		var parts = args.parse(),
-			userInfo, duration;
-
-		if ( !parts.length ) {
-			return stringMuteList();
-		}
-		else if ( parts.length < 2 ) {
-			return 'Please give mute duration, see `/help mute`';
-		}
-
-		bot.log( parts, '/mute input' );
-
-		userInfo = userInfoFromParam( parts[0], args );
-		if ( userInfo.error ) {
-			return userInfo.error;
-		}
-		else if ( userInfo.id === bot.adapter.user_id ) {
-			return 'Never try and mute a bot which can own your ass.';
-		}
-		else if ( bot.isOwner(userInfo.id) ) {
-			return 'You probably didn\'t want to mute a room owner.';
-		}
-
-		duration = parseDuration( parts[1] );
-		if ( !duration ) {
-			return 'I don\'t know how to follow that format, see `/help mute`';
-		}
-
-		takeVoice({
-			id : userInfo.id,
-			invokingId : args.get('message_id'),
-			duration : duration
-		}, finish );
-
-		function finish () {
-			args.reply(
-				'Muted user {0} for {1}'.supplant(userInfo.id, duration) );
-			galleryMode.lockIfNeeded();
-		}
-	},
-
-	permissions : {
-		del : 'NONE',
-		use : 'OWNER'
-	},
-	description : 'Mutes a user. `/mute usrid duration` ' +
-		'Duration should be in the format `n[mhd]` for n minutes/hours/days. ' +
-		'If only n is provided, minutes is assumed.'
-});
-
-bot.addCommand({
-	name : 'unmute',
-	fun : function umute ( args ) {
-		var parts = args.parse();
-
-		bot.log( parts, '/unmute input' );
-
-		if ( !parts.length ) {
-			return 'Who shall I unmute?';
-		}
-
-		var userID = userInfoFromParam( parts[0], args );
-		if ( userID.error ) {
-			return userID.error;
-		}
-
-		giveVoice( userID.id, finish );
-
-		function finish () {
-			args.reply( 'Unmuted user ' + userID.id );
-			galleryMode.unlockIfNeeded();
-		}
-	},
-
-	permissions : {
-		del : 'NONE',
-		use : 'OWNER'
-	},
-	description : 'Unmutes a user. `/unmute usrid`'
-});
-
-})();
 
 ;
 (function () {
