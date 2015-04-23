@@ -574,6 +574,13 @@ Function.prototype.memoizeAsync = function ( hasher ) {
 	};
 };
 
+//returns the function in string-form, without the enclosing crap.
+Function.prototype.stringContents = function () {
+	return this.toString()
+		.replace(/^function\*?\s+\([^)]*\)\s*\{/, '')
+		.replace(/\}$/, '');
+};
+
 //returns the number with at most `places` digits after the dot
 //examples:
 // 1.337.maxDecimal(1) === 1.3
@@ -756,7 +763,7 @@ var bot = window.bot = {
 		try {
 			//it wants to execute some code
 			if ( /^c?>/.test(msg) ) {
-				this.eval( msg.toString(), msg.directreply.bind(msg) );
+				this.prettyEval( msg.toString(), msg.directreply.bind(msg) );
 			}
 			//or maybe some other action.
 			else {
@@ -1088,9 +1095,10 @@ bot.Command = function ( cmd ) {
 			else if ( canDo === 'NONE' ) {
 				return false;
 			}
-			else if ( canDo === 'OWNER' ) {
-				return bot.isOwner( usrid );
+			else if ( bot.isOwner(usrid) ) {
+				return true;
 			}
+
 			return canDo.indexOf( usrid ) > -1;
 		};
 	});
@@ -1264,41 +1272,264 @@ bot.isOwner = function ( usrid ) {
 
 IO.register( 'input', bot.parseMessage, bot );
 
-//execute arbitrary js code in a relatively safe environment
-bot.eval = (function () {
-
-//translation tool: http://tinkerbin.heroku.com/84dPpGFr
-//just a base64 encode of codeWorker.js
-var workerCode = atob( 'dmFyIGdsb2JhbCA9IHRoaXM7CgovKm1vc3QgZXh0cmEgZnVuY3Rpb25zIGNvdWxkIGJlIHBvc3NpYmx5IHVuc2FmZSovCnZhciB3aGl0ZXkgPSB7CgknQXJyYXknICAgICAgICAgICAgICA6IDEsCgknQm9vbGVhbicgICAgICAgICAgICA6IDEsCgknRGF0ZScgICAgICAgICAgICAgICA6IDEsCgknRXJyb3InICAgICAgICAgICAgICA6IDEsCgknRXZhbEVycm9yJyAgICAgICAgICA6IDEsCgknRnVuY3Rpb24nICAgICAgICAgICA6IDEsCgknSW5maW5pdHknICAgICAgICAgICA6IDEsCgknSlNPTicgICAgICAgICAgICAgICA6IDEsCgknTWFwJyAgICAgICAgICAgICAgICA6IDEsCgknTWF0aCcgICAgICAgICAgICAgICA6IDEsCgknTmFOJyAgICAgICAgICAgICAgICA6IDEsCgknTnVtYmVyJyAgICAgICAgICAgICA6IDEsCgknT2JqZWN0JyAgICAgICAgICAgICA6IDEsCgknUHJvbWlzZScgICAgICAgICAgICA6IDEsCgknUHJveHknICAgICAgICAgICAgICA6IDEsCgknUmFuZ2VFcnJvcicgICAgICAgICA6IDEsCgknUmVmZXJlbmNlRXJyb3InICAgICA6IDEsCgknUmVnRXhwJyAgICAgICAgICAgICA6IDEsCgknU2V0JyAgICAgICAgICAgICAgICA6IDEsCgknU3RyaW5nJyAgICAgICAgICAgICA6IDEsCgknU3ludGF4RXJyb3InICAgICAgICA6IDEsCgknVHlwZUVycm9yJyAgICAgICAgICA6IDEsCgknVVJJRXJyb3InICAgICAgICAgICA6IDEsCgknV2Vha01hcCcgICAgICAgICAgICA6IDEsCgknV2Vha1NldCcgICAgICAgICAgICA6IDEsCgknYXRvYicgICAgICAgICAgICAgICA6IDEsCgknYnRvYScgICAgICAgICAgICAgICA6IDEsCgknY29uc29sZScgICAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJJyAgICAgICAgICA6IDEsCgknZGVjb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZW5jb2RlVVJJJyAgICAgICAgICA6IDEsCgknZW5jb2RlVVJJQ29tcG9uZW50JyA6IDEsCgknZXZhbCcgICAgICAgICAgICAgICA6IDEsCgknZXhlYycgICAgICAgICAgICAgICA6IDEsIC8qIG91ciBvd24gZnVuY3Rpb24gKi8KCSdnbG9iYWwnICAgICAgICAgICAgIDogMSwKCSdpc0Zpbml0ZScgICAgICAgICAgIDogMSwKCSdpc05hTicgICAgICAgICAgICAgIDogMSwKCSdvbm1lc3NhZ2UnICAgICAgICAgIDogMSwKCSdwYXJzZUZsb2F0JyAgICAgICAgIDogMSwKCSdwYXJzZUludCcgICAgICAgICAgIDogMSwKCSdwb3N0TWVzc2FnZScgICAgICAgIDogMSwKCSdzZWxmJyAgICAgICAgICAgICAgIDogMSwKCSd1bmRlZmluZWQnICAgICAgICAgIDogMSwKCSd3aGl0ZXknICAgICAgICAgICAgIDogMSwKCgkvKiB0eXBlZCBhcnJheXMgYW5kIHNoaXQgKi8KCSdBcnJheUJ1ZmZlcicgICAgICAgOiAxLAoJJ0Jsb2InICAgICAgICAgICAgICA6IDEsCgknRmxvYXQzMkFycmF5JyAgICAgIDogMSwKCSdGbG9hdDY0QXJyYXknICAgICAgOiAxLAoJJ0ludDhBcnJheScgICAgICAgICA6IDEsCgknSW50MTZBcnJheScgICAgICAgIDogMSwKCSdJbnQzMkFycmF5JyAgICAgICAgOiAxLAoJJ1VpbnQ4QXJyYXknICAgICAgICA6IDEsCgknVWludDE2QXJyYXknICAgICAgIDogMSwKCSdVaW50MzJBcnJheScgICAgICAgOiAxLAoJJ1VpbnQ4Q2xhbXBlZEFycmF5JyA6IDEsCgoJLyoKCSB0aGVzZSBwcm9wZXJ0aWVzIGFsbG93IEZGIHRvIGZ1bmN0aW9uLiB3aXRob3V0IHRoZW0sIGEgZnVja2Zlc3Qgb2YKCSBpbmV4cGxpY2FibGUgZXJyb3JzIGVudXNlcy4gdG9vayBtZSBhYm91dCA0IGhvdXJzIHRvIHRyYWNrIHRoZXNlIGZ1Y2tlcnMKCSBkb3duLgoJIGZ1Y2sgaGVsbCBpdCBpc24ndCBmdXR1cmUtcHJvb2YsIGJ1dCB0aGUgZXJyb3JzIHRocm93biBhcmUgdW5jYXRjaGFibGUKCSBhbmQgdW50cmFjYWJsZS4gc28gYSBoZWFkcy11cC4gZW5qb3ksIGZ1dHVyZS1tZSEKCSAqLwoJJ0RPTUV4Y2VwdGlvbicgICAgICA6IDEsCgknRXZlbnQnICAgICAgICAgICAgIDogMSwKCSdNZXNzYWdlRXZlbnQnICAgICAgOiAxLAoJJ1dvcmtlck1lc3NhZ2VFdmVudCc6IDEKfTsKClsgZ2xvYmFsLCBPYmplY3QuZ2V0UHJvdG90eXBlT2YoZ2xvYmFsKSBdLmZvckVhY2goZnVuY3Rpb24gKCBvYmogKSB7CglPYmplY3QuZ2V0T3duUHJvcGVydHlOYW1lcyggb2JqICkuZm9yRWFjaChmdW5jdGlvbiggcHJvcCApIHsKCQlpZiggd2hpdGV5Lmhhc093blByb3BlcnR5KHByb3ApICkgewoJCQlyZXR1cm47CgkJfQoKCQl0cnkgewoJCQlPYmplY3QuZGVmaW5lUHJvcGVydHkoIG9iaiwgcHJvcCwgewoJCQkJZ2V0IDogZnVuY3Rpb24gKCkgewoJCQkJCS8qIFRFRSBIRUUgKi8KCQkJCQl0aHJvdyBuZXcgUmVmZXJlbmNlRXJyb3IoIHByb3AgKyAnIGlzIG5vdCBkZWZpbmVkJyApOwoJCQkJfSwKCQkJCWNvbmZpZ3VyYWJsZSA6IGZhbHNlLAoJCQkJZW51bWVyYWJsZSA6IGZhbHNlCgkJCX0pOwoJCX0KCQljYXRjaCAoIGUgKSB7CgkJCWRlbGV0ZSBvYmpbIHByb3AgXTsKCgkJCWlmICggb2JqWyBwcm9wIF0gIT09IHVuZGVmaW5lZCApIHsKCQkJCW9ialsgcHJvcCBdID0gbnVsbDsKCQkJfQoJCX0KCX0pOwp9KTsKCk9iamVjdC5kZWZpbmVQcm9wZXJ0eSggQXJyYXkucHJvdG90eXBlLCAnam9pbicsIHsKCXdyaXRhYmxlOiBmYWxzZSwKCWNvbmZpZ3VyYWJsZTogZmFsc2UsCgllbnVtcmFibGU6IGZhbHNlLAoKCXZhbHVlOiAoZnVuY3Rpb24gKCBvbGQgKSB7CgkJcmV0dXJuIGZ1bmN0aW9uICggYXJnICkgewoJCQlpZiAoIHRoaXMubGVuZ3RoID4gNTAwIHx8IChhcmcgJiYgYXJnLmxlbmd0aCA+IDUwMCkgKSB7CgkJCQl0aHJvdyAnRXhjZXB0aW9uOiB0b28gbWFueSBpdGVtcyc7CgkJCX0KCgkJCXJldHVybiBvbGQuYXBwbHkoIHRoaXMsIGFyZ3VtZW50cyApOwoJCX07Cgl9KCBBcnJheS5wcm90b3R5cGUuam9pbiApKQp9KTsKCgovKiB3ZSBkZWZpbmUgaXQgb3V0c2lkZSBzbyBpdCdsbCBub3QgYmUgaW4gc3RyaWN0IG1vZGUgKi8KdmFyIGV4ZWMgPSBmdW5jdGlvbiAoIGNvZGUgKSB7CglyZXR1cm4gZXZhbCggJ3VuZGVmaW5lZDtcbicgKyBjb2RlICk7Cn07CnZhciBjb25zb2xlID0gewoJX2l0ZW1zIDogW10sCglsb2cgOiBmdW5jdGlvbigpIHsKCQljb25zb2xlLl9pdGVtcy5wdXNoLmFwcGx5KCBjb25zb2xlLl9pdGVtcywgYXJndW1lbnRzICk7Cgl9Cn07CmNvbnNvbGUuZXJyb3IgPSBjb25zb2xlLmluZm8gPSBjb25zb2xlLmRlYnVnID0gY29uc29sZS5sb2c7CgooZnVuY3Rpb24oKSB7CgkidXNlIHN0cmljdCI7CgoJZ2xvYmFsLm9ubWVzc2FnZSA9IGZ1bmN0aW9uICggZXZlbnQgKSB7CgkJZ2xvYmFsLnBvc3RNZXNzYWdlKHsKCQkJZXZlbnQgOiAnc3RhcnQnCgkJfSk7CgoJCXZhciBqc29uU3RyaW5naWZ5ID0gSlNPTi5zdHJpbmdpZnksIC8qYmFja3VwKi8KCQkJcmVzdWx0LAoKCQkJb3JpZ2luYWxTZXRUaW1lb3V0ID0gc2V0VGltZW91dCwKCQkJdGltZW91dENvdW50ZXIgPSAwOwoKCQl2YXIgc2VuZFJlc3VsdCA9IGZ1bmN0aW9uICggcmVzdWx0ICkgewoJCQlnbG9iYWwucG9zdE1lc3NhZ2UoewoJCQkJYW5zd2VyIDoganNvblN0cmluZ2lmeSggcmVzdWx0LCByZXZpdmVyICksCgkJCQlsb2cgICAgOiBqc29uU3RyaW5naWZ5KCBjb25zb2xlLl9pdGVtcywgcmV2aXZlciApLnNsaWNlKCAxLCAtMSApCgkJCX0pOwoJCX07CgkJdmFyIGRvbmUgPSBmdW5jdGlvbiAoIHJlc3VsdCApIHsKCQkJaWYgKCB0aW1lb3V0Q291bnRlciA8IDEgKSB7CgkJCQlzZW5kUmVzdWx0KCByZXN1bHQgKTsKCQkJfQoJCX07CgoJCXZhciByZXZpdmVyID0gZnVuY3Rpb24gKCBrZXksIHZhbHVlICkgewoJCQl2YXIgb3V0cHV0OwoKCQkJaWYgKCBzaG91bGRTdHJpbmcodmFsdWUpICkgewoJCQkJb3V0cHV0ID0gJycgKyB2YWx1ZTsKCQkJfQoJCQllbHNlIHsKCQkJCW91dHB1dCA9IHZhbHVlOwoJCQl9CgoJCQlyZXR1cm4gb3V0cHV0OwoJCX07CgoJCS8qSlNPTiBkb2VzIG5vdCBsaWtlIGFueSBvZiB0aGUgZm9sbG93aW5nKi8KCQl2YXIgc3RydW5nID0gewoJCQlGdW5jdGlvbiAgOiB0cnVlLCBFcnJvcgkgOiB0cnVlLAoJCQlVbmRlZmluZWQgOiB0cnVlLCBSZWdFeHAgOiB0cnVlCgkJfTsKCQl2YXIgc2hvdWxkU3RyaW5nID0gZnVuY3Rpb24gKCB2YWx1ZSApIHsKCQkJdmFyIHR5cGUgPSAoIHt9ICkudG9TdHJpbmcuY2FsbCggdmFsdWUgKS5zbGljZSggOCwgLTEgKTsKCgkJCWlmICggdHlwZSBpbiBzdHJ1bmcgKSB7CgkJCQlyZXR1cm4gdHJ1ZTsKCQkJfQoJCQkvKm5laXRoZXIgZG9lcyBpdCBmZWVsIGNvbXBhc3Npb25hdGUgYWJvdXQgTmFOIG9yIEluZmluaXR5Ki8KCQkJcmV0dXJuIHZhbHVlICE9PSB2YWx1ZSB8fCB2YWx1ZSA9PT0gSW5maW5pdHk7CgkJfTsKCgkJc2VsZi5zZXRUaW1lb3V0ID0gZnVuY3Rpb24gKGNiKSB7CgkJCS8qYmVjYXVzZSBvZiBTb21lS2l0dGVucyovCgkJCWlmICghY2IpIHsKCQkJCXJldHVybjsKCQkJfQoKCQkJdmFyIGFyZ3MgPSBbXS5zbGljZS5jYWxsKCBhcmd1bWVudHMgKTsKCQkJYXJnc1sgMCBdID0gd3JhcHBlcjsKCQkJdGltZW91dENvdW50ZXIgKz0gMTsKCgkJCW9yaWdpbmFsU2V0VGltZW91dC5hcHBseSggc2VsZiwgYXJncyApOwoKCQkJZnVuY3Rpb24gd3JhcHBlciAoKSB7CgkJCQl0aW1lb3V0Q291bnRlciAtPSAxOwoJCQkJY2IuYXBwbHkoIHNlbGYsIGFyZ3VtZW50cyApOwoKCQkJCWRvbmUoKTsKCQkJfQoJCX07CgoJCXRyeSB7CgkJCXJlc3VsdCA9IGV4ZWMoIGV2ZW50LmRhdGEgKTsKCQl9CgkJY2F0Y2ggKCBlICkgewoJCQlyZXN1bHQgPSBlLnRvU3RyaW5nKCk7CgkJfQoKCQkvKmhhbmRsZSBwcm9taXNlcyBhcHByb3ByaWF0ZWx5Ki8KCQlpZiAoIHJlc3VsdCAmJiByZXN1bHQudGhlbiAmJiByZXN1bHQuY2F0Y2ggKSB7CgkJCXJlc3VsdC50aGVuKCBkb25lICkuY2F0Y2goIGRvbmUgKTsKCQl9CgkJZWxzZSB7CgkJCWRvbmUoIHJlc3VsdCApOwoJCX0KCX07Cn0pKCk7Cg==' );
-
-var blob = new Blob( [workerCode], { type : 'application/javascript' } ),
-	codeUrl = window.URL.createObjectURL( blob );
-
+//load up coffeescript if we're not in dev mdoe
 setTimeout(function () {
 	if (bot.devMode) {
 		return;
 	}
-	IO.injectScript( 'https://raw.github.com/jashkenas/coffee-script/master/extras/coffee-script.js' );
+
+	IO.injectScript( 'https://rawgithub.com/jashkenas/coffee-script/master/extras/coffee-script.js' );
 }, 1000);
 
-return function ( code, cb ) {
+//execute arbitrary js code in a relatively safe environment
+bot.eval = (function () {
+
+var workerCode = function () {
+var global = this;
+
+/*most extra functions could be possibly unsafe*/
+var whitey = {
+	'Array'              : 1,
+	'Boolean'            : 1,
+	'Date'               : 1,
+	'Error'              : 1,
+	'EvalError'          : 1,
+	'Function'           : 1,
+	'Infinity'           : 1,
+	'JSON'               : 1,
+	'Map'                : 1,
+	'Math'               : 1,
+	'NaN'                : 1,
+	'Number'             : 1,
+	'Object'             : 1,
+	'Promise'            : 1,
+	'Proxy'              : 1,
+	'RangeError'         : 1,
+	'ReferenceError'     : 1,
+	'RegExp'             : 1,
+	'Set'                : 1,
+	'String'             : 1,
+	'SyntaxError'        : 1,
+	'TypeError'          : 1,
+	'URIError'           : 1,
+	'WeakMap'            : 1,
+	'WeakSet'            : 1,
+	'atob'               : 1,
+	'btoa'               : 1,
+	'console'            : 1,
+	'decodeURI'          : 1,
+	'decodeURIComponent' : 1,
+	'encodeURI'          : 1,
+	'encodeURIComponent' : 1,
+	'eval'               : 1,
+	'exec'               : 1, /* our own function */
+	'global'             : 1,
+	'isFinite'           : 1,
+	'isNaN'              : 1,
+	'onmessage'          : 1,
+	'parseFloat'         : 1,
+	'parseInt'           : 1,
+	'postMessage'        : 1,
+	'self'               : 1,
+	'undefined'          : 1,
+	'whitey'             : 1,
+
+	/* typed arrays and shit */
+	'ArrayBuffer'       : 1,
+	'Blob'              : 1,
+	'Float32Array'      : 1,
+	'Float64Array'      : 1,
+	'Int8Array'         : 1,
+	'Int16Array'        : 1,
+	'Int32Array'        : 1,
+	'Uint8Array'        : 1,
+	'Uint16Array'       : 1,
+	'Uint32Array'       : 1,
+	'Uint8ClampedArray' : 1,
+
+	/*
+	 these properties allow FF to function. without them, a fuckfest of
+	 inexplicable errors enuses. took me about 4 hours to track these fuckers
+	 down.
+	 fuck hell it isn't future-proof, but the errors thrown are uncatchable
+	 and untracable. so a heads-up. enjoy, future-me!
+	 */
+	'DOMException'      : 1,
+	'Event'             : 1,
+	'MessageEvent'      : 1,
+	'WorkerMessageEvent': 1
+};
+
+[ global, Object.getPrototypeOf(global) ].forEach(function ( obj ) {
+	Object.getOwnPropertyNames( obj ).forEach(function( prop ) {
+		if( whitey.hasOwnProperty(prop) ) {
+			return;
+		}
+
+		try {
+			Object.defineProperty( obj, prop, {
+				get : function () {
+					/* TEE HEE */
+					throw new ReferenceError( prop + ' is not defined' );
+				},
+				configurable : false,
+				enumerable : false
+			});
+		}
+		catch ( e ) {
+			delete obj[ prop ];
+
+			if ( obj[ prop ] !== undefined ) {
+				obj[ prop ] = null;
+			}
+		}
+	});
+});
+
+Object.defineProperty( Array.prototype, 'join', {
+	writable: false,
+	configurable: false,
+	enumrable: false,
+
+	value: (function ( old ) {
+		return function ( arg ) {
+			if ( this.length > 500 || (arg && arg.length > 500) ) {
+				throw 'Exception: too many items';
+			}
+
+			return old.apply( this, arguments );
+		};
+	}( Array.prototype.join ))
+});
+
+
+/* we define it outside so it'll not be in strict mode */
+var exec = function ( code, arg ) {
+	return eval( 'undefined;\n' + code );
+};
+var console = {
+	_items : [],
+	log : function() {
+		console._items.push.apply( console._items, arguments );
+	}
+};
+console.error = console.info = console.debug = console.log;
+
+(function() {
+	"use strict";
+
+	global.onmessage = function ( event ) {
+		global.postMessage({
+			event : 'start'
+		});
+
+		var jsonStringify = JSON.stringify, /*backup*/
+			result,
+
+			originalSetTimeout = setTimeout,
+			timeoutCounter = 0;
+
+		var sendResult = function ( result ) {
+			global.postMessage({
+				answer : jsonStringify( result, reviver ),
+				log    : jsonStringify( console._items, reviver ).slice( 1, -1 )
+			});
+		};
+		var done = function ( result ) {
+			if ( timeoutCounter < 1 ) {
+				sendResult( result );
+			}
+		};
+
+		var reviver = function ( key, value ) {
+			var output;
+
+			if ( shouldString(value) ) {
+				output = '' + value;
+			}
+			else {
+				output = value;
+			}
+
+			return output;
+		};
+
+		/*JSON does not like any of the following*/
+		var strung = {
+			Function  : true, Error	 : true,
+			Undefined : true, RegExp : true
+		};
+		var shouldString = function ( value ) {
+			var type = ( {} ).toString.call( value ).slice( 8, -1 );
+
+			if ( type in strung ) {
+				return true;
+			}
+			/*neither does it feel compassionate about NaN or Infinity*/
+			return value !== value || value === Infinity;
+		};
+
+		self.setTimeout = function (cb) {
+			/*because of SomeKittens*/
+			if (!cb) {
+				return;
+			}
+
+			var args = [].slice.call( arguments );
+			args[ 0 ] = wrapper;
+			timeoutCounter += 1;
+
+			originalSetTimeout.apply( self, args );
+
+			function wrapper () {
+				timeoutCounter -= 1;
+				cb.apply( self, arguments );
+
+				done();
+			}
+		};
+
+		try {
+			result = exec( event.data.code, event.data.arg );
+		}
+		catch ( e ) {
+			result = e.toString();
+		}
+
+		/*handle promises appropriately*/
+		if ( result && result.then && result.catch ) {
+			result.then( done ).catch( done );
+		}
+		else {
+			done( result );
+		}
+	};
+})();
+
+}.stringContents();
+
+var blob = new Blob( [workerCode], { type : 'application/javascript' } ),
+	codeUrl = window.URL.createObjectURL( blob );
+
+return function ( code, arg, cb ) {
+	if ( arguments.length === 2 ) {
+		cb  = arg;
+		arg = null;
+	}
+
 	var worker = new Worker( codeUrl ),
 		timeout;
 
-	if ( code[0] === 'c' ) {
-		code = CoffeeScript.compile( code.replace(/^c>/, ''), {bare:1} );
-	}
-	else {
-		code = code.replace( /^>/, '' );
-	}
-
 	worker.onmessage = function ( evt ) {
+		bot.log( evt, 'eval worker.onmessage' );
+
 		var type = evt.data.event;
+
 		if ( type === 'start' ) {
 			start();
 		}
 		else {
-			finish( dressUpAnswer(evt.data) );
+			finish( null, evt.data );
 		}
 	};
 
@@ -1308,7 +1539,10 @@ return function ( code, cb ) {
 	};
 
 	//and it all boils down to this...
-	worker.postMessage( code );
+	worker.postMessage({
+		code : code,
+		arg  : arg
+	});
 	//so fucking cool.
 
 	function start () {
@@ -1321,12 +1555,12 @@ return function ( code, cb ) {
 		}, 500 );
 	}
 
-	function finish ( result ) {
+	function finish ( err, result ) {
 		clearTimeout( timeout );
 		worker.terminate();
 
 		if ( cb && cb.call ) {
-			cb( result );
+			cb( err, result );
 		}
 		else {
 			console.warn( 'eval did not get callback' );
@@ -1334,40 +1568,66 @@ return function ( code, cb ) {
 	}
 };
 
-function dressUpAnswer ( answerObj ) {
-	bot.log( answerObj, 'eval answerObj' );
-	var answer = answerObj.answer,
-		log = answerObj.log,
-		result;
+}());
 
-	if ( answer === undefined ) {
-		return 'Malformed output from web-worker. If you weren\'t just ' +
-			'fooling around trying to break me, raise an issue or contact ' +
-			'Zirak';
+bot.prettyEval = function ( code, arg, cb ) {
+	if ( arguments.length === 2 ) {
+		cb  = arg;
+		arg = null;
 	}
 
-	result = snipAndCodify( answer );
-
-	if ( log && log.length ) {
-		result += ' Logged: ' + snipAndCodify( log );
-	}
-
-	return result;
-}
-
-function snipAndCodify ( str ) {
-	var ret;
-
-	if ( str.length > 400 ) {
-		ret = '`' +	 str.slice(0, 400) + '` (snip)';
+	if ( code[0] === 'c' ) {
+		code = CoffeeScript.compile( code.replace(/^c>/, ''), {bare:1} );
 	}
 	else {
-		ret = '`' + str +'`';
+		code = code.replace( /^>/, '' );
 	}
 
-	return ret;
-}
-}());
+	return bot.eval( code, arg, finish );
+
+	function finish ( err, answerObj ) {
+		if ( err ) {
+			cb( err );
+		}
+		else {
+			cb( dressUpAnswer(answerObj) );
+		}
+	}
+
+	function dressUpAnswer ( answerObj ) {
+		bot.log( answerObj, 'eval answerObj' );
+		var answer = answerObj.answer,
+			log = answerObj.log,
+			result;
+
+		if ( answer === undefined ) {
+			return 'Malformed output from web-worker. If you weren\'t just ' +
+				'fooling around trying to break me, raise an issue or contact ' +
+				'Zirak';
+		}
+
+		result = snipAndCodify( answer );
+
+		if ( log && log.length ) {
+			result += ' Logged: ' + snipAndCodify( log );
+		}
+
+		return result;
+	}
+
+	function snipAndCodify ( str ) {
+		var ret;
+
+		if ( str.length > 400 ) {
+			ret = '`' + str.slice(0, 400) + '` (snip)';
+		}
+		else {
+			ret = '`' + str +'`';
+		}
+
+		return ret;
+	}
+};
 
 
 (function () {
@@ -1462,10 +1722,9 @@ var macros = {
 
 		//the chat keeps a low opacity for users who remained silent for long,
 		// and high opacity for those who recently talked
-		var active = [].filter.call( presentUsers, function ( user ) {
+		var user = Array.filter( presentUsers, function ( user ) {
 			return Number( user.style.opacity ) >= 0.5;
-		}),
-		user = active[ Math.floor(Math.random() * (active.length-1)) ];
+		}).random();
 
 		if ( !user ) {
 			return 'Nobody';
@@ -1485,8 +1744,21 @@ var macros = {
 	//random number, min <= n <= max
 	//treats non-numeric inputs like they don't exist
 	rand : function ( msgObj, min, max ) {
-		min = Number( min );
-		max = Number( max );
+		// rand() === rand( 0, 10 )
+		if ( !min ) {
+			min = 0;
+			max = 10;
+		}
+		// rand( max ) === rand( 0, max )
+		else if ( !max ) {
+			max = min;
+			min = 0;
+		}
+		else {
+			min = Number( min );
+			max = Number( max );
+		}
+
 		return Math.rand( min, max );
 	}
 };
@@ -1535,10 +1807,8 @@ bot.parseMacro = function parse ( source, extraVars ) {
 
 		//parse the arguments, split them into individual arguments,
 		// and trim'em (to cover the case of "arg,arg" and "arg, arg")
-		return (
-			[ source ].concat(
-				parse( macroArgs, extraVars )
-					.split( ',' ).invoke( 'trim' ) ) );
+		var parsedArgs = parse( macroArgs, extraVars );
+		return [ source ].concat( parsedArgs.split(',').invoke('trim') );
 		//this is not good code
 	}
 
@@ -1766,7 +2036,7 @@ var commands = {
 	eval : function ( msg, cb ) {
 		cb = cb || msg.directreply.bind( msg );
 
-		return bot.eval( msg, cb );
+		return bot.prettyEval( msg, cb );
 	},
 	coffee : function ( msg, cb ) {
 		//yes, this is a bit yucky
@@ -2890,33 +3160,6 @@ bot.listen(
 bot.listen( /^bitch/i, bot.personality.bitch, bot.personality );
 
 ;
-(function () {
-var hammers = {
-	STOP  : 'HAMMERTIME!',
-	STAHP : 'HAMMAHTIME!',
-	HALT  : 'HAMMERZEIT!',
-	STOY  : 'ZABIVAT\' VREMYA!',
-	SISTITE: 'MALLEUS TEMPUS!'
-};
-
-// /(STOP|STAHP|...)[\.!\?]?$/
-var re = new RegExp(
-	'(' +
-		Object.keys(hammers).map(RegExp.escape).join('|') +
-	')[\\.!?]?$' );
-
-IO.register( 'input', function STOP ( msgObj ) {
-	var sentence = msgObj.content.toUpperCase(),
-		res = re.exec( sentence );
-
-	if ( res ) {
-		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
-	}
-});
-
-})();
-
-;
 //solves #86, mostly written by @Shmiddty
 (function () {
 "use strict";
@@ -3340,32 +3583,40 @@ var converters = {
 	C : function ( c ) {
 		return {
 			F : c * 1.8 + 32, // 9/5 = 1.8
-			K : c + 273.15 };
+			K : c + 273.15
+		};
 	},
 	F : function ( f ) {
 		return {
 			C : (f - 32) / 1.8,
-			K : (f + 459.67) * 5 / 9 };
+			K : (f + 459.67) * 5 / 9
+		};
 	},
 	K : function ( k ) {
 		if ( k < 0 ) {
-			return null;
+			return {
+				C : 0,
+				F : 0
+			};
 		}
 
 		return {
 			C : k - 273.15,
-			F : k * 1.8 - 459.67 };
+			F : k * 1.8 - 459.67
+		};
 	},
 
 	//lengths
 	//1m = 3.2808(...)f
 	m : function ( m ) {
 		return {
-			f : m * 3.280839895 };
+			f : m * 3.280839895
+		};
 	},
 	f : function ( f ) {
 		return {
-			m : f / 3.28083989 };
+			m : f / 3.28083989
+		};
 	},
 
 	//km: 1m = 1km * 1000
@@ -3388,11 +3639,13 @@ var converters = {
 	//angles
 	d : function ( d ) {
 		return {
-			r : d * Math.PI / 180 };
+			r : d * Math.PI / 180
+		};
 	},
 	r : function ( r ) {
 		return {
-			d : r * 180 / Math.PI };
+			d : r * 180 / Math.PI
+		};
 	},
 
 	//weights
@@ -3400,18 +3653,21 @@ var converters = {
 		return {
 			lb : g * 0.0022,
 			//the following will be horribly inaccurate
-			st : g * 0.000157473 };
+			st : g * 0.000157473
+		};
 	},
 	lb : function ( lb ) {
 		return {
 			g : lb * 453.592,
-			st : lb * 0.0714286 };
+			st : lb * 0.0714286
+		};
 	},
 	//stones: 1st = 6350g = 14lb
 	st : function ( st ) {
 		return {
 			g : st * 6350.29,
-			lb : st * 14 };
+			lb : st * 14
+		};
 	},
 
 	//kg: 1g = 1kg * 1000
@@ -3437,106 +3693,106 @@ var longNames = {
 
 var currencies, symbols; //to be filled in next line by build
 /* acquired by going to google.com/finance/converter and running
-JSON.stringify([].map.call(f.from.options, function (e) { return e.value; }, {}), null, 4)
+JSON.stringify([].reduce.call(f.from.options, function (r, e) { return (r[e.value] = true, r); }, {}), null, 4)
 for some reason, NIS (New Israeli Shekel) does not appear there, only ILS,
 despite Google accepting both. it was added manually
 */
-currencies = Object.TruthMap([
-    "AED",
-    "ANG",
-    "ARS",
-    "AUD",
-    "BDT",
-    "BGN",
-    "BHD",
-    "BND",
-    "BOB",
-    "BRL",
-    "BWP",
-    "CAD",
-    "CHF",
-    "CLP",
-    "CNY",
-    "COP",
-    "CRC",
-    "CZK",
-    "DKK",
-    "DOP",
-    "DZD",
-    "EEK",
-    "EGP",
-    "EUR",
-    "FJD",
-    "GBP",
-    "HKD",
-    "HNL",
-    "HRK",
-    "HUF",
-    "IDR",
-    "ILS",
-    "INR",
-    "JMD",
-    "JOD",
-    "JPY",
-    "KES",
-    "KRW",
-    "KWD",
-    "KYD",
-    "KZT",
-    "LBP",
-    "LKR",
-    "LTL",
-    "LVL",
-    "MAD",
-    "MDL",
-    "MKD",
-    "MUR",
-    "MVR",
-    "MXN",
-    "MYR",
-    "NAD",
-    "NGN",
-    "NIO",
-    "NIS",
-    "NOK",
-    "NPR",
-    "NZD",
-    "OMR",
-    "PEN",
-    "PGK",
-    "PHP",
-    "PKR",
-    "PLN",
-    "PYG",
-    "QAR",
-    "RON",
-    "RSD",
-    "RUB",
-    "SAR",
-    "SCR",
-    "SEK",
-    "SGD",
-    "SKK",
-    "SLL",
-    "SVC",
-    "THB",
-    "TND",
-    "TRY",
-    "TTD",
-    "TWD",
-    "TZS",
-    "UAH",
-    "UGX",
-    "USD",
-    "UYU",
-    "UZS",
-    "VEF",
-    "VND",
-    "XOF",
-    "YER",
-    "ZAR",
-    "ZMK"
-]);
+currencies = {
+    "AED": true,
+    "ANG": true,
+    "ARS": true,
+    "AUD": true,
+    "BDT": true,
+    "BGN": true,
+    "BHD": true,
+    "BND": true,
+    "BOB": true,
+    "BRL": true,
+    "BWP": true,
+    "CAD": true,
+    "CHF": true,
+    "CLP": true,
+    "CNY": true,
+    "COP": true,
+    "CRC": true,
+    "CZK": true,
+    "DKK": true,
+    "DOP": true,
+    "DZD": true,
+    "EEK": true,
+    "EGP": true,
+    "EUR": true,
+    "FJD": true,
+    "GBP": true,
+    "HKD": true,
+    "HNL": true,
+    "HRK": true,
+    "HUF": true,
+    "IDR": true,
+    "ILS": true,
+    "INR": true,
+    "JMD": true,
+    "JOD": true,
+    "JPY": true,
+    "KES": true,
+    "KRW": true,
+    "KWD": true,
+    "KYD": true,
+    "KZT": true,
+    "LBP": true,
+    "LKR": true,
+    "LTL": true,
+    "LVL": true,
+    "MAD": true,
+    "MDL": true,
+    "MKD": true,
+    "MUR": true,
+    "MVR": true,
+    "MXN": true,
+    "MYR": true,
+    "NAD": true,
+    "NGN": true,
+    "NIO": true,
+    "NIS": true,
+    "NOK": true,
+    "NPR": true,
+    "NZD": true,
+    "OMR": true,
+    "PEN": true,
+    "PGK": true,
+    "PHP": true,
+    "PKR": true,
+    "PLN": true,
+    "PYG": true,
+    "QAR": true,
+    "RON": true,
+    "RSD": true,
+    "RUB": true,
+    "SAR": true,
+    "SCR": true,
+    "SEK": true,
+    "SGD": true,
+    "SKK": true,
+    "SLL": true,
+    "SVC": true,
+    "THB": true,
+    "TND": true,
+    "TRY": true,
+    "TTD": true,
+    "TWD": true,
+    "TZS": true,
+    "UAH": true,
+    "UGX": true,
+    "USD": true,
+    "UYU": true,
+    "UZS": true,
+    "VEF": true,
+    "VND": true,
+    "XOF": true,
+    "YER": true,
+    "ZAR": true,
+    "ZMK": true
+};
 symbols = {
     //euro €
     "\u20ac" : "EUR",
@@ -3546,9 +3802,9 @@ symbols = {
     //pound sterling ₤
     "\u20a4" : "GBP",
 
-    //indian rupee ₨ (common)
+    //indian rupee ₨
     "\u20a8" : "INR",
-    //indian rupee ₹ (official)
+    //indian rupee ₹
     "\u20b9" : "INR",
 
     //yen ¥
@@ -3718,9 +3974,9 @@ var moneyConverter = {
 
 	getRate : function ( cb ) {
 		var self = this,
-			rate;
+			rate = this.checkCache();
 
-		if ( rate = this.checkCache() ) {
+		if ( rate ) {
 			cb( rate );
 			return;
 		}
@@ -3760,7 +4016,8 @@ var moneyConverter = {
 				//so we won't request again, keep it in memory for 5 hours
 				// 5(hours) = 1000(ms) * 60(seconds)
 				//            * 60(minutes) * 5 = 18000000
-				obj.time - now <= 18e6 );
+				obj.time - now <= 18e6
+		);
 
 		console.log( this.ratesCache, exists );
 
@@ -5301,6 +5558,7 @@ function learn ( args ) {
 		input  : commandParts[ 2 ] || '.*',
 		//meta info
 		creator: args.get( 'user_name' ),
+		creatorID : args.get('user_id' ),
 		date   : new Date()
 	};
 
@@ -5339,7 +5597,8 @@ function addCustomCommand ( command ) {
 		fun : makeCustomCommand( command ),
 		permissions : {
 			use : 'ALL',
-			del : 'ALL'
+			//to fix #171, command.creatorID was added. we need to retain BC
+			del : command.creatorID ? [ command.creatorID ] : 'OWNER'
 		}
 	});
 	cmd.learned = true;
@@ -5480,6 +5739,7 @@ bot.addCommand({
 });
 
 loadCommands();
+
 }());
 
 ;
@@ -6180,6 +6440,33 @@ bot.addCommand( statsCmd );
 
 ;
 (function () {
+var hammers = {
+	STOP  : 'HAMMERTIME!',
+	STAHP : 'HAMMAHTIME!',
+	HALT  : 'HAMMERZEIT!',
+	STOY  : 'ZABIVAT\' VREMYA!',
+	SISTITE: 'MALLEUS TEMPUS!'
+};
+
+// /(STOP|STAHP|...)[\.!\?]?$/
+var re = new RegExp(
+	'(' +
+		Object.keys(hammers).map(RegExp.escape).join('|') +
+	')[\\.!?]?$' );
+
+IO.register( 'input', function STOP ( msgObj ) {
+	var sentence = msgObj.content.toUpperCase(),
+		res = re.exec( sentence );
+
+	if ( res ) {
+		bot.adapter.out.add( hammers[res[1]], msgObj.room_id );
+	}
+});
+
+})();
+
+;
+(function () {
 /*
   ^\s*         #tolerate pre-whitespace
   s            #substitution prefix
@@ -6203,9 +6490,13 @@ bot.addCommand( statsCmd );
   (      #flag capturing group
     g?   #global (optional)
     i?   #case insensitive (optional)
-  )      #FIN
+  )
+  (?:
+    \s+
+    (\d+) #message id
+  )?  #FIN
  */
-var sub = /^\s*s(\/|\|)((?:(?:\\\1)|[^\1])*?)\1((?:(?:\\\1)|[^\1])*?)\1(g?i?)/;
+var sub = /^\s*s(\/|\|)((?:(?:\\\1)|[^\1])*?)\1((?:(?:\\\1)|[^\1])*?)\1(g?i?)(?:\s+(\d+))?/;
 bot.listen( sub, substitute );
 
 function substitute ( msg ) {
@@ -6216,47 +6507,112 @@ function substitute ( msg ) {
 		return 'Empty regex is empty';
 	}
 
-	var message = get_matching_message( re, msg.get('message_id') );
-
-	if ( !message ) {
-		return 'No matching message (are you sure we\'re in the right room?)';
-	}
-	bot.log( message, 'substitution found message' );
-
-	var link = get_message_link( message );
-
-	// #159, check if the message is a partial, has a "(see full text)" link.
-	if ( message.getElementsByClassName('partial').length ) {
-		retrieve_full_text( message, finish );
+	var messages;
+	if ( msg.matches[5] ) {
+		messages = Array.from(
+			document.querySelectorAll('#message-' + msg.matches[5] + ' .content')
+		);
 	}
 	else {
-		return finish( message.textContent );
+		messages = Array.from(
+			document.getElementsByClassName('content')
+		).reverse();
 	}
 
-	function finish ( text ) {
-		var reply = text.replace( re, replacement ) + ' ' +
-			msg.link( '(source)', link );
+	getMatchingMessage( re, messages, msg.get('message_id'), function ( err, message ) {
+		if ( err ) {
+			msg.reply( err );
+			return;
+		}
 
-		msg.reply( reply );
-	}
+		if ( !message ) {
+			msg.reply(
+				'No matching message (are you sure we\'re in the right room?)'
+			);
+			return;
+		}
+		bot.log( message, 'substitution found message' );
+
+		var link = getMessageLink( message );
+
+		// #159, check if the message is a partial, has a "(see full text)" link.
+		if ( message.getElementsByClassName('partial').length ) {
+			retrieveFullText( message, finish );
+		}
+		else {
+			finish( message.textContent );
+		}
+
+		function finish ( text ) {
+			var reply = text.replace( re, replacement ) + ' ' +
+				msg.link( '(source)', link );
+
+			msg.reply( reply );
+		}
+	});
 }
 
-function get_matching_message ( re, onlyBefore ) {
-	var messages = Array.from(
-		document.getElementsByClassName('content') ).reverse();
-	return messages.first( matches );
+function getMatchingMessage ( re, messages, onlyBefore, cb ) {
+	bot.log( re, messages, onlyBefore, 'substitution getMatchingMessage args' );
+	var arg = {
+		maxId : onlyBefore,
+		pattern : re,
+		messages : messages.map(function ( el ) {
+			return {
+				id	 : Number( el.parentElement.id.match(/\d+/)[0] ),
+				text : el.textContent
+			};
+		})
+	};
 
-	function matches ( el ) {
-		var id = Number( el.parentElement.id.match(/\d+/)[0] );
-		return id < onlyBefore && re.test( el.textContent );
-	}
+	// the following function is passed to bot.eval, which means it will run in
+	//a different context. the only variable we get is ~arg~, because we pass it
+	//to bot.eval
+	// we do the skip and jump through bot.eval to avoid a ReDoS (#217).
+	var matcher = function () {
+		var arg = arguments[1],
+			matchIndex = null;
+
+		arg.messages.some(function ( msg, idx ) {
+			if ( msg.id < arg.maxId && arg.pattern.test(msg.text) ) {
+				matchIndex = idx;
+				return true;
+			}
+
+			return false;
+		});
+
+		// remember we're inside bot.eval, final expression is the result.
+		// so it'll work well with minification, we have to create an expression
+		//which won't be removed
+		(function () {
+			return matchIndex;
+		})();
+	};
+
+	bot.eval( matcher.stringContents(), arg, function ( err, resp ) {
+		bot.log( err, resp, 'substitution matcher response' );
+
+		// meh
+		if ( err ) {
+			cb( err );
+			return;
+		}
+
+		var index = JSON.parse( resp.answer );
+		if ( Number(index) !== index ) {
+			return;
+		}
+
+		cb( null, messages[index] );
+	});
 }
 
 // <a class="action-link" href="/transcript/message/msgid#msgid>...</a>
 // <div class="content">message</div>
 //if the message was a reply, there'd be another element between them:
 // <a class="reply-info" href="/transcript/message/repliedMsgId#repliedMsgId>
-function get_message_link ( message ) {
+function getMessageLink ( message ) {
 	var node = message;
 
 	while ( !node.classList.contains('action-link') ) {
@@ -6267,10 +6623,10 @@ function get_message_link ( message ) {
 }
 
 // <div class="content">
-//  <div class="partial"> ... </div>
-//  <a class="more-data" href="what we want">(see full text)</a>
+//	<div class="partial"> ... </div>
+//	<a class="more-data" href="what we want">(see full text)</a>
 // </div>
-function retrieve_full_text ( message, cb ) {
+function retrieveFullText ( message, cb ) {
 	var href = message.children[ 1 ].href;
 	bot.log( href, 'substitution expanding message' );
 
@@ -7102,25 +7458,19 @@ function command ( args, cb ) {
 
 	function finish ( resp ) {
 		//the result will look like this:
-		// [search_term, [title0, title1, title2, ...]]
-		//we only asked for one result, so the 2nd array will have 1 item
-		var title = resp[ 1 ][ 0 ],
+		// [search_term, [title0], [description0], [link0]]
+		//we only asked for one result, so the inner arrays will have only 1 item each
+		var res = resp[ 3 ][ 0 ],
 			base = 'http://en.wikipedia.org/wiki/',
-			found = true, res;
+			found = true;
 
-		if ( !title ) {
+		if ( !res ) {
 			found = false;
 			res = [
 				'No result found',
 				'The Wikipedia contains no knowledge of such a thing',
 				'The Gods of Wikipedia did not bless us'
 			].random();
-		}
-		else {
-			//for some reason, wikipedia can't simply return a url
-			title = encodeURIComponent( title.replace(/ /g, '_') );
-
-			res = base + title;
 		}
 
 		if ( cb && cb.call ) {
@@ -7248,40 +7598,32 @@ var nulls = [
 	'I could not find such a video',
 	'The Lords of YouTube did not find your query favorable' ];
 function youtube ( args, cb ) {
-	IO.jsonp({
-		url : 'https://gdata.youtube.com/feeds/api/videos',
-		jsonpName : 'callback',
-		data : {
-			q : args.toString(),
-			'max-results' : 1,
-			v : 2,
-			alt : 'json'
-		},
-		fun : finish
-	});
+	IO.jsonp.google(
+		args.toString() + ' site:youtube.com', finishCall );
 
-	//the response looks something like this:
-	/*
-	{
-		tons of crap
-		"entry" : [{
-			lots of crap
-			"link" : [{
-				some crap
-				"href" : what we care about
-			}]
-			some more crap
-		}]
-		and then some more
-	}
-	*/
-	function finish ( resp ) {
-		var entry = resp.feed.entry;
-		if ( !entry || !entry.length ) {
-			args.reply( nulls.random() );
+	function finishCall ( resp ) {
+		if ( resp.responseStatus !== 200 ) {
+			finish( 'Something went on fire; status ' + resp.responseStatus );
+			return;
+		}
+
+		var result = resp.responseData.results[ 0 ];
+		bot.log( result, '/youtube result' );
+
+		if ( !result ) {
+			finish( nulls.random() );
 		}
 		else {
-			args.send( entry[0].link[0].href );
+			finish( decodeURIComponent(result.url) );
+		}
+	}
+
+	function finish ( res ) {
+		if ( cb && cb.call ) {
+			cb( res );
+		}
+		else {
+			args.directreply( res );
 		}
 	}
 }
@@ -7298,6 +7640,7 @@ bot.addCommand({
 }());
 
 ;
+/* jshint ignore:start */
 ;(function(/* <[^>]> the b̗o̴̻̰̼͙̭̹̩i̛̫͍̻̗̻͈͉d̗̺̮̺͇̜ who s̯̯̜͙̪e̦͖̮͇͕͓e͙̱͚̯̫s̠̮̬͈͔̠̀ ̬̰̼͞a̶̼̩̻̘̦̟͈l̷͉̙͚̰̬̥l͞....*/) {// zIRAK IS gOING TOkILL ME KEHEHEHEHEH
 	var zalgo = function ( args ) {var ZALGO=function(ZA_LGO) {				return Math.floor(Math.random() * ZA_LGO);
 }/*<([a-z]+) *[^/]*?>*/
@@ -7424,3 +7767,4 @@ Th͎̯̠͚̥e̜̞͇͔̣ ̼̰͚̱̜̬͡ͅN̢̳̞͔e̴̩̠̖͎̤̬z̧̺̘͎̮̣ṕ
 		(
 		)
 		;//t͕̥́h̡̠͔͕̳̳e҉̱͓̱̦è̟n̢̗͖̜̳d̺̖
+/* jshint ignore:end */

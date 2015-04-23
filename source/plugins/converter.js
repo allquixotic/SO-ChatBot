@@ -7,32 +7,40 @@ var converters = {
 	C : function ( c ) {
 		return {
 			F : c * 1.8 + 32, // 9/5 = 1.8
-			K : c + 273.15 };
+			K : c + 273.15
+		};
 	},
 	F : function ( f ) {
 		return {
 			C : (f - 32) / 1.8,
-			K : (f + 459.67) * 5 / 9 };
+			K : (f + 459.67) * 5 / 9
+		};
 	},
 	K : function ( k ) {
 		if ( k < 0 ) {
-			return null;
+			return {
+				C : 0,
+				F : 0
+			};
 		}
 
 		return {
 			C : k - 273.15,
-			F : k * 1.8 - 459.67 };
+			F : k * 1.8 - 459.67
+		};
 	},
 
 	//lengths
 	//1m = 3.2808(...)f
 	m : function ( m ) {
 		return {
-			f : m * 3.280839895 };
+			f : m * 3.280839895
+		};
 	},
 	f : function ( f ) {
 		return {
-			m : f / 3.28083989 };
+			m : f / 3.28083989
+		};
 	},
 
 	//km: 1m = 1km * 1000
@@ -55,11 +63,13 @@ var converters = {
 	//angles
 	d : function ( d ) {
 		return {
-			r : d * Math.PI / 180 };
+			r : d * Math.PI / 180
+		};
 	},
 	r : function ( r ) {
 		return {
-			d : r * 180 / Math.PI };
+			d : r * 180 / Math.PI
+		};
 	},
 
 	//weights
@@ -67,18 +77,21 @@ var converters = {
 		return {
 			lb : g * 0.0022,
 			//the following will be horribly inaccurate
-			st : g * 0.000157473 };
+			st : g * 0.000157473
+		};
 	},
 	lb : function ( lb ) {
 		return {
 			g : lb * 453.592,
-			st : lb * 0.0714286 };
+			st : lb * 0.0714286
+		};
 	},
 	//stones: 1st = 6350g = 14lb
 	st : function ( st ) {
 		return {
 			g : st * 6350.29,
-			lb : st * 14 };
+			lb : st * 14
+		};
 	},
 
 	//kg: 1g = 1kg * 1000
@@ -259,9 +272,9 @@ var moneyConverter = {
 
 	getRate : function ( cb ) {
 		var self = this,
-			rate;
+			rate = this.checkCache();
 
-		if ( rate = this.checkCache() ) {
+		if ( rate ) {
 			cb( rate );
 			return;
 		}
@@ -301,7 +314,8 @@ var moneyConverter = {
 				//so we won't request again, keep it in memory for 5 hours
 				// 5(hours) = 1000(ms) * 60(seconds)
 				//            * 60(minutes) * 5 = 18000000
-				obj.time - now <= 18e6 );
+				obj.time - now <= 18e6
+		);
 
 		console.log( this.ratesCache, exists );
 
