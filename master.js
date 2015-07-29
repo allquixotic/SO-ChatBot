@@ -1125,6 +1125,9 @@ bot.CommunityCommand = function ( command, req ) {
 		old_execute = cmd.exec,
 		old_canUse  = cmd.canUse;
 
+	var pendingMessage = command.pendingMessage ||
+			'Already registered; still need {0} more';
+	console.log( command.pendingMessage, pendingMessage );
 	req = req || 2;
 
 	cmd.canUse = function () {
@@ -1164,7 +1167,7 @@ bot.CommunityCommand = function ( command, req ) {
 		needed -= 1;
 
 		if ( needed > 0 ) {
-			return 'Registered; need {0} more to execute'.supplant( needed );
+			return pendingMessage.supplant( needed );
 		}
 
 		bot.log( 'should execute' );
@@ -2284,12 +2287,13 @@ Object.iterate( commands, function ( cmdName, fun ) {
 			use : privilegedCommands[ cmdName ] ? 'OWNER' : 'ALL'
 		},
 		description : descriptions[ cmdName ],
+		pendingMessage: fun.pendingMessage,
 		unTellable : unTellable[ cmdName ],
-		async : commands[ cmdName ].async
+		async : fun.async
 	};
 
 	if ( communal[cmdName] ) {
-		cmd = bot.CommunityCommand( cmd );
+		cmd = bot.CommunityCommand( cmd, fun.invokeReq );
 	}
 	bot.addCommand( cmd );
 });
@@ -2603,6 +2607,19 @@ bot.adapter = {
 			text : this.escape( text ),
 			url  : url
 		});
+	},
+
+	moveMessage : function ( msgid, fromRoom, toRoom, cb ) {
+		IO.xhr({
+			method : 'POST',
+			url : '/admin/movePosts/' + fromRoom,
+			data : {
+				fkey: bot.adapter.fkey,
+				to: toRoom,
+				ids: msgid
+			},
+			finish : cb || function () {}
+		});
 	}
 };
 
@@ -2757,17 +2774,17 @@ var polling = bot.adapter.in = {
 	},
 
 	handleMultilineMessage : function ( msg ) {
-		this.breakMultilineMessage( msg ).forEach(function ( line ) {
+		this.breakMultilineMessage( msg.content ).forEach(function ( line ) {
 			var msgObj = Object.merge( msg, { content : line.trim() });
 
 			IO.in.receive( msgObj );
 		});
 	},
-	breakMultilineMessage : function ( msg ) {
+	breakMultilineMessage : function ( content ) {
 		//remove the enclosing tag
-		var multiline = msg.content
+		var multiline = content
 			//slice upto the beginning of the ending tag
-			.slice( 0, msg.content.lastIndexOf('</div>') )
+			.slice( 0, content.lastIndexOf('</div>') )
 			//and strip away the beginning tag
 			.replace( '<div class=\'full\'>', '' );
 
@@ -3499,7 +3516,8 @@ var ban = {
 
 	permissions : { del : 'NONE', use : 'OWNER' },
 	description : 'Bans a user from using me. Lacking arguments, prints the ' +
-		'ban list. `/ban [usr_id|usr_name]`'
+		'ban list. `/ban [usr_id|usr_name]`',
+	pendingMessage : 'The user will be thrown into mindjail in {0} more invocations'
 };
 
 var unban = {
@@ -5769,14 +5787,23 @@ bot.addCommand(bot.CommunityCommand({
 	},
 	permissions : { del : 'NONE', use : 'OWNER' },
 	description : 'Kills me :(',
+	pendingMessage : 'I will shut up after {0} more invocations.'
 }));
 
 ;
 (function () {
 
 function mdn ( args, cb ) {
-	IO.jsonp.google(
-		args.toString() + ' site:developer.mozilla.org', finishCall );
+	var terms = args.toString().split(/,\s*/g);
+	var results = {
+		unescapedUrls : [],
+		formatted : []
+	};
+
+	terms.forEach(function ( term ) {
+		IO.jsonp.google(
+			term + ' site:developer.mozilla.org', finishCall );
+	});
 
 	function finishCall ( resp ) {
 		if ( resp.responseStatus !== 200 ) {
@@ -5786,9 +5813,26 @@ function mdn ( args, cb ) {
 
 		var result = resp.responseData.results[ 0 ];
 		bot.log( result, '/mdn result' );
-		finish( result.url );
-	}
 
+		var title = IO.decodehtmlEntities(
+			result.titleNoFormatting.split(' -')[0].trim()
+		);
+
+		results.formatted.push( bot.adapter.link(title, result.url) );
+		results.unescapedUrls.push( result.url );
+
+		if ( results.formatted.length === terms.length ) {
+			aggregatedResults();
+		}
+	}
+	function aggregatedResults () {
+		var msg = results.formatted.join( ', ' );
+		if ( msg.length > bot.adapter.maxLineLength ) {
+			msg = results.unescapedUrls.join( ', ' );
+		}
+
+		finish( msg );
+	}
 	function finish ( res ) {
 		if ( cb && cb.call ) {
 			cb( res );
@@ -7001,6 +7045,118 @@ bot.addCommand({
 
 ;
 (function () {
+
+//only activate for SO room 17; TODO consider changing if well accepted
+if (bot.adapter.site !== 'stackoverflow' || bot.adapter.roomid !== 17) {
+	bot.log('Not activating unformatted code checking; not in right room/site');
+	return;
+}
+
+var badMessages = new Map();
+
+IO.register( 'rawinput', function checkUnformattedCode (msgObj) {
+	var msgid = msgObj.message_id;
+
+	//only handle new messages and edits
+	if (msgObj.event_type !== 1 && msgObj.event_type !== 2) {
+		return;
+	}
+
+	//so far it should only apply to the js room
+	if ( msgObj.room_id !== 17 ) {
+		return;
+	}
+
+	//don't bother with owners
+	if ( bot.isOwner(msgObj.user_id) ) {
+		return;
+	}
+
+	//and only look at multiline messages
+	if ( !msgObj.content.startsWith('<div class=\'full\'>') ) {
+		potentiallyUnlecture();
+		return;
+	}
+
+	var content = bot.adapter.in.breakMultilineMessage( msgObj.content )
+			.map(function (line) {
+				//for some reason, chat adds a space prefix for every line...
+				return line.replace(/^ /, '');
+			}).join( '\n' );
+	content = IO.decodehtmlEntities(content);
+
+	//and messages which aren't code blocks
+	if ( content.startsWith('<pre class=\'full\'>') ) {
+		potentiallyUnlecture();
+		return;
+	}
+
+	var isANaughtyMessage = hasUnformattedCode( content );
+
+	if ( !isANaughtyMessage ) {
+		potentiallyUnlecture();
+		return;
+	}
+
+	bot.log( '[formatting] Message {0} is a naughty one'.supplant(msgid) );
+	var lectureTimeout = setTimeout( lectureUser, 10000, msgObj, content );
+	badMessages.set( msgid, lectureTimeout );
+
+	function potentiallyUnlecture () {
+		if ( badMessages.has(msgid) ) {
+			bot.log( '[formatting] Message {0} was fixed'.supplant(msgid) );
+			clearTimeout( badMessages.get(msgid) );
+			badMessages.delete( msgid );
+		}
+	}
+});
+
+function lectureUser ( msgObj, content ) {
+	var user = bot.users[ msgObj.user_id ],
+		msgid = msgObj.message_id;
+
+	bot.log( '[formatting] Lecturing user ' + msgObj.user_name );
+	bot.adapter.out.add(
+		bot.adapter.reply( msgObj.user_name ) + ' ' + createLecture( content )
+	);
+
+	if ( user && user.reputation < 2000 ) {
+		bot.log( '[formatting] Binning offending message' );
+		bot.adapter.moveMessage( msgid, msgObj.room_id, 23262 );
+	}
+}
+
+function createLecture ( content ) {
+	var lineCount = content.split('\n').length;
+
+	var lecture = (
+		'Please don\'t post unformatted code - ' +
+		'hit Ctrl+K before sending, use up-arrow to edit messages, ' +
+		'and see the {0}.'
+	).supplant( bot.adapter.link('faq', '/faq') );
+
+	if ( lineCount >= 10 ) {
+		lecture += ' For posting large code blocks, use a paste site like ' +
+			'https://gist.github.com, http://hastebin.com or http://pastie.org';
+	}
+
+	return lecture;
+}
+
+function hasUnformattedCode ( text ) {
+	var lines = text.split( '\n' );
+	if ( lines.length < 4 ) {
+		return false;
+	}
+
+	var codeyLine = /^\}|^<\//;
+	return lines.some( / /.test.bind(codeyLine) );
+}
+
+})();
+
+;
+(function () {
 "use strict";
 
 var memoryKey = 'unonebox-state',
@@ -7599,7 +7755,7 @@ var nulls = [
 	'The Lords of YouTube did not find your query favorable' ];
 function youtube ( args, cb ) {
 	IO.jsonp.google(
-		args.toString() + ' site:youtube.com', finishCall );
+		args.toString() + ' site:youtube.com/watch', finishCall );
 
 	function finishCall ( resp ) {
 		if ( resp.responseStatus !== 200 ) {
