@@ -17,7 +17,7 @@ var bot = window.bot = {
 
 	parseMessage : function ( msgObj ) {
 		if ( !this.validateMessage(msgObj) ) {
-			bot.log( msgObj, 'parseMessage invalid' );
+			bot.log( JSON.stringify(msgObj), 'parseMessage invalid' );
 			return;
 		}
 
