@@ -46,11 +46,13 @@ hound.drainQueue = function (cb) {
 
 function seLogin () {
 	hound
-		.type('#se-login input[type="email"]', config.email)
-		.type('#se-login input[type="password"]', config.password)
-		.click('#se-login input[type="button"]')
-		.wait()
-		.screenshot('pics/login.png');
+		.type('#email', config.email)
+                .wait(5000)
+                .type('#password', config.password)
+                .wait(5000)
+                .click('#submit-button')
+                .wait(10000)
+                .screenshot('pics/login.png');
 }
 function injectToChat (hound) {
 	hound
@@ -74,7 +76,7 @@ function injectToChat (hound) {
 hound
 	.goto(config.siteUrl + '/users/login/')
 	.screenshot('pics/pre-login.png')
-	.wait(1000)
+	.wait(5000)
 	.url(function (url) {
 		if (!/login-add$/.test(url)) {
 			console.log('Need to authenticate');
