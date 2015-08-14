@@ -64,7 +64,7 @@ function injectToChat (hound) {
 			script.src = 'https://raw.github.com/Zirak/SO-ChatBot/master/master.js';
 			script.onload = function() {
 				console.log('Loaded bot');
-				bot.adapter.out.add('I will derive!');
+				bot.adapter.out.add('ChatBot John Cavil has loaded and is ready for commands. Type !!help to learn more about me.');
 			};
 			document.head.appendChild(script);
 		}, function () {
