@@ -7,11 +7,11 @@ var hound = new Nightmare({
 
 /***********	Change me!	  ***********/
 var config = {
-	email:	  'you can guess',
-	password: 'what these are',
+	email:	  '***REMOVED***',
+	password: '***REMOVED***',
 
-	siteUrl: 'https://stackoverflow.com',
-	roomUrl: 'https://chat.stackoverflow.com/rooms/1'
+	siteUrl: 'http://superuser.com',
+	roomUrl: 'http://chat.stackexchange.com/rooms/118'
 };
 
 function once (fn) {
@@ -46,10 +46,12 @@ hound.drainQueue = function (cb) {
 
 function seLogin () {
 	hound
-		.type('#se-login input[type="email"]', config.email)
-		.type('#se-login input[type="password"]', config.password)
-		.click('#se-login input[type="button"]')
-		.wait()
+		.type('#email', config.email)
+		.wait(5000)
+		.type('#password', config.password)
+		.wait(5000)
+		.click('#submit-button')
+		.wait(10000)
 		.screenshot('pics/login.png');
 }
 function injectToChat (hound) {
@@ -59,11 +61,11 @@ function injectToChat (hound) {
 		.screenshot('pics/chat.png')
 		.evaluate(function () {
 			var script = document.createElement('script');
-			script.src = 'https://raw.github.com/Zirak/SO-ChatBot/master/master.js';
+			script.src = 'http://localhost/master.js';
 			script.onload = function() {
-				bot.activateDevMode();
+				//bot.activateDevMode();
 				console.log('Loaded bot');
-				bot.adapter.out.add('I will derive!');
+				bot.adapter.out.add('I have just been restarted! This happens daily automatically, or when my owner restarts me. Ready for commands.');
 			};
 			document.head.appendChild(script);
 		}, function () {
@@ -74,7 +76,7 @@ function injectToChat (hound) {
 hound
 	.goto(config.siteUrl + '/users/login/')
 	.screenshot('pics/pre-login.png')
-	.wait(1000)
+	.wait(5000)
 	.url(function (url) {
 		if (!/login-add$/.test(url)) {
 			console.log('Need to authenticate');
