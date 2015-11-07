@@ -7,8 +7,8 @@ var hound = new Nightmare({
 
 /***********	Change me!	  ***********/
 var config = {
-	email:	  '***REMOVED***',
-	password: '***REMOVED***',
+	email:	  'you@gmail.com',
+	password: 'password',
 
 	siteUrl: 'http://superuser.com',
 	roomUrl: 'http://chat.stackexchange.com/rooms/118'
