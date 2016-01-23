@@ -1,25 +1,30 @@
 (function () {
 "use strict";
 
-var message = "Welcome to the Root Access chat for Super Users! Please don't ask if you can ask or if anyone's around; just ask " +
-	"your question, and if anyone's free and interested they'll help.";
+var message = bot.config.welcomeMessage;
 
 function welcome ( name ) {
-	return bot.adapter.reply( name ) + " " + message;
+    bot.adapter.out.add( bot.adapter.reply(name) + " " + message, room );
 }
 
-bot.addCommand({
-	name : 'welcome',
-	fun : function ( args ) {
-		if (!args.length) {
-			return message;
-		}
+            finish();
+    seen[ uid ] = true;
 
-		return args.send( welcome(args) );
-	},
-	permission : {
-		del : 'NONE'
-	},
-	description : 'Welcomes a user. `/welcome user`'
+        finish();
+
+    function finish () {
+bot.addCommand({
+    name : 'welcome',
+    fun : function ( args ) {
+        if (!args.length) {
+            return message;
+        }
+
+        welcome( args, args.get('room_id') );
+    },
+    permission : {
+        del : 'NONE'
+    },
+    description : 'Welcomes a user. `/welcome user`'
 });
 }());

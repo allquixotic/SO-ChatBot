@@ -5,14 +5,7 @@ var hound = new Nightmare({
 	cookiesFile: 'cookies.jar'
 });
 
-/***********	Change me!	  ***********/
-var config = {
-	email:	  'you@gmail.com',
-	password: 'password',
-
-	siteUrl: 'http://superuser.com',
-	roomUrl: 'http://chat.stackexchange.com/rooms/118'
-};
+var config = require('run-headless.config.json');
 
 function once (fn) {
 	var called = false, res;
@@ -46,12 +39,10 @@ hound.drainQueue = function (cb) {
 
 function seLogin () {
 	hound
-		.type('#email', config.email)
-		.wait(5000)
-		.type('#password', config.password)
-		.wait(5000)
-		.click('#submit-button')
-		.wait(10000)
+		.type('#se-login input[type="email"]', config.email)
+		.type('#se-login input[type="password"]', config.password)
+		.click('#se-login input[type="button"]')
+		.wait()
 		.screenshot('pics/login.png');
 }
 function injectToChat (hound) {
