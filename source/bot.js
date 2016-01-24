@@ -263,24 +263,25 @@ var bot = window.bot = {
         this.validateMessage = function ( msgObj ) {
             return msgObj.content.trim().startsWith( this.config.pattern );
         };
+    },
+
+    clear : function () {
+	Object.iterate( localStorage, function ( key, val ) {
+		if ( key.startsWith('bot_') ) {
+			localStorage.removeItem(key);
+		}
+	});
+	this.data = {};
+        var pendingMessage = command.pendingMessage ||
+        'Already registered; still need {0} more';
+        console.log( command.pendingMessage, pendingMessage );
+        return pendingMessage.supplant( needed );
     }
 };
 
 //#build Command.js
 //#build Message.js
-	},
 	
-	clear : function () {
-		Object.iterate( localStorage, function ( key, val ) {
-			if ( key.startsWith('bot_') ) {
-				localStorage.removeItem(key);
-			}
-		});
-		this.data = {};
-	var pendingMessage = command.pendingMessage ||
-			'Already registered; still need {0} more';
-	console.log( command.pendingMessage, pendingMessage );
-			return pendingMessage.supplant( needed );
 
 //#build adapter.js
 //#build users.js
