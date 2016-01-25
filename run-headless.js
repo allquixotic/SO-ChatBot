@@ -2,7 +2,8 @@ var Nightmare = require('nightmare'),
 	readline = require('readline');
 
 var hound = new Nightmare({
-	cookiesFile: 'cookies.jar'
+	cookiesFile: 'cookies.jar',
+	webSecurity: false
 });
 
 var config = require('./run-headless.config.json');
