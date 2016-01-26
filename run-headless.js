@@ -1,13 +1,33 @@
 var config = require('./run-headless.config.json');
+var os = require('os');
 
 var webdriver = require('selenium-webdriver'),
 	By = require('selenium-webdriver').By,
-	until = require('selenium-webdriver').until;
+	until = require('selenium-webdriver').until,
+    firefoxOptions = require('selenium-webdriver/firefox').Options,
+    chromeOptions = require('selenium-webdriver/chrome').Options;
 
-var driver = new webdriver.Builder()
-    .forBrowser(config.browser || 'firefox')
-    .build(),
-    timeouts = driver.manage().timeouts();
+var driverBuilder = new webdriver.Builder()
+    .forBrowser(config.browser || 'firefox');
+
+if(os.platform() == "linux" && !config.browserBinary && !(process.env["DISPLAY"] && process.env["DISPLAY"].length() > 0))
+{
+    if(config.browser == "firefox")
+    {
+        var ffo = new firefoxOptions();
+        ffo.setBinary("xvfb-run -a firefox");
+        driverBuild.setFirefoxOptions(ffo);
+    }
+    else if(config.browser == "chrome")
+    {
+        var co = new chromeOptions();
+        co.setBinary("xvfb-run -a chrome");
+        driverBuild.setChromeOptions(co);
+    }
+}
+
+var driver = driverBuilder.build(),
+timeouts = driver.manage().timeouts();
 
 timeouts.implicitlyWait(120000).then(function(x)   { return timeouts.pageLoadTimeout(120000); })
     .then(function(x) { return timeouts.setScriptTimeout(120000); })
