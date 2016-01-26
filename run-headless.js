@@ -1,12 +1,17 @@
-var Nightmare = require('nightmare'),
-	readline = require('readline');
-
-var hound = new Nightmare({
-	cookiesFile: 'cookies.jar',
-	webSecurity: false
-});
-
 var config = require('./run-headless.config.json');
+
+var webdriver = require('selenium-webdriver'),
+	By = require('selenium-webdriver').By,
+	until = require('selenium-webdriver').until;
+
+var driver = new webdriver.Builder()
+    .forBrowser(config.browser || 'firefox')
+    .build(),
+    timeouts = driver.manage().timeouts();
+
+timeouts.implicitlyWait(120000).then(function(x)   { return timeouts.pageLoadTimeout(120000); })
+    .then(function(x) { return timeouts.setScriptTimeout(120000); })
+    .then(function(x) { headlessMain() });
 
 function once (fn) {
 	var called = false, res;
@@ -20,8 +25,8 @@ function once (fn) {
 	};
 }
 
-hound.drainQueue = function (cb) {
-	var self = hound;
+driver.drainQueue = function (cb) {
+	var self = driver;
 
 	setTimeout(next, 0);
 	function next(err) {
@@ -39,54 +44,62 @@ hound.drainQueue = function (cb) {
 };
 
 function seLogin () {
-	hound
-		.type('#se-login input[type="email"]', config.email)
-		.type('#se-login input[type="password"]', config.password)
-		.click('#se-login input[type="button"]')
-		.wait()
-		.screenshot('pics/login.png');
+	return driver.findElement(By.css('#se-login input[type="email"]')).sendKeys(config.email).then(function () {
+        return driver.findElement(By.css('#se-login input[type="password"]')).sendKeys(config.password);
+    }).then(function() {
+        return driver.findElement(By.css('#se-login input[type="button"]')).click();
+    });
 }
-function injectToChat (hound) {
-	hound
-		.goto(config.roomUrl)
-		.wait()
-		.screenshot('pics/chat.png')
-		.evaluate(function () {
-			var script = document.createElement('script');
-			script.src = 'http://localhost/master.js';
+function injectToChat (driver) {
+	driver.get(config.roomUrl).then(function() {
+        return driver.sleep(5000);
+    }).then(function () {
+    	return driver.evaluateScript(function () {
+            var script = document.createElement('script');
+			script.src = arguments[0] || 'https://raw.github.com/Zirak/SO-ChatBot/master/master.js';
 			script.onload = function() {
-				//bot.activateDevMode();
-				console.log('Loaded bot');
-				bot.adapter.out.add('I have just been restarted! This happens daily automatically, or when my owner restarts me. Ready for commands.');
+                if(arguments[1]) {
+                    bot.activateDevMode();
+                }
+			    console.log('Loaded bot');
+                bot.adapter.out.add(arguments[2] || 'I will derive!');
 			};
 			document.head.appendChild(script);
-		}, function () {
-			console.log('Injected chatbot.');
-		});
+		}, config.botScript, config.devMode, config.botRestartMsg);
+    }).then(function() {
+                console.log('Injected chatbot.');
+            });
 }
 
-hound
-	.goto(config.siteUrl + '/users/login/')
-	.screenshot('pics/pre-login.png')
-	.wait(5000)
-	.url(function (url) {
-		if (!/login-add$/.test(url)) {
-			console.log('Need to authenticate');
-			hound.use(seLogin);
-		}
-		else {
-			console.log('Cool, already logged in');
-		}
-
-		hound.use(injectToChat);
-		hound.drainQueue(function () {
-			console.log('Should be done loading stuff.');
-			hitTheRepl();
-		});
-	})
-	.setup(function () {
-		hound.drainQueue();
-	});
+function headlessMain() {
+    return driver.get(config.siteUrl + '/users/login/').then(function() {
+        return driver.sleep(5000);
+    }).then(function() {
+        return driver.getCurrentUrl();
+    }).then(function (url) {
+        condprom = this;
+        if (!/login-add$/.test(url)) {
+            console.log('Need to authenticate');
+            condprom = seLogin().then(function() {
+                return driver.sleep(5000);
+            });
+        }
+        else {
+            console.log('Cool, already logged in');
+        }
+        return condprom;
+    }).then(function() {
+        return injectToChat(driver);
+    }).then(function () {
+            driver.drainQueue(function () {
+                console.log('Should be done loading stuff.');
+                hitTheRepl();
+            });
+        return this;
+    }).then(function() {
+            return driver.drainQueue();
+    });
+}
 
 function hitTheRepl() {
 	var repl = readline.createInterface({
@@ -96,29 +109,33 @@ function hitTheRepl() {
 
 	console.log('You are now in a REPL with the remote page. Have fun!');
 
-	hound.on('consoleMessage', function (msg) {
+    //TODO: See if we need to do this with Selenium
+    /*
+	driver.on('consoleMessage', function (msg) {
 		console.log('<', msg);
 	});
-	hound.on('error', function (msg) {
+	driver.on('error', function (msg) {
 		console.log('! ', msg);
-	});
+	});*/
 
 	repl.on('line', function (data) {
-		hound.evaluate(function (code) {
+		driver.evaluateScript(function () {
 			try {
-				return eval(code);
+				return eval(arguments[0]);
 			}
 			catch (e) {
 				return e.message;
 			}
-		}, function (res) {
+		}, data).then(function (res) {
 			console.log('$', res);
 			repl.prompt();
-		}, data).drainQueue();
+		}).then(function() {
+            driver.drainQueue();
+        });
 	});
 	repl.on('close', function () {
 		console.log('Leaving the nightmare...');
-		hound.teardownInstance();
+		driver.quit();
 	});
 
 	repl.prompt();

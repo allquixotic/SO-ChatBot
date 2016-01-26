@@ -3,5 +3,10 @@
 	"password": "what these are",
 
 	"siteUrl": "https://stackoverflow.com",
-	"roomUrl": "https://chat.stackoverflow.com/rooms/1"
+	"roomUrl": "https://chat.stackoverflow.com/rooms/1",
+
+	"browser": "chrome",
+	"botScript" : "http://localhost/master.js",
+	"devMode" : false,
+	"botRestartMsg" : "I have just been restarted! This happens daily automatically, or when my owner restarts me. Ready for commands."
 }
