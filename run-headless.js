@@ -40,11 +40,16 @@ hound.drainQueue = function (cb) {
 
 function seLogin () {
 	hound
-		.type('#se-login input[type="email"]', config.email)
-		.type('#se-login input[type="password"]', config.password)
-		.click('#se-login input[type="button"]')
+		.evaluate(function(email, password) {
+			document.querySelector('#login-form input[type="email"]').value = email;
+			document.querySelector('#login-form input[type="password"]').value = password;
+		}, function() {}, config.email, config.password)
+		.screenshot('pics/mid-login.png')
+		.click('#login-form input[type="button"]')
 		.wait()
-		.screenshot('pics/login.png');
+		.screenshot('pics/login.png')
+		.wait(1000)
+		.screenshot('pics/post-login.png');
 }
 function injectToChat (hound) {
 	hound
