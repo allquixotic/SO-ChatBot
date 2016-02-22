@@ -46,9 +46,7 @@ function seLogin () {
 		}, function() {}, config.email, config.password)
 		.screenshot('pics/mid-login.png')
 		.click('#login-form input[type="button"]')
-		.wait()
-		.screenshot('pics/login.png')
-		.wait(1000)
+		.wait(10000) // wait for stackauth universal login to complete
 		.screenshot('pics/post-login.png');
 }
 function injectToChat (hound) {
@@ -75,7 +73,7 @@ hound
 	.screenshot('pics/pre-login.png')
 	.wait(5000)
 	.url(function (url) {
-		if (!/login-add$/.test(url)) {
+		if (!/login-add/.test(url)) {
 			console.log('Need to authenticate');
 			hound.use(seLogin);
 		}
