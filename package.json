@@ -6,7 +6,10 @@
 	"dependencies": {
 		"webdriverio": "3.4.0"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+	  "browserify": "^13.0.0",
+	  "uglify-js": "^2.4.15"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/allquixotic/SO-ChatBot.git"
