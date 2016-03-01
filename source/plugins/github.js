@@ -1,5 +1,5 @@
 // issue #51 introduced this feature; #97 added user search.
-
+module.exports = function (bot) {
 //valid args are one of the following:
 // /github reponame
 //which searches for a repository `reponame`
@@ -132,3 +132,5 @@ bot.addCommand({
 		'`/github username/`',
 	async : true
 });
+
+};

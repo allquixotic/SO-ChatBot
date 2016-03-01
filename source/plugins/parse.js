@@ -1,3 +1,4 @@
+module.exports = function (bot) {
 bot.addCommand({
 	name : 'parse',
 	fun : function ( args ) {
@@ -14,3 +15,5 @@ bot.addCommand({
 	description : 'Returns result of "parsing" message according to the my ' +
 		'mini-macro capabilities (see online docs)',
 });
+
+};

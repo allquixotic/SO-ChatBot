@@ -1,4 +1,4 @@
-(function () {
+module.exports = function (bot) {
 "use strict";
 
 //ths fnctn tks sntnc nd trns t t awsm
@@ -30,4 +30,4 @@ bot.addCommand({
 	description : 'tks a sntnc and trns i awsm'
 });
 
-}());
+};

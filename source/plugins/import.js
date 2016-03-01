@@ -1,4 +1,4 @@
-(function() {
+module.exports = function (bot) {
     "use strict";
     
     var doImport = function (args) {
@@ -41,4 +41,4 @@
         permissions : { del : 'NONE', use : 'OWNER' },
         description : 'Imports the persistent memory described in args `/export <exported-content>`'
     });
-})();
+};

@@ -1,4 +1,4 @@
-(function() {
+module.exports = function (bot) {
     "use strict";
 
     var doExport = function(args) {
@@ -38,4 +38,4 @@
         permissions : { del : 'NONE', use : 'OWNER' },
         description : 'Blurts out a message with the persistent memory storage for export `/export`'
     });
-})();
+};

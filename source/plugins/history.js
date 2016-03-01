@@ -1,4 +1,4 @@
-(function () {
+module.exports = function (bot) {
 "use strict";
 
 var history = {
@@ -247,4 +247,4 @@ bot.addCommand({
 	async : true
 });
 
-})();
+};

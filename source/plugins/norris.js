@@ -1,5 +1,4 @@
-(function () {
-
+module.exports = function (bot) {
 function norris ( args, cb ) {
 	var chucky = 'http://api.icndb.com/jokes/random';
 
@@ -37,4 +36,4 @@ bot.addCommand({
 	async : true
 });
 
-})();
+};

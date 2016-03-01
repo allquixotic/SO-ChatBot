@@ -1,4 +1,4 @@
-(function () {
+module.exports = function (bot) {
 
 function color ( args ) {
 	var base = 'http://southouse.tk/colors.php?color='
@@ -22,4 +22,4 @@ bot.addCommand({
 		' `/color color0[ color1[ ...]]`'
 });
 
-})();
+};

@@ -1,4 +1,4 @@
-(function () {
+module.exports = function (bot) {
 var timers = Object.create( null ),
 	id = 0;
 
@@ -54,4 +54,4 @@ bot.addCommand({
 		'`/timer stop name` stops a timer.'
 });
 
-})();
+};

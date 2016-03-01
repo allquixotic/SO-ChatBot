@@ -1,4 +1,4 @@
-(function () {
+module.exports = function (bot) {
 var list = bot.memory.get( 'todo' );
 
 var userlist = function ( usrid ) {
@@ -141,4 +141,4 @@ bot.addCommand({
 		'`rm items|indices` removes items specified by indice or content'
 });
 
-}());
+};

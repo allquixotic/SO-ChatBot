@@ -1,4 +1,4 @@
-(function () {
+module.exports = function (bot) {
 // This is a proxy to add padding to a JSON API
 // See: https://github.com/shea-sollars/sap
 var requestURI = 'http://www.lobby.ws/api/sap.js';
@@ -82,4 +82,4 @@ bot.addCommand({
 	async : true
 });
 
-}());
+};

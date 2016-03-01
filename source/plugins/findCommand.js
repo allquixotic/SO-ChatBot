@@ -1,4 +1,4 @@
-(function () {
+module.exports = function (bot) {
 var findCommand = function ( args ) {
     var input = args.toString().toLowerCase(),
         ret = '';
@@ -56,4 +56,4 @@ bot.addCommand({
     description : 'Searches for a bot command matching part of a ' +
         'name/description. `/findCommand partOfNameOrDescription`'
 });
-})();
+};
