@@ -1,3 +1,5 @@
+//the following is code that'll run inside eval's web worker
+module.exports = (function () {
 var global = this;
 
 /*most extra functions could be possibly unsafe*/
@@ -189,7 +191,7 @@ console.error = console.info = console.debug = console.log;
                 return true;
             }
             /*neither does it feel compassionate about NaN or Infinity*/
-            return value !== value || !Number.isFinite(value);
+            return value !== value || Math.abs(value) === Infinity;
         };
 
         self.setTimeout = function (cb) {
@@ -228,3 +230,4 @@ console.error = console.info = console.debug = console.log;
         }
     };
 })();
+}).stringContents();
