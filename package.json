@@ -2,15 +2,14 @@
 	"name": "so-chatbot",
 	"version": "0.1.0",
 	"description": "A chatbot for StackOverflow.",
-	"main": "run-headless.js",
+	"main": "run-headless-webdriver.js",
 	"dependencies": {
-		"uglify-js": "^2.4.15",
-		"nightmare": "^1.8.2"
+		"webdriverio": "3.4.0"
 	},
 	"devDependencies": {},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Zirak/SO-ChatBot.git"
+		"url": "git+https://github.com/allquixotic/SO-ChatBot.git"
 	},
 	"keywords": [
 		"chatbot",
@@ -20,7 +19,8 @@
 	"author": "Zirak",
 	"license": "WTFPL",
 	"bugs": {
-		"url": "https://github.com/Zirak/SO-ChatBot/issues"
+		"url": "https://github.com/allquixotic/SO-ChatBot/issues"
 	},
-	"homepage": "https://github.com/Zirak/SO-ChatBot#readme"
+	"homepage": "https://github.com/allquixotic/SO-ChatBot#readme"
 }
+
