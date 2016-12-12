@@ -556,7 +556,7 @@ var output = {
                 console.error( xhr );
                 output.add(
                     'Error ' + xhr.status + ' occured, I will call the maid ' +
-                    ' (@Zirak)' );
+                    ' (@allquixotic)' );
             }
             else {
                 output.total += 1;
