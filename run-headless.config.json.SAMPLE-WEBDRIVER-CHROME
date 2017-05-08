@@ -1,0 +1,21 @@
+{
+	"email": "foo@example.com",
+	"password": "foobar",
+
+	"siteUrl": "https://stackexchange.com",
+	"roomUrl": "https://chat.stackexchange.com/rooms/40974",
+	"loginUrl": "http://stackexchange.com/users/login",
+
+	"scriptUrl": "https://example.com/chatbot/master.js",
+
+	"driverOptions": {
+		"desiredCapabilities": {
+			"browserName": "chrome",
+			"chromeOptions": {
+				"binary": "/root/dev/chrome-linux/chrome",
+				"args": ["headless", "no-sandbox", "disable-web-security", "allow-running-insecure-content", "user-data-dir=/root/dev/chprofile"]
+			}
+		}
+	}
+
+}
