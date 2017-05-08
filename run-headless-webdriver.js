@@ -88,12 +88,18 @@ client
             .setValue('#password', config.password)
             .submitForm('.login-form form')
             .frame()
+            .waitUntil(function() {
+                return client.getUrl().then(function(url) {
+                    var urllib = require('url');
+                    return urllib.parse(url).format() === urllib.parse(config.siteUrl).format();
+                });
+            }, 10000, 'URL after login incorrect')
             .getUrl()
             .then(function(url) {
                 console.log('Login submitted; loaded ' + url);
             });
     }, function(err) {
-        console.log('Already logged in; skipping login');
+        console.log('Already logged in; skipping login', err);
     })
     .url(config.roomUrl)
     .getUrl()
@@ -145,4 +151,8 @@ client
         });
         
         repl.prompt();
+    })
+    .catch(function(err) {
+        console.log('Toto, I\'ve a feeling we\'re not in Kansas anymore.', '(not supposed to reach this)', err);
+        cleanupAndExit(2);
     });
