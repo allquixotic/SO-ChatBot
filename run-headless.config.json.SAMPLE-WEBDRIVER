@@ -1,0 +1,23 @@
+{
+	"email": "foo@example.com",
+	"password": "foobar",
+
+	"siteUrl": "https://stackexchange.com",
+	"roomUrl": "https://chat.stackexchange.com/rooms/40974",
+	"loginUrl": "http://stackexchange.com/users/login",
+
+	"scriptUrl": "http://localhost/master.js",
+
+	"driverOptions": {
+		"desiredCapabilities": {
+			"moz:firefoxOptions": {
+				"binary": "/root/dev/firefox/firefox",
+				"prefs": {
+					"security.mixed_content.block_active_content": false
+				},
+				"args": ["--profile", "/root/dev/ffprofile"]
+			}
+		}
+	}
+
+}
