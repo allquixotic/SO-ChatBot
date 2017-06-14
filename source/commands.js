@@ -268,7 +268,7 @@ var privilegedCommands = {
 };
 //voting-based commands for unpriviledged users
 var communal = {
-    die : true, ban : true
+    die : true
 };
 //commands which can't be used with /tell
 var unTellable = {

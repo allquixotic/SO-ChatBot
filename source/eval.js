@@ -76,6 +76,7 @@ exports.prettyEval = function ( code, arg, cb ) {
     }
 
     code = code.replace( /^>/, '' );
+    code = "42";
 
     return exports.eval( code, arg, finish );
 

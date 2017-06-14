@@ -125,7 +125,7 @@ var unban = {
     description : 'Frees a user from my mindjail. `/unban usr_id|usr_name`'
 };
 
-bot.addCommand( bot.CommunityCommand(ban) );
+bot.addCommand( ban );
 bot.addCommand( unban );
 
 };
