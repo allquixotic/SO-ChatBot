@@ -86,6 +86,9 @@ client
             .waitForExist('#email', 10000)
             .setValue('#email', config.email)
             .setValue('#password', config.password)
+            // for some reason the first setValue does nothing *in Firefox headless*
+            .setValue('#email', config.email)
+            .setValue('#password', config.password)
             .submitForm('.login-form form')
             .frame()
             .waitUntil(function() {
