@@ -115,7 +115,8 @@ client
         script.onload = function() {
             //bot.activateDevMode();
             console.log('Loaded bot');
-            bot.adapter.out.add('I have just been restarted! This happens daily automatically, or when my owner restarts me. Ready for commands.');
+            bot.adapter.in.init(40974);
+            bot.adapter.out.add('I have just been restarted! This happens daily automatically, or when my owner restarts me. Ready for commands.', 40974);
         };
         document.head.appendChild(script);
     }, config.scriptUrl)
