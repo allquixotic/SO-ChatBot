@@ -4,7 +4,7 @@
 	"description": "A chatbot for StackOverflow.",
 	"main": "run-headless-webdriver.js",
 	"dependencies": {
-		"webdriverio": "3.4.0"
+		"webdriverio": "4.12.0"
 	},
 	"devDependencies": {
 	  "browserify": "^13.0.0",
