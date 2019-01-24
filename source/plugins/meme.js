@@ -1,3 +1,7 @@
+// I've disabled the !!/meme command and "enter meme.jpg to get a meme"
+// feature because alltheragefaces.com has been shut down. -bwDraco
+
+/*
 module.exports = function (bot) {
 // #151: Listen for meme image names and reply with that meme.
 
@@ -62,3 +66,4 @@ function getMemeLink ( meme ) {
 }
 
 };
+*/
